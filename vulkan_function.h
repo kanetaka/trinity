@@ -1,5 +1,4 @@
-#ifndef Vulkan_Function_H
-#define Vulkan_Function_H
+#pragma once
 
 #include <vulkan/vulkan.h>
 
@@ -18,5 +17,3 @@ void QueuePresent();
 
 void SetViewport(int width,int height);
 void SetScissor(int width,int height);
-
-#endif

@@ -1,95 +1,79 @@
-#ifndef Vulkan_Extern_H
-#define Vulkan_Extern_H
+#pragma once
 
 #include <vulkan/vulkan.h>
-
 #include <iostream>
 #include <vector>
 using namespace std;
 
-class Vulkan
-{
+class Vulkan {
 private:
-    void createSemaphore(VkSemaphore *semaphore);
+    void CreateSemaphore(VkSemaphore *semaphore);
 public:
     Vulkan();
     ~Vulkan();
 
-    //global createImageView
-    VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
-    //global createImage
-    void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
-    //global findMemoryType
-    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
-    ////////////////////////////////////////////////////
-    ///////             [Core]
-    //////////////////////////////////////////
-    VkInstance instance;
-    vector<VkExtensionProperties> instance_extension;
-    void Create_Instance();
+    // global CreateImageView
+    VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+    // global CreateImage
+    void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+    // global FindMemoryType
+    uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
-    VkDebugReportCallbackEXT debugCallback;
-    void Create_Debug();
+    // **** [Core] **** //
+    void CreateInstance();
+    void CreateDebug();
+    void CreateSurface();
+    void SelectPhysicalDevice();
+    void SelectQueueFamily();
+    void CreateDevice();
 
-    VkSurfaceKHR surface;
-    void Create_Surface();
+    // ****  [Screen] **** //
+    bool CreateSwapchain(bool resize);
+    void CreateImageViews();
+    void SetupDepthStencil();
+    void CreateRenderPass();
+    void CreateFramebuffers();
 
-    VkPhysicalDevice physical_devices;
-    void Select_PhysicalDevice();
+    /////////////////////////
+    void CreateCommandPool();
+    void CreateCommandBuffers();
+    void CreateSemaphores();
+    void CreateFences();
 
-    uint32_t graphics_QueueFamilyIndex;
-    uint32_t present_QueueFamilyIndex;
-    void Select_QueueFamily();
+    VkInstance instance_;
+    vector<VkExtensionProperties> instance_extension_;
+    VkDebugReportCallbackEXT debug_callback_;
+    VkSurfaceKHR surface_;
+    VkPhysicalDevice physical_devices_;
+    uint32_t graphics_queue_family_index_;
+    uint32_t present_queue_family_index_;
+    VkDevice device_;
+    VkQueue graphics_queue_;
+    VkQueue present_queue_;
 
-    VkDevice device;
-    VkQueue graphicsQueue;
-    VkQueue presentQueue;
-    void Create_Device();
 
-    ////////////////////////////////////////////////////
-    ///////           [Screen]
-    //////////////////////////////////////////
-    VkSwapchainKHR swapchain;//
+    VkSwapchainKHR swapchain_;
+    VkSurfaceCapabilitiesKHR surface_capabilities_;
+    VkSurfaceFormatKHR surface_format_;
+    VkExtent2D swapchain_size_;
+    vector<VkImage> swapchain_images_;
+    uint32_t swapchain_image_count_;
 
-    VkSurfaceCapabilitiesKHR surfaceCapabilities;//
-    VkSurfaceFormatKHR surfaceFormat;//
-    VkExtent2D swapchainSize;//
+    vector<VkImageView> swapchain_image_views_;
+    VkFormat depth_format_;
+    VkImage depth_image_;
+    VkDeviceMemory depth_image_memory_;
+    VkImageView depth_image_view_;
 
-    vector<VkImage> swapchainImages;//
-    uint32_t swapchainImageCount;//
-    bool Create_Swapchain(bool resize);
+    VkRenderPass render_pass_;
 
-    vector<VkImageView> swapchainImageViews;
-    void Create_ImageViews();
+    vector<VkFramebuffer> swapchain_framebuffers_;
 
-    VkFormat depthFormat;//
-    VkImage depthImage;//
-    VkDeviceMemory depthImageMemory;//
-    VkImageView depthImageView;//
-    void Setup_DepthStencil();//
-
-    VkRenderPass render_pass;//
-    void Create_RenderPass();//
-
-    vector<VkFramebuffer> swapchainFramebuffers;
-    void Create_Framebuffers();
-
-    ///////////////////////////////////////////////////////////
-
-    VkCommandPool commandPool;
-    void createCommandPool();
-
-    vector<VkCommandBuffer> commandBuffers;
-    void createCommandBuffers();
-
-    VkSemaphore imageAvailableSemaphore;
-    VkSemaphore renderingFinishedSemaphore;
-    void create_semaphores();
-
-    vector<VkFence> fences;
-    void createFences();
+    VkCommandPool command_pool_;
+    vector<VkCommandBuffer> command_buffers_;
+    VkSemaphore image_available_semaphore_;
+    VkSemaphore rendering_finished_semaphore_;
+    vector<VkFence> fences_;
 };
 
-void init_vulkan_extern(Vulkan *vulkan);
-
-#endif
+void InitVulkanExtern(Vulkan *vulkan);

@@ -6,52 +6,47 @@ extern Vulkan *vulkan;
 uint32_t frameIndex;
 VkCommandBuffer commandBuffer;
 VkImage image;
-void AcquireNextImage()
-{
-    vkAcquireNextImageKHR(  vulkan->device,
-            vulkan->swapchain,
+void AcquireNextImage() {
+    vkAcquireNextImageKHR(  vulkan->device_,
+            vulkan->swapchain_,
             UINT64_MAX,
-            vulkan->imageAvailableSemaphore,
+            vulkan->image_available_semaphore_,
             VK_NULL_HANDLE,
             &frameIndex);
 
-    vkWaitForFences(vulkan->device, 1, &vulkan->fences[frameIndex], VK_FALSE, UINT64_MAX);
-    vkResetFences(vulkan->device, 1, &vulkan->fences[frameIndex]);  
+    vkWaitForFences(vulkan->device_, 1, &vulkan->fences_[frameIndex], VK_FALSE, UINT64_MAX);
+    vkResetFences(vulkan->device_, 1, &vulkan->fences_[frameIndex]);  
 
-    commandBuffer = vulkan->commandBuffers[frameIndex];
-    image = vulkan->swapchainImages[frameIndex];
+    commandBuffer = vulkan->command_buffers_[frameIndex];
+    image = vulkan->swapchain_images_[frameIndex];
 }
 
-void ResetCommandBuffer()
-{
+void ResetCommandBuffer() {
     vkResetCommandBuffer(commandBuffer, 0);
 }
 
-void BeginCommandBuffer()
-{
+void BeginCommandBuffer() {
     VkCommandBufferBeginInfo beginInfo = {};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
     beginInfo.flags = VK_COMMAND_BUFFER_USAGE_SIMULTANEOUS_USE_BIT;
     vkBeginCommandBuffer(commandBuffer, &beginInfo);
 }
 
-void EndCommandBuffer()
-{
+void EndCommandBuffer() {
     vkEndCommandBuffer(commandBuffer);
 }
 
-void FreeCommandBuffers()
-{
-    vkFreeCommandBuffers(vulkan->device, vulkan->commandPool, 1, &commandBuffer);
+void FreeCommandBuffers() {
+    vkFreeCommandBuffers(vulkan->device_, vulkan->command_pool_, 1, &commandBuffer);
 }
 
-void BeginRenderPass(VkClearColorValue clear_color,VkClearDepthStencilValue clear_depth_stencil)
-{
+void BeginRenderPass(VkClearColorValue clear_color,VkClearDepthStencilValue clear_depth_stencil) {
     VkRenderPassBeginInfo render_pass_info = {};
-    render_pass_info.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-    render_pass_info.renderPass        = vulkan->render_pass;render_pass_info.framebuffer       = vulkan->swapchainFramebuffers[frameIndex];
+    render_pass_info.sType             = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    render_pass_info.renderPass        = vulkan->render_pass_;
+    render_pass_info.framebuffer       = vulkan->swapchain_framebuffers_[frameIndex];
     render_pass_info.renderArea.offset = {0, 0};
-    render_pass_info.renderArea.extent = vulkan->swapchainSize;
+    render_pass_info.renderArea.extent = vulkan->swapchain_size_;
     render_pass_info.clearValueCount   = 1;
 
     vector<VkClearValue> clearValues(2);
@@ -64,42 +59,38 @@ void BeginRenderPass(VkClearColorValue clear_color,VkClearDepthStencilValue clea
     vkCmdBeginRenderPass(commandBuffer, &render_pass_info, VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void EndRenderPass()
-{
+void EndRenderPass() {
     vkCmdEndRenderPass(commandBuffer);
 }
 
 VkPipelineStageFlags waitDestStageMask = VK_PIPELINE_STAGE_TRANSFER_BIT;
-void QueueSubmit()
-{
+void QueueSubmit() {
     VkSubmitInfo submitInfo = {};
     submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     submitInfo.waitSemaphoreCount = 1;
-    submitInfo.pWaitSemaphores = &vulkan->imageAvailableSemaphore;
+    submitInfo.pWaitSemaphores = &vulkan->image_available_semaphore_;
     submitInfo.pWaitDstStageMask = &waitDestStageMask;
     submitInfo.commandBufferCount = 1;
     submitInfo.pCommandBuffers = &commandBuffer;
     submitInfo.signalSemaphoreCount = 1;
-    submitInfo.pSignalSemaphores = &vulkan->renderingFinishedSemaphore;
-    vkQueueSubmit(vulkan->graphicsQueue, 1, &submitInfo, vulkan->fences[frameIndex]);
+    submitInfo.pSignalSemaphores = &vulkan->rendering_finished_semaphore_;
+    vkQueueSubmit(vulkan->graphics_queue_, 1, &submitInfo, vulkan->fences_[frameIndex]);
 }
 
-void QueuePresent()
-{
+void QueuePresent() {
     VkPresentInfoKHR presentInfo = {};
     presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
     presentInfo.waitSemaphoreCount = 1;
-    presentInfo.pWaitSemaphores = &vulkan->renderingFinishedSemaphore;
+    presentInfo.pWaitSemaphores = &vulkan->rendering_finished_semaphore_;
     presentInfo.swapchainCount = 1;
-    presentInfo.pSwapchains = &vulkan->swapchain;
+    presentInfo.pSwapchains = &vulkan->swapchain_;
     presentInfo.pImageIndices = &frameIndex;
-    vkQueuePresentKHR(vulkan->presentQueue, &presentInfo);
+    vkQueuePresentKHR(vulkan->present_queue_, &presentInfo);
 
-    vkQueueWaitIdle(vulkan->presentQueue);
+    vkQueueWaitIdle(vulkan->present_queue_);
 }
 
-void SetViewport(int width,int height)
-{
+void SetViewport(int width,int height) {
     VkViewport viewport;
     viewport.width = (float)width / 2;
     viewport.height = (float)height;
@@ -110,8 +101,7 @@ void SetViewport(int width,int height)
     vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 }
 
-void SetScissor(int width,int height)
-{
+void SetScissor(int width,int height) {
     VkRect2D scissor;
     scissor.extent.width = width / 2;
     scissor.extent.height = height;
