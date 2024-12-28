@@ -2,18 +2,18 @@
 
 #include <vulkan/vulkan.h>
 
-void AcquireNextImage();
+void acquireNextImage();
 
-void ResetCommandBuffer();
-void BeginCommandBuffer();
-void EndCommandBuffer();
-void FreeCommandBuffers();
+void resetCommandBuffer();
+void beginCommandBuffer();
+void endCommandBuffer();
+void freeCommandBuffers();
 
-void BeginRenderPass(VkClearColorValue clear_color,VkClearDepthStencilValue clear_depth_stencil);
-void EndRenderPass();
+void beginRenderPass(VkClearColorValue clear_color,VkClearDepthStencilValue clear_depth_stencil);
+void endRenderPass();
 
-void QueueSubmit();
-void QueuePresent();
+void queueSubmit();
+void queuePresent();
 
-void SetViewport(int width,int height);
-void SetScissor(int width,int height);
+void setViewport(int width,int height);
+void setScissor(int width,int height);

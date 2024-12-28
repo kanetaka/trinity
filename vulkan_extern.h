@@ -13,32 +13,32 @@ public:
     ~Vulkan();
 
     // global CreateImageView
-    VkImageView CreateImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
+    VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
     // global CreateImage
-    void CreateImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+    void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
     // global FindMemoryType
-    uint32_t FindMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+    uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 
     // **** [Core] **** //
-    void CreateInstance();
-    void CreateDebug();
-    void CreateSurface();
-    void SelectPhysicalDevice();
-    void SelectQueueFamily();
-    void CreateDevice();
+    void createInstance();
+    void createDebug();
+    void createSurface();
+    void selectPhysicalDevice();
+    void selectQueueFamily();
+    void createDevice();
 
     // ****  [Screen] **** //
-    bool CreateSwapchain(bool resize);
-    void CreateImageViews();
-    void SetupDepthStencil();
-    void CreateRenderPass();
-    void CreateFramebuffers();
+    bool createSwapchain(bool resize);
+    void createImageViews();
+    void setupDepthStencil();
+    void createRenderPass();
+    void createFramebuffers();
 
     /////////////////////////
-    void CreateCommandPool();
-    void CreateCommandBuffers();
-    void CreateSemaphores();
-    void CreateFences();
+    void createCommandPool();
+    void createCommandBuffers();
+    void createSemaphores();
+    void createFences();
 
     VkInstance instance_;
     vector<VkExtensionProperties> instance_extension_;
