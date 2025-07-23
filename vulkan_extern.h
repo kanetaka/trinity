@@ -76,4 +76,4 @@ public:
     vector<VkFence> fences_;
 };
 
-void InitVulkanExtern(Vulkan *vulkan);
+void initVulkanExtern(Vulkan *vulkan);

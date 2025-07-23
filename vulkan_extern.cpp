@@ -5,7 +5,7 @@
 
 #define CLAMP(x, lo, hi)    ((x) < (lo) ? (lo) : (x) > (hi) ? (hi) : (x))
 
-void InitVulkanExtern(Vulkan *vulkan) {
+void initVulkanExtern(Vulkan *vulkan) {
     // [Core]
     vulkan->createInstance();
     vulkan->createDebug();
