@@ -17,3 +17,5 @@ void queuePresent();
 
 void setViewport(int width,int height);
 void setScissor(int width,int height);
+
+void drawTriangle();

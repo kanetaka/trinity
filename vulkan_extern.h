@@ -5,6 +5,11 @@
 #include <vector>
 using namespace std;
 
+struct Vertex {
+    float pos[2];
+    float color[3];
+};
+
 class Vulkan {
 private:
     void CreateSemaphore(VkSemaphore *semaphore);
@@ -39,6 +44,12 @@ public:
     void createCommandBuffers();
     void createSemaphores();
     void createFences();
+    
+    // Triangle rendering
+    void createVertexBuffer();
+    void createGraphicsPipeline();
+    VkShaderModule createShaderModule(const vector<char>& code);
+    void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 
     VkInstance instance_;
     vector<VkExtensionProperties> instance_extension_;
@@ -74,6 +85,12 @@ public:
     VkSemaphore image_available_semaphore_;
     VkSemaphore rendering_finished_semaphore_;
     vector<VkFence> fences_;
+
+    // --- Triangle rendering ---
+    VkPipelineLayout pipeline_layout_;
+    VkPipeline graphics_pipeline_;
+    VkBuffer vertex_buffer_;
+    VkDeviceMemory vertex_buffer_memory_;
 };
 
 void initVulkanExtern(Vulkan *vulkan);

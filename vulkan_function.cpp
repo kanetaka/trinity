@@ -104,3 +104,11 @@ void setScissor(int width,int height) {
     scissor.offset.y = 0;
     vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 }
+
+void drawTriangle() {
+    vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, vulkan->graphics_pipeline_);
+    VkBuffer vertexBuffers[] = { vulkan->vertex_buffer_ };
+    VkDeviceSize offsets[] = { 0 };
+    vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+    vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+}

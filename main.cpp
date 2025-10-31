@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
             VkClearDepthStencilValue clear_depth_stencil = {1.0f, 0};
             beginRenderPass(clear_color, clear_depth_stencil);
             {
+                drawTriangle();
             }
             endRenderPass();
         }
