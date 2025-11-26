@@ -6,6 +6,11 @@ project(kousoku LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Set runtime library to avoid conflicts (global setting)
+if(WIN32)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
+endif()
+
 # Vulkan SDK path
 set(VULKAN_SDK_PATH "C:/VulkanSDK/1.4.328.1")
 
@@ -26,6 +31,8 @@ set(HEADERS
     vulkan_context.h
     triangle_app.h
     kousoku_app.h
+    core/command_buffer.h
+    core/swapchain.h
 )
 
 # Create executable
@@ -42,6 +49,13 @@ target_link_libraries(kousoku
 if(WIN32)
     set_target_properties(kousoku PROPERTIES
         WIN32_EXECUTABLE TRUE
+    )
+    
+    # Fix runtime library conflicts and suppress PDB warnings
+    target_link_options(kousoku PRIVATE 
+        $<$<CONFIG:Debug>:/NODEFAULTLIB:msvcrt.lib>
+        $<$<CONFIG:Release>:/NODEFAULTLIB:msvcrtd.lib>
+        /ignore:4099  # Suppress PDB warnings for external libraries
     )
 endif()
 

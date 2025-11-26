@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
     TriangleApp app{};
     app.OnInitialize();
 
-    // メッセージループ
+    // Message Loop
     bool running = true;
     SDL_Event event;
     while (running) {
