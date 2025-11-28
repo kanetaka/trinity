@@ -11,14 +11,19 @@ if(WIN32)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif()
 
-# Vulkan SDK path
-set(VULKAN_SDK_PATH "C:/VulkanSDK/1.4.328.1")
+# Vulkan SDK path from environment variable
+set(VK_SDK_PATH $ENV{VK_SDK_PATH})
+
+# Check if VK_SDK_PATH is set
+if(NOT VK_SDK_PATH)
+    message(FATAL_ERROR "VK_SDK_PATH environment variable is not set. Please set it to your Vulkan SDK installation path.")
+endif()
 
 # Include directories
-include_directories(${VULKAN_SDK_PATH}/Include)
+include_directories(${VK_SDK_PATH}/Include)
 
 # Library directories
-link_directories(${VULKAN_SDK_PATH}/Lib)
+link_directories(${VK_SDK_PATH}/Lib)
 
 # Source files
 set(SOURCES
