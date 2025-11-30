@@ -28,14 +28,15 @@ link_directories(${VK_SDK_PATH}/Lib)
 # Source files
 set(SOURCES
     main.cpp
-    vulkan_context.cpp
+    core/vulkan_context.cpp
+    core/command_buffer.cpp
 )
 
 # Header files (for IDE organization)
 set(HEADERS
-    vulkan_context.h
     triangle_app.h
     kousoku_app.h
+    core/vulkan_context.h
     core/command_buffer.h
     core/swapchain.h
 )

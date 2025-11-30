@@ -8,8 +8,7 @@
 #include <string>
 #include <cstring>
 
-#include "core/command_buffer.h"
-#include "core/swapchain.h"
+#include "command_buffer.h"
 
 class Swapchain;
 class CommandBuffer;
