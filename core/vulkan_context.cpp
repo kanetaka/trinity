@@ -7,14 +7,66 @@
 #include <sstream>
 #include <set>
 
+#if defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <windows.h>
+#endif
+
+
+VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
+    VkDebugUtilsMessageSeverityFlagBitsEXT severity,
+    VkDebugUtilsMessageTypeFlagsEXT type,
+    const VkDebugUtilsMessengerCallbackDataEXT* callback_data,
+    void* user_data) {
+    std::stringstream ss;
+    ss << "[Validation Layer]" << callback_data->pMessage << std::endl;
+
+#if defined(_WIN32)
+	OutputDebugStringA(ss.str().c_str());
+#else
+    std::cerr << ss;
+#endif
+    return VK_FALSE;
+}
+
+// ------------------------------- //
+// ---- Public Static Methods ---- //
+// ------------------------------- //
+
 VulkanContext& VulkanContext::Get() {
     static VulkanContext instance;
     return instance;
 }
 
+// ------------------------------- //
+// ---- Public Member Methods ---- //
+// ------------------------------- //
+
 void VulkanContext::Initialize(const char* app_name, ISurfaceProvider* surface_provider) {
     surface_provider_ = surface_provider;
 } // VulkanContext::Initialize
+
+
+void VulkanContext::SetDebugObjectName(void* object_handle, VkObjectType type, const char* name) {
+#if _DEBUG || DEBUG
+    if (pfn_set_debug_utils_object_name_ext_) {
+        VkDebugUtilsObjectNameInfoEXT name_info {
+            .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
+            .pNext = nullptr,
+            .objectType = type,
+            .objectHandle = reinterpret_cast<uint64_t>(object_handle),
+            .pObjectName = name,
+        };
+        pfn_set_debug_utils_object_name_ext_(device_, &name_info);
+	}
+#endif // _DEBUG || DEBUG
+}
+
+// -------------------------------- //
+// ---- Private Member Methods ---- //
+// -------------------------------- //
 
 void VulkanContext::CreateInstance(const char* app_name) {
     VkApplicationInfo app_info {
@@ -30,7 +82,13 @@ void VulkanContext::CreateInstance(const char* app_name) {
     std::vector<const char*> extensions;
     std::vector<const char*> layers;
 
-    // TODO Debug layers
+#if DEBUG || _DEBUG
+    // Enable debug utils extension
+    extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+
+    // Enable validation layer
+    layers.push_back("VK_LAYER_KHRONOS_validation");
+#endif // DEBUG || _DEBUG
 
     GetWindowSystemExtensions(extensions);
 
@@ -48,6 +106,7 @@ void VulkanContext::CreateInstance(const char* app_name) {
         throw std::runtime_error("Failed to create Vulkan instance");
     }
 } // VulkanContext::CreateInstance
+
 
 void VulkanContext::PickPhysicalDevice() {
     uint32_t device_count = 0;
@@ -111,6 +170,33 @@ void VulkanContext::CreateLogicalDevice() {
     }
     vkGetDeviceQueue(device_, graphics_queue_family_index_, 0, &graphics_queue_);
 } // VulkanContext::CreateLogicalDevice
+
+void VulkanContext::CreateDebugMessenger() {
+    VkDebugUtilsMessengerCreateInfoEXT debug_messenger_info {
+        .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT,
+        .pNext = nullptr,
+        .flags = 0,
+        .messageSeverity =
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT,
+        .messageType =
+            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
+        .pfnUserCallback = DebugCallback,
+        .pUserData = nullptr,
+	};
+} // VulkanContext::CreateDebugMessenger
+
+void VulkanContext::CreateCommandPool() {
+    VkCommandPoolCreateInfo cmd_pool_info{
+        .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
+        .pNext = nullptr,
+        .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
+        .queueFamilyIndex = graphics_queue_family_index_
+    };
+}
 
 template<typename T>
 void BuildExtensionChain(T& last) {

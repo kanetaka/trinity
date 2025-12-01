@@ -17,8 +17,9 @@ class ISurfaceProvider;
 class VulkanContext {
 public:
     static constexpr uint32_t MaxInflightFrames = 2;
-    static VulkanContext& Get(); // TODO GetInstance
+    static VulkanContext& Get(); // TODO GetContext
 
+public:
     void Initialize(const char* app_name, ISurfaceProvider* surface_provider);
     void Cleanup();
     void RecreateSwapchain();
@@ -71,16 +72,14 @@ private:
     void CreateDebugMessenger();
     void CreateCommandPool();
     void CreateDescriptorPool();
-
     void CreateFrameContexts();
     void DestroyFrameContexts();
-
     void AdvanceFrame();
     void BuildFeatures();
 
+private:
     ISurfaceProvider* surface_provider_{};
     VkInstance instance_{};
-
     VkPhysicalDevice physical_device_{};
     VkDevice device_{};
     VkQueue graphics_queue_{};
@@ -88,7 +87,6 @@ private:
     uint32_t present_queue_family_index_{};
     VkPhysicalDeviceMemoryProperties memory_properties_{};
     VkPhysicalDeviceProperties device_properties_{};
-
     VkSurfaceKHR surface_{};
     VkCommandPool command_pool_{};
     VkDescriptorPool descriptor_pool_{};
@@ -100,7 +98,6 @@ private:
 
     uint32_t current_frame_index_{0};
 
-    // -----
     VkPhysicalDeviceFeatures2 physical_device_features_ {
         .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
     };
