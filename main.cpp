@@ -1,10 +1,8 @@
 #include "triangle_app.h"
 #include "core/vulkan_context.h"
 #include "core/sdl2_surface_provider.h"
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
-
 #include <iostream>
 #include <string>
 

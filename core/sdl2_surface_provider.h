@@ -1,5 +1,4 @@
 #pragma once
-
 #include "surface_provider.h"
 #include <SDL2/SDL.h>
 

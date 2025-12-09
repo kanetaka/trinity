@@ -207,7 +207,7 @@ void Swapchain::CreateFrameContext() {
 		vkCreateSemaphore(device, &semaphore_info, nullptr, &semaphore);
 		present_semaphores_.push_back(semaphore);
 	}
-} // Swapchain::CreateFrameContext
+}
 
 void Swapchain::DestroyFrameContext() {
 	auto& vulkan_context = VulkanContext::Get();
@@ -224,4 +224,4 @@ void Swapchain::DestroyFrameContext() {
 	}
 
 	present_semaphores_.clear();
-} // Swapchain::DestroyFrameContext
+}

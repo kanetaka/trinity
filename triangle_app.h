@@ -1,5 +1,4 @@
 #pragma once
-
 #include "kousoku_app.h"
 
 class TriangleApp : public IKousokuApp {

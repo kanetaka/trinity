@@ -1,5 +1,4 @@
 #pragma once
-
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <memory>
@@ -7,7 +6,6 @@
 #include <stdint.h>
 #include <string>
 #include <cstring>
-
 #include "core/command_buffer.h"
 
 class Swapchain;
@@ -17,7 +15,7 @@ class ISurfaceProvider;
 class VulkanContext {
 public:
     static constexpr uint32_t MaxInflightFrames = 2;
-    static VulkanContext& Get(); // TODO GetContext
+    static VulkanContext& Get();
 
 public:
     void Initialize(const char* app_name, ISurfaceProvider* surface_provider);

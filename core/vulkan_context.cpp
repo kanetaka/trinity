@@ -1,6 +1,5 @@
 #include "core/vulkan_context.h"
 #include "core/swapchain.h"
-
 #include <stdexcept>
 #include <cassert>
 #include <iostream>
@@ -24,7 +23,7 @@ VKAPI_ATTR VkBool32 VKAPI_CALL DebugCallback(
     ss << "[Validation Layer]" << callback_data->pMessage << std::endl;
 
 #if defined(_WIN32)
-	OutputDebugStringA(ss.str().c_str());
+    OutputDebugStringA(ss.str().c_str());
 #else
     std::cerr << ss;
 #endif
@@ -46,52 +45,62 @@ VulkanContext& VulkanContext::Get() {
 
 void VulkanContext::Initialize(const char* app_name, ISurfaceProvider* surface_provider) {
     surface_provider_ = surface_provider;
-} // VulkanContext::Initialize
+    
+    CreateInstance(app_name);
+    PickPhysicalDevice();
+    CreateLogicalDevice();
+    
+#if DEBUG || _DEBUG
+    CreateDebugMessenger();
+#endif
+
+    CreateCommandPool();
+}
 
 void VulkanContext::Cleanup() {
-	vkDeviceWaitIdle(device_);
+    vkDeviceWaitIdle(device_);
     DestroyFrameContexts();
-	vkDestroyCommandPool(device_, command_pool_, nullptr);
+    vkDestroyCommandPool(device_, command_pool_, nullptr);
 
-	if (debug_messenger_ != VK_NULL_HANDLE) {
-		auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance_, "vkDestroyDebugUtilsMessengerEXT");
+    if (debug_messenger_ != VK_NULL_HANDLE) {
+        auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance_, "vkDestroyDebugUtilsMessengerEXT");
         if (func != nullptr) {
-			func(instance_, debug_messenger_, nullptr);
+            func(instance_, debug_messenger_, nullptr);
         }
-		debug_messenger_ = VK_NULL_HANDLE;
+        debug_messenger_ = VK_NULL_HANDLE;
     }
 
     if (swapchain_) {
         swapchain_->Cleanup();
-        // TODO resetä÷êîÇ…Ç¬Ç¢Çƒí≤Ç◊ÇÈ?
+        // TODO
     }
 
     if (surface_ != VK_NULL_HANDLE) {
-		vkDestroySurfaceKHR(instance_, surface_, nullptr);
-		surface_ = VK_NULL_HANDLE;
+        vkDestroySurfaceKHR(instance_, surface_, nullptr);
+        surface_ = VK_NULL_HANDLE;
     }
 
-	vkDestroyDevice(device_, nullptr);
-	vkDestroyInstance(instance_, nullptr);
-	device_ = VK_NULL_HANDLE;
-	instance_ = VK_NULL_HANDLE;
+    vkDestroyDevice(device_, nullptr);
+    vkDestroyInstance(instance_, nullptr);
+    device_ = VK_NULL_HANDLE;
+    instance_ = VK_NULL_HANDLE;
 }
 
 void VulkanContext::RecreateSwapchain() {
-    if (swapchain_) {
-		swapchain_ = std::make_unique<Swapchain>();
+    if (!swapchain_) {
+        swapchain_ = std::make_unique<Swapchain>();
     }
 
-	if (surface_ == VK_NULL_HANDLE) {
-		CreateSurface();
-	}
+    if (surface_ == VK_NULL_HANDLE) {
+        CreateSurface();
+    }
 
-	auto width = surface_provider_->GetFrameBufferWidth();
-	auto height = surface_provider_->GetFrameBufferHeight();
-	swapchain_->Recreate(width, height);
+    auto width = surface_provider_->GetFrameBufferWidth();
+    auto height = surface_provider_->GetFrameBufferHeight();
+    swapchain_->Recreate(width, height);
 
     DestroyFrameContexts();
-	CreateFrameContexts();
+    CreateFrameContexts();
 
 }
 
@@ -102,30 +111,30 @@ std::shared_ptr<CommandBuffer> VulkanContext::CreateCommandBuffer() {
         .commandPool = command_pool_,
         .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
         .commandBufferCount = 1,
-	};
+    };
     VkCommandBuffer command_buffer{};
-	vkAllocateCommandBuffers(device_, &command_alloc_info, &command_buffer);
+    vkAllocateCommandBuffers(device_, &command_alloc_info, &command_buffer);
 
     return std::make_shared<CommandBuffer>(command_buffer);
 }
 
 VkResult VulkanContext::AcquireNextImage() {
     auto* frame = GetCurrentFrameContext();
-	auto fence = frame->inflight_fence;
-	vkWaitForFences(device_, 1, &fence, VK_TRUE, UINT64_MAX);
+    auto fence = frame->inflight_fence;
+    vkWaitForFences(device_, 1, &fence, VK_TRUE, UINT64_MAX);
 
-	auto result = swapchain_->AcquireNextImage();
-	if (result == VK_SUCCESS) {
-		vkResetFences(device_, 1, &fence);
+    auto result = swapchain_->AcquireNextImage();
+    if (result == VK_SUCCESS) {
+        vkResetFences(device_, 1, &fence);
     }
     else if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-		auto width = surface_provider_->GetFrameBufferWidth();
-		auto height = surface_provider_->GetFrameBufferHeight();
+        auto width = surface_provider_->GetFrameBufferWidth();
+        auto height = surface_provider_->GetFrameBufferHeight();
         if (width > 0 && height > 0) {
-			swapchain_->Recreate(width, height);
+            swapchain_->Recreate(width, height);
         }
     }
-	assert(result != VK_ERROR_DEVICE_LOST);
+    assert(result != VK_ERROR_DEVICE_LOST);
 
     return result;
 }
@@ -135,8 +144,8 @@ void VulkanContext::SubmitPresent() {
 
     VkPipelineStageFlags wait_stage_mask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkSemaphore render_complete_semaphore = swapchain_->GetRenderCompleteSemaphore();
-	VkSemaphore present_complete_semaphore = swapchain_->GetPresentCompleteSemaphore();
-	VkCommandBuffer command_buffer = frame.command_buffer->Get();
+    VkSemaphore present_complete_semaphore = swapchain_->GetPresentCompleteSemaphore();
+    VkCommandBuffer command_buffer = frame.command_buffer->Get();
 
     VkSubmitInfo submit_info {
         .sType = VK_STRUCTURE_TYPE_SUBMIT_INFO,
@@ -149,15 +158,15 @@ void VulkanContext::SubmitPresent() {
         .signalSemaphoreCount = 1,
         .pSignalSemaphores = &render_complete_semaphore,
     };
-	auto result = vkQueueSubmit(graphics_queue_, 1, &submit_info, frame.inflight_fence);
+    auto result = vkQueueSubmit(graphics_queue_, 1, &submit_info, frame.inflight_fence);
     assert(result != VK_ERROR_DEVICE_LOST);
 
-	swapchain_->QueuePresent(graphics_queue_);
+    swapchain_->QueuePresent(graphics_queue_);
     AdvanceFrame();
 }
 
 VulkanContext::FrameContext* VulkanContext::GetCurrentFrameContext() {
-	return &frame_contexts_[current_frame_index_];
+    return &frame_contexts_[current_frame_index_];
 }
 
 void VulkanContext::SetDebugObjectName(void* object_handle, VkObjectType type, const char* name) {
@@ -171,7 +180,7 @@ void VulkanContext::SetDebugObjectName(void* object_handle, VkObjectType type, c
             .pObjectName = name,
         };
         pfn_set_debug_utils_object_name_ext_(device_, &name_info);
-	}
+    }
 #endif // _DEBUG || DEBUG
 }
 
@@ -220,12 +229,15 @@ void VulkanContext::CreateInstance(const char* app_name) {
 
 void VulkanContext::CreateSurface() {
     surface_ = surface_provider_->CreateSurface(instance_);
+    if (surface_ == VK_NULL_HANDLE) {
+        throw std::runtime_error("Failed to create Vulkan surface from surface provider");
+    }
 
-	VkBool32 present_support = VK_FALSE;
-	vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, graphics_queue_family_index_, surface_, &present_support);
+    VkBool32 present_support = VK_FALSE;
+    vkGetPhysicalDeviceSurfaceSupportKHR(physical_device_, graphics_queue_family_index_, surface_, &present_support);
     if (present_support == VK_FALSE) {
         throw std::runtime_error("Selected physical device does not support presentation");
-	}
+    }
 }
 
 
@@ -299,6 +311,10 @@ void VulkanContext::CreateCommandPool() {
         .flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT,
         .queueFamilyIndex = graphics_queue_family_index_
     };
+    
+    if (vkCreateCommandPool(device_, &cmd_pool_info, nullptr, &command_pool_) != VK_SUCCESS) {
+        throw std::runtime_error("Failed to create command pool");
+    }
 }
 
 void VulkanContext::CreateFrameContexts() {
@@ -309,16 +325,16 @@ void VulkanContext::CreateFrameContexts() {
             .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
             .pNext = nullptr,
             .flags = VK_FENCE_CREATE_SIGNALED_BIT,
-		};
-		vkCreateFence(device_, &fence_info, nullptr, &frame.inflight_fence);
+        };
+        vkCreateFence(device_, &fence_info, nullptr, &frame.inflight_fence);
     }
 }
 
 void VulkanContext::DestroyFrameContexts() {
     for (auto& frame: frame_contexts_) {
-		vkDestroyFence(device_, frame.inflight_fence, nullptr);
+        vkDestroyFence(device_, frame.inflight_fence, nullptr);
     }
-	frame_contexts_.clear();
+    frame_contexts_.clear();
 }
 
 void VulkanContext::AdvanceFrame() {
@@ -367,5 +383,5 @@ void VulkanContext::CreateDebugMessenger() {
             VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT,
         .pfnUserCallback = DebugCallback,
         .pUserData = nullptr,
-	};
+    };
 }
