@@ -22,11 +22,6 @@ VkSurfaceKHR Sdl2SurfaceProvider::CreateSurface(VkInstance instance) {
 	if (!SDL_Vulkan_CreateSurface(window_, instance, &surface)) {
 		const char* sdl_error = SDL_GetError();
 		std::cerr << "SDL_Vulkan_CreateSurface failed: " << sdl_error << std::endl;
-		std::cerr << "Possible causes:" << std::endl;
-		std::cerr << "1. Window was not created with SDL_WINDOW_VULKAN flag" << std::endl;
-		std::cerr << "2. Required Vulkan instance extensions are missing" << std::endl;
-		std::cerr << "3. Vulkan runtime or drivers are not properly installed" << std::endl;
-		
 		throw std::runtime_error(std::string("Failed to create Vulkan surface: ") + sdl_error);
 	}
 	return surface;
