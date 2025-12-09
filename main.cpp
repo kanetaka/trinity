@@ -1,7 +1,10 @@
 #include "triangle_app.h"
 #include "core/vulkan_context.h"
+#include "core/sdl2_surface_provider.h"
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
+
 #include <iostream>
 #include <string>
 
@@ -10,11 +13,17 @@ using namespace std;
 int main(int argc, char *argv[]) {
     SDL_Init(SDL_INIT_EVERYTHING);
     std::string window_name__("Example SDL2 Vulkan application");
-    SDL_Window* window = SDL_CreateWindow(window_name__.c_str(), SDL_WINDOWPOS_CENTERED,SDL_WINDOWPOS_CENTERED,800,600,SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN);
+    SDL_Window* window = SDL_CreateWindow(
+            window_name__.c_str(),
+            SDL_WINDOWPOS_CENTERED,
+            SDL_WINDOWPOS_CENTERED,
+            1280, 720,
+            SDL_WINDOW_VULKAN | SDL_WINDOW_SHOWN);
+    Sdl2SurfaceProvider surface_provider(window);
 
-    auto& vulkan_ctx = VulkanContext::Get();
-    vulkan_ctx.GetWindowSystemExtensions = [window](auto& extensions) {
-        unsigned int extension_count = 0;
+    auto& vulkan_context = VulkanContext::Get();
+    vulkan_context.GetWindowSystemExtensions = [window](auto& extensions) {
+        uint32_t extension_count = 0;
         if (!SDL_Vulkan_GetInstanceExtensions(window, &extension_count, nullptr)) {
             throw std::runtime_error("Failed to get SDL Vulkan extensions");
         }
@@ -23,10 +32,12 @@ int main(int argc, char *argv[]) {
             throw std::runtime_error("Failed to get SDL Vulkan extensions");
         }
         extensions.insert(extensions.end(), sdl_extensions.begin(), sdl_extensions.end());
-	};
+    };
+    vulkan_context.Initialize("Kousoku Triangle", &surface_provider);
+    vulkan_context.RecreateSwapchain();
 
-    TriangleApp app{};
-    app.OnInitialize();
+    TriangleApp tri_app{};
+    tri_app.Initialize();
 
     // Message Loop
     bool running = true;
@@ -37,7 +48,7 @@ int main(int argc, char *argv[]) {
                 running = false;
             }
         }
-        app.OnDrawFrame();
+        tri_app.DrawFrame();
     }
 
     SDL_DestroyWindow(window);

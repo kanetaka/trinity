@@ -3,7 +3,7 @@
 class IKousokuApp {
 public:
     virtual ~IKousokuApp() = default;
-    virtual void OnInitialize() = 0;
-    virtual void OnDrawFrame() = 0;
-    virtual void OnCleanup() = 0;
+    virtual void Initialize() = 0;
+    virtual void DrawFrame() = 0;
+    virtual void Cleanup() = 0;
 };

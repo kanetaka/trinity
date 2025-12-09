@@ -21,16 +21,10 @@ endif()
 
 # Include directories
 include_directories(${VK_SDK_PATH}/Include)
+include_directories(${CMAKE_SOURCE_DIR})
 
 # Library directories
 link_directories(${VK_SDK_PATH}/Lib)
-
-# Source files
-set(SOURCES
-    main.cpp
-    core/vulkan_context.cpp
-    core/command_buffer.cpp
-)
 
 # Header files (for IDE organization)
 set(HEADERS
@@ -38,11 +32,25 @@ set(HEADERS
     kousoku_app.h
     core/vulkan_context.h
     core/command_buffer.h
+    core/image_barrier.h
     core/swapchain.h
+    core/surface_provider.h
+    core/sdl2_surface_provider.h
+)
+
+# Source files
+set(SOURCES
+    main.cpp
+    triangle_app.cpp
+    core/vulkan_context.cpp
+    core/command_buffer.cpp
+    core/image_barrier.cpp
+    core/swapchain.cpp
+    core/sdl2_surface_provider.cpp
 )
 
 # Create executable
-add_executable(kousoku ${SOURCES} ${HEADERS})
+add_executable(kousoku ${HEADERS} ${SOURCES})
 
 # Link libraries
 target_link_libraries(kousoku

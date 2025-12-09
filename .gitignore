@@ -1,3 +1,90 @@
+# This projeect's
+
+# Build directories
 build/
+out/
+cmake-build-*/
+_build/
+_builds/
+
+# IDE and Editor files
 .vs/
 .vscode/
+*.swp
+*.swo
+*~
+.idea/
+*.code-workspace
+
+# CMake generated files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+CPack*.cmake
+*.cmake
+
+# Visual Studio files
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.sdf
+*.opensdf
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+x64/
+x86/
+Debug/
+Release/
+*.pdb
+*.ilk
+*.exe
+*.dll
+*.lib
+*.obj
+*.exp
+*.idb
+*.manifest
+
+# Compiler and linker output
+*.o
+*.obj
+*.so
+*.dylib
+*.a
+*.la
+*.lo
+*.exe
+*.out
+*.app
+
+# OS specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Backup and temporary files
+*~
+*.bak
+*.tmp
+*.temp
+_bak/
+backup/
+
+# Package manager
+conan.lock
+vcpkg_installed/
+packages/
+
+# Logs and temporary data
+*.log
+logs/
+temp/

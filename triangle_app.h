@@ -4,10 +4,7 @@
 
 class TriangleApp : public IKousokuApp {
 public:
-    virtual void OnInitialize() override {
-    }
-    virtual void OnDrawFrame() override {
-    }
-    virtual void OnCleanup() override {
-    }
+    virtual void Initialize() override { } 
+    virtual void DrawFrame() override;
+    virtual void Cleanup() override { }
 };

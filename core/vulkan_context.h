@@ -8,7 +8,7 @@
 #include <string>
 #include <cstring>
 
-#include "command_buffer.h"
+#include "core/command_buffer.h"
 
 class Swapchain;
 class CommandBuffer;
@@ -22,31 +22,30 @@ public:
 public:
     void Initialize(const char* app_name, ISurfaceProvider* surface_provider);
     void Cleanup();
+
     void RecreateSwapchain();
 
     VkInstance GetInstance() const { return instance_; }
     VkDevice GetDevice() const { return device_; }
     VkPhysicalDevice GetPhysicalDevice() const { return physical_device_; }
     VkDescriptorPool GetDescriptorPool() const { return descriptor_pool_; }
-
     VkQueue GetGraphicsQueue() const { return graphics_queue_; }
     uint32_t GetGraphicsQueueFamilyIndex() const { return graphics_queue_family_index_; }
     uint32_t GetPresentQueueFamilyIndex() const { return present_queue_family_index_; }
-
     VkCommandPool GetCommandPool() const { return command_pool_; }
     VkSurfaceKHR GetSurface() const { return surface_; }
 
     std::shared_ptr<CommandBuffer> CreateCommandBuffer();
 
-    VkDescriptorSet AllocateDescriptorSet(VkDescriptorSetLayout layout);
-    void FreeDescriptorSet(VkDescriptorSet descriptor_set);
-
     struct FrameContext {
         std::shared_ptr<CommandBuffer> command_buffer;
         VkFence inflight_fence = VK_NULL_HANDLE;
     };
-
     uint32_t GetCurrentFrameIndex() const { return current_frame_index_; }
+
+
+    VkDescriptorSet AllocateDescriptorSet(VkDescriptorSetLayout layout);
+    void FreeDescriptorSet(VkDescriptorSet descriptor_set);
 
     VkResult AcquireNextImage();
 
@@ -67,15 +66,20 @@ private:
 private:
     void CreateInstance(const char* app_name);
     void CreateSurface();
+
     void PickPhysicalDevice();
     void CreateLogicalDevice();
-    void CreateDebugMessenger();
+
     void CreateCommandPool();
     void CreateDescriptorPool();
+
     void CreateFrameContexts();
     void DestroyFrameContexts();
+
     void AdvanceFrame();
     void BuildFeatures();
+
+    void CreateDebugMessenger();
 
 private:
     ISurfaceProvider* surface_provider_{};
