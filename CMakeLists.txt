@@ -26,10 +26,16 @@ include_directories(${CMAKE_SOURCE_DIR})
 # Library directories
 link_directories(${VK_SDK_PATH}/Lib)
 
-# Header files (for IDE organization)
-set(HEADERS
+# Header files organized by category
+set(ROOT_HEADERS
     triangle_app.h
-    kousoku_app.h
+)
+
+set(COMMON_HEADERS
+    common/application.h
+)
+
+set(CORE_HEADERS
     core/vulkan_context.h
     core/command_buffer.h
     core/image_barrier.h
@@ -38,10 +44,13 @@ set(HEADERS
     core/sdl2_surface_provider.h
 )
 
-# Source files
-set(SOURCES
+# Source files organized by category
+set(ROOT_SOURCES
     main.cpp
     triangle_app.cpp
+)
+
+set(CORE_SOURCES
     core/vulkan_context.cpp
     core/command_buffer.cpp
     core/image_barrier.cpp
@@ -49,8 +58,20 @@ set(SOURCES
     core/sdl2_surface_provider.cpp
 )
 
+# Combine all sources and headers
+set(ALL_HEADERS ${ROOT_HEADERS} ${COMMON_HEADERS} ${CORE_HEADERS})
+set(ALL_SOURCES ${ROOT_SOURCES} ${CORE_SOURCES})
+
 # Create executable
-add_executable(kousoku ${HEADERS} ${SOURCES})
+add_executable(kousoku ${ALL_HEADERS} ${ALL_SOURCES})
+
+# Create Visual Studio source filters (virtual folders)
+source_group("Header Files" FILES ${ROOT_HEADERS})
+source_group("Header Files\\common" FILES ${COMMON_HEADERS})
+source_group("Header Files\\core" FILES ${CORE_HEADERS})
+
+source_group("Source Files" FILES ${ROOT_SOURCES})
+source_group("Source Files\\core" FILES ${CORE_SOURCES})
 
 # Link libraries
 target_link_libraries(kousoku
