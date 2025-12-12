@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(kousoku LANGUAGES CXX)
+# Project configuration
+set(PROJECT_NAME kousoku)
+project(${PROJECT_NAME} LANGUAGES CXX)
 
 # Set C++20 standard
 set(CMAKE_CXX_STANDARD 20)
@@ -36,12 +38,14 @@ set(COMMON_HEADERS
 )
 
 set(CORE_HEADERS
-    core/vulkan_context.h
+    core/buffer_resource.h
     core/command_buffer.h
+    core/gpu_resource_base.h
     core/image_barrier.h
-    core/swapchain.h
-    core/surface_provider.h
     core/sdl2_surface_provider.h
+    core/surface_provider.h
+    core/swapchain.h
+    core/vulkan_context.h
 )
 
 # Source files organized by category
@@ -51,11 +55,12 @@ set(ROOT_SOURCES
 )
 
 set(CORE_SOURCES
-    core/vulkan_context.cpp
+    core/buffer_resource.cpp
     core/command_buffer.cpp
     core/image_barrier.cpp
-    core/swapchain.cpp
     core/sdl2_surface_provider.cpp
+    core/swapchain.cpp
+    core/vulkan_context.cpp
 )
 
 # Combine all sources and headers
@@ -63,7 +68,7 @@ set(ALL_HEADERS ${ROOT_HEADERS} ${COMMON_HEADERS} ${CORE_HEADERS})
 set(ALL_SOURCES ${ROOT_SOURCES} ${CORE_SOURCES})
 
 # Create executable
-add_executable(kousoku ${ALL_HEADERS} ${ALL_SOURCES})
+add_executable(${PROJECT_NAME} ${ALL_HEADERS} ${ALL_SOURCES})
 
 # Create Visual Studio source filters (virtual folders)
 source_group("Header Files" FILES ${ROOT_HEADERS})
@@ -74,7 +79,7 @@ source_group("Source Files" FILES ${ROOT_SOURCES})
 source_group("Source Files\\core" FILES ${CORE_SOURCES})
 
 # Link libraries
-target_link_libraries(kousoku
+target_link_libraries(${PROJECT_NAME}
     SDL2main
     SDL2
     vulkan-1
@@ -82,12 +87,12 @@ target_link_libraries(kousoku
 
 # Set this as a GUI application (equivalent to gui_app : true in meson)
 if(WIN32)
-    set_target_properties(kousoku PROPERTIES
+    set_target_properties(${PROJECT_NAME} PROPERTIES
         WIN32_EXECUTABLE TRUE
     )
     
     # Fix runtime library conflicts and suppress PDB warnings
-    target_link_options(kousoku PRIVATE 
+    target_link_options(${PROJECT_NAME} PRIVATE 
         $<$<CONFIG:Debug>:/NODEFAULTLIB:msvcrt.lib>
         $<$<CONFIG:Release>:/NODEFAULTLIB:msvcrtd.lib>
         /ignore:4099  # Suppress PDB warnings for external libraries
@@ -95,6 +100,6 @@ if(WIN32)
 endif()
 
 # Set output directory (optional)
-set_target_properties(kousoku PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )

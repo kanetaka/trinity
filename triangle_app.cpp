@@ -4,6 +4,14 @@
 #include "core/image_barrier.h"
 #include <thread>
 
+void TriangleApp::Initialize() {
+    // Initialization code can be added here if needed
+}
+
+void TriangleApp::Cleanup() {
+    // Cleanup code can be added here if needed
+}
+
 void TriangleApp::DrawFrame() {
     auto& vulkan_context = VulkanContext::Get();
     auto& swapchain = vulkan_context.GetSwapchain();
