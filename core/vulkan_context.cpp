@@ -43,6 +43,10 @@ VulkanContext& VulkanContext::Get() {
 // ---- Public Member Methods ---- //
 // ------------------------------- //
 
+VulkanContext::FrameContext* VulkanContext::GetCurrentFrameContext() {
+    return &frame_contexts_[current_frame_index_];
+}
+
 void VulkanContext::Initialize(const char* app_name, ISurfaceProvider* surface_provider) {
     surface_provider_ = surface_provider;
     
@@ -101,7 +105,6 @@ void VulkanContext::RecreateSwapchain() {
 
     DestroyFrameContexts();
     CreateFrameContexts();
-
 }
 
 std::shared_ptr<CommandBuffer> VulkanContext::CreateCommandBuffer() {
@@ -165,8 +168,15 @@ void VulkanContext::SubmitPresent() {
     AdvanceFrame();
 }
 
-VulkanContext::FrameContext* VulkanContext::GetCurrentFrameContext() {
-    return &frame_contexts_[current_frame_index_];
+uint32_t VulkanContext::FindMemoryType(const VkMemoryRequirements& requirements, VkMemoryPropertyFlags propeties) const {
+	for (uint32_t i = 0; i < memory_properties_.memoryTypeCount; ++i) {
+		const bool is_type_compatible = (requirements.memoryTypeBits & (1 << i)) != 0;
+		const bool has_desired_properties = (memory_properties_.memoryTypes[i].propertyFlags & propeties) == propeties;
+		if (is_type_compatible && has_desired_properties) {
+            return i;
+        }
+    }
+    throw std::runtime_error("Failed to find suitable memory type");
 }
 
 void VulkanContext::SetDebugObjectName(void* object_handle, VkObjectType type, const char* name) {

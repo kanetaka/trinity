@@ -18,10 +18,10 @@ public:
     static VulkanContext& Get();
 
 public:
-    void Initialize(const char* app_name, ISurfaceProvider* surface_provider);
-    void Cleanup();
-
-    void RecreateSwapchain();
+    struct FrameContext {
+        std::shared_ptr<CommandBuffer> command_buffer;
+        VkFence inflight_fence = VK_NULL_HANDLE;
+    };
 
     VkInstance GetInstance() const { return instance_; }
     VkDevice GetDevice() const { return device_; }
@@ -32,15 +32,16 @@ public:
     uint32_t GetPresentQueueFamilyIndex() const { return present_queue_family_index_; }
     VkCommandPool GetCommandPool() const { return command_pool_; }
     VkSurfaceKHR GetSurface() const { return surface_; }
-
-    std::shared_ptr<CommandBuffer> CreateCommandBuffer();
-
-    struct FrameContext {
-        std::shared_ptr<CommandBuffer> command_buffer;
-        VkFence inflight_fence = VK_NULL_HANDLE;
-    };
+    std::unique_ptr<Swapchain>& GetSwapchain() { return swapchain_; }
     uint32_t GetCurrentFrameIndex() const { return current_frame_index_; }
+    FrameContext* GetCurrentFrameContext();
 
+    std::function<void(std::vector<const char*>&)> GetWindowSystemExtensions;
+
+    void Initialize(const char* app_name, ISurfaceProvider* surface_provider);
+    void Cleanup();
+    void RecreateSwapchain();
+    std::shared_ptr<CommandBuffer> CreateCommandBuffer();
 
     VkDescriptorSet AllocateDescriptorSet(VkDescriptorSetLayout layout);
     void FreeDescriptorSet(VkDescriptorSet descriptor_set);
@@ -49,11 +50,8 @@ public:
 
     void SubmitPresent();
     void SubmitAndWait(std::shared_ptr<CommandBuffer> command_buffer);
-    FrameContext* GetCurrentFrameContext();
 
-    std::unique_ptr<Swapchain>& GetSwapchain() { return swapchain_; }
     uint32_t FindMemoryType(const VkMemoryRequirements& requirements, VkMemoryPropertyFlags propeties) const;
-    std::function<void(std::vector<const char*>&)> GetWindowSystemExtensions;
 
     void SetDebugObjectName(void* object_handle, VkObjectType type, const char* name);
 

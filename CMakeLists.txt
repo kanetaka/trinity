@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 # Project configuration
-set(PROJECT_NAME kousoku)
+set(PROJECT_NAME x8)
 project(${PROJECT_NAME} LANGUAGES CXX)
 
 # Set C++20 standard
@@ -45,6 +45,7 @@ set(CORE_HEADERS
     core/sdl2_surface_provider.h
     core/surface_provider.h
     core/swapchain.h
+    core/vertex_buffer.h
     core/vulkan_context.h
 )
 
@@ -60,6 +61,7 @@ set(CORE_SOURCES
     core/image_barrier.cpp
     core/sdl2_surface_provider.cpp
     core/swapchain.cpp
+    core/vertex_buffer.cpp
     core/vulkan_context.cpp
 )
 

@@ -4,12 +4,29 @@
 #include "core/image_barrier.h"
 #include <thread>
 
+// ------------------------------- //
+// ---- Public Member Methods ---- //
+// ------------------------------- //
+
 void TriangleApp::Initialize() {
-    // Initialization code can be added here if needed
+    InitializeTriangleVertexBuffer();
+	InitializeGraphicsPipeline();
 }
 
 void TriangleApp::Cleanup() {
-    // Cleanup code can be added here if needed
+	auto& context = VulkanContext::Get();
+	auto device = context.GetDevice();
+
+	vkDeviceWaitIdle(device);
+
+    if (pipeline_ != VK_NULL_HANDLE) {
+		vkDestroyPipeline(device, pipeline_, nullptr);
+    }
+    if (pipeline_layout_ != VK_NULL_HANDLE) {
+        vkDestroyPipelineLayout(device, pipeline_layout_, nullptr);
+    }
+	vertex_buffer_->Cleanrup();
+    vertex_buffer_.reset();
 }
 
 void TriangleApp::DrawFrame() {
@@ -79,4 +96,21 @@ void TriangleApp::DrawFrame() {
     );
     command_buffer->End();
     vulkan_context.SubmitPresent();
+}
+
+// -------------------------------- //
+// ---- Private Member Methods ---- //
+// -------------------------------- //
+
+void TriangleApp::InitializeTriangleVertexBuffer() {
+    const std::vector<Vertex> triangle_vertices = {
+        { { -0.5f, -0.5f, 0.0f }, { 1.0f, 0.0f, 0.0f } },
+        { {  0.5f, -0.5f, 0.0f }, { 0.0f, 1.0f, 0.0f } },
+        { {  0.0f,  0.5f, 0.0f }, { 0.0f, 0.0f, 1.0f } },
+    };
+	VkDeviceSize buffer_size = sizeof(Vertex) * triangle_vertices.size();
+	vertex_buffer_ = VertexBuffer::Create(buffer_size, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+	void* p = vertex_buffer_->Map();
+	memcpy(p, triangle_vertices.data(), static_cast<size_t>(buffer_size));
+	vertex_buffer_->Unmap();
 }

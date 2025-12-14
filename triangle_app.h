@@ -2,7 +2,7 @@
 #include "common/application.h"
 #include "core/vulkan_context.h"
 #include "core/swapchain.h"
-#include "core/buffer_resource.h"
+#include "core/vertex_buffer.h"
 #include <glm/glm.hpp>
 #include <string>
 #include <vector>
