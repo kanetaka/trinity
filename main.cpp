@@ -1,14 +1,19 @@
 #include "triangle_app.h"
 #include "core/vulkan_context.h"
 #include "core/sdl2_surface_provider.h"
+#include "core/asset_path.h"
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_vulkan.h>
 #include <iostream>
 #include <string>
-
-using namespace std;
+#include <filesystem>
 
 int main(int argc, char *argv[]) {
+	std::filesystem::path exe_dir = std::filesystem::path(argv[0]).parent_path();
+	std::filesystem::current_path(exe_dir);
+	std::filesystem::path asset_dir = exe_dir / "../../assets";
+	SetAssetRootPath(asset_dir);
+
     SDL_Init(SDL_INIT_EVERYTHING);
     std::string window_name__("Example SDL2 Vulkan application");
     SDL_Window* window = SDL_CreateWindow(

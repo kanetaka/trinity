@@ -38,6 +38,7 @@ set(COMMON_HEADERS
 )
 
 set(CORE_HEADERS
+    core/asset_path.h
     core/buffer_resource.h
     core/command_buffer.h
     core/gpu_resource_base.h
@@ -56,6 +57,7 @@ set(ROOT_SOURCES
 )
 
 set(CORE_SOURCES
+    core/asset_path.cpp
     core/buffer_resource.cpp
     core/command_buffer.cpp
     core/image_barrier.cpp
