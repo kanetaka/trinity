@@ -1,7 +1,7 @@
 #pragma once
-#include "kousoku_app.h"
+#include "trinity_app.h"
 
-class TriangleApp : public IKousokuApp {
+class TriangleApp : public ITrinityApp {
 public:
     virtual void Initialize() override { } 
     virtual void DrawFrame() override;

@@ -1,8 +1,8 @@
 #pragma once
 
-class IKousokuApp {
+class ITrinityApp {
 public:
-    virtual ~IKousokuApp() = default;
+    virtual ~ITrinityApp() = default;
     virtual void Initialize() = 0;
     virtual void DrawFrame() = 0;
     virtual void Cleanup() = 0;
