@@ -9,10 +9,10 @@
 #include <filesystem>
 
 int main(int argc, char *argv[]) {
-	std::filesystem::path exe_dir = std::filesystem::path(argv[0]).parent_path();
-	std::filesystem::current_path(exe_dir);
-	std::filesystem::path asset_dir = exe_dir / "../../assets";
-	SetAssetRootPath(asset_dir);
+    std::filesystem::path exe_dir = std::filesystem::path(argv[0]).parent_path();
+    std::filesystem::current_path(exe_dir);
+    std::filesystem::path asset_dir = exe_dir / "../../assets";
+    SetAssetRootPath(asset_dir);
 
     SDL_Init(SDL_INIT_EVERYTHING);
     std::string window_name__("Example SDL2 Vulkan application");

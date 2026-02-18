@@ -25,17 +25,17 @@ public:
     virtual ~BufferResource() { Cleanrup(); }
 
 protected:
-	BufferResource() = default;
+    BufferResource() = default;
 
 public:
     bool IsHostAccessible() const override { return (memory_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT) != 0; }
     VkAccessFlags GetAccessFlags() const override { return access_flags_; }
-	void SetAccessFlags(const VkAccessFlags access_flags) override { access_flags_ = access_flags; }
+    void SetAccessFlags(const VkAccessFlags access_flags) override { access_flags_ = access_flags; }
     VkBuffer GetBuffer() const override { return buffer_; }
     VkDeviceSize GetBufferSize() const override { return size_; }
     VkDescriptorBufferInfo GetDescriptorBufferInfo() const override;
 
-	virtual void Cleanrup();
+    virtual void Cleanrup();
 
 protected:
     bool CreateBuffer(const VkBufferCreateInfo& buffer_create_info, VkMemoryPropertyFlags memory_props);

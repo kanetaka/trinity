@@ -169,10 +169,10 @@ void VulkanContext::SubmitPresent() {
 }
 
 uint32_t VulkanContext::FindMemoryType(const VkMemoryRequirements& requirements, VkMemoryPropertyFlags propeties) const {
-	for (uint32_t i = 0; i < memory_properties_.memoryTypeCount; ++i) {
-		const bool is_type_compatible = (requirements.memoryTypeBits & (1 << i)) != 0;
-		const bool has_desired_properties = (memory_properties_.memoryTypes[i].propertyFlags & propeties) == propeties;
-		if (is_type_compatible && has_desired_properties) {
+    for (uint32_t i = 0; i < memory_properties_.memoryTypeCount; ++i) {
+        const bool is_type_compatible = (requirements.memoryTypeBits & (1 << i)) != 0;
+        const bool has_desired_properties = (memory_properties_.memoryTypes[i].propertyFlags & propeties) == propeties;
+        if (is_type_compatible && has_desired_properties) {
             return i;
         }
     }

@@ -55,14 +55,14 @@ bool BufferResource<T>::CreateBuffer(const VkBufferCreateInfo& buffer_create_inf
         .memoryTypeIndex = context.FindMemoryType(memory_requirements, memory_props),
     };
 
-	result = vkAllocateMemory(device, &allocate_info, nullptr, &memory_);
+    result = vkAllocateMemory(device, &allocate_info, nullptr, &memory_);
     if (result != VK_SUCCESS) {
         return false;
     }
 
-	vkBindBufferMemory(device, buffer_, memory_, 0);
-	size_ = buffer_create_info.size;
-	memory_props_ = memory_props;
+    vkBindBufferMemory(device, buffer_, memory_, 0);
+    size_ = buffer_create_info.size;
+    memory_props_ = memory_props;
 
     return true;
 }
