@@ -1,8 +1,8 @@
 #pragma once
 
-class INo9App {
+class INovaApp {
 public:
-  virtual ~INo9App() = default;
+  virtual ~INovaApp() = default;
   virtual void Initialize() = 0;
   virtual void DrawFrame() = 0;
   virtual void Cleanup() = 0;

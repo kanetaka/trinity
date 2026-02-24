@@ -1,9 +1,9 @@
 #pragma once
-#include "trinity_app.h"
+#include "nova_app.h"
 
-class TriangleApp : public ITrinityApp {
+class TriangleApp : public INovaApp {
 public:
-    virtual void Initialize() override { } 
-    virtual void DrawFrame() override;
-    virtual void Cleanup() override { }
+  virtual void Initialize() override {}
+  virtual void DrawFrame() override;
+  virtual void Cleanup() override {}
 };

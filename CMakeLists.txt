@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(no9 LANGUAGES CXX)
+project(nova LANGUAGES CXX)
 
 # Set C++20 standard
 set(CMAKE_CXX_STANDARD 20)
@@ -29,7 +29,7 @@ link_directories(${VK_SDK_PATH}/Lib)
 # Header files (for IDE organization)
 set(HEADERS
     triangle_app.h
-    no9_app.h
+    nova_app.h
     core/vulkan_context.h
     core/command_buffer.h
     core/image_barrier.h
@@ -50,10 +50,10 @@ set(SOURCES
 )
 
 # Create executable
-add_executable(no9 ${HEADERS} ${SOURCES})
+add_executable(nova ${HEADERS} ${SOURCES})
 
 # Link libraries
-target_link_libraries(no9
+target_link_libraries(nova
     SDL2main
     SDL2
     vulkan-1
@@ -61,12 +61,12 @@ target_link_libraries(no9
 
 # Set this as a GUI application (equivalent to gui_app : true in meson)
 if(WIN32)
-    set_target_properties(no9 PROPERTIES
+    set_target_properties(nova PROPERTIES
         WIN32_EXECUTABLE TRUE
     )
     
     # Fix runtime library conflicts and suppress PDB warnings
-    target_link_options(no9 PRIVATE 
+    target_link_options(nova PRIVATE 
         $<$<CONFIG:Debug>:/NODEFAULTLIB:msvcrt.lib>
         $<$<CONFIG:Release>:/NODEFAULTLIB:msvcrtd.lib>
         /ignore:4099  # Suppress PDB warnings for external libraries
@@ -74,6 +74,6 @@ if(WIN32)
 endif()
 
 # Set output directory (optional)
-set_target_properties(no9 PROPERTIES
+set_target_properties(nova PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
