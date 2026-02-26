@@ -1,8 +1,8 @@
 #pragma once
 
-class INovaApp {
+class ITrinityApp {
 public:
-  virtual ~INovaApp() = default;
+  virtual ~ITrinityApp() = default;
   virtual void Initialize() = 0;
   virtual void DrawFrame() = 0;
   virtual void Cleanup() = 0;
