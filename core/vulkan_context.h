@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <memory>
@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <string>
 #include <cstring>
+
 #include "core/command_buffer.h"
 
 class Swapchain;
@@ -17,57 +18,86 @@ public:
     static constexpr uint32_t MaxInflightFrames = 2;
     static VulkanContext& Get();
 
-public:
-    void Initialize(const char* app_name, ISurfaceProvider* surface_provider);
+    // 初期化
+    void Initialize(const char* appName, ISurfaceProvider* surfaceProvider);
+    
+    // 終了処理
     void Cleanup();
 
+    // スワップチェインの作成
     void RecreateSwapchain();
 
-    VkInstance GetInstance() const { return instance_; }
-    VkDevice GetDevice() const { return device_; }
-    VkPhysicalDevice GetPhysicalDevice() const { return physical_device_; }
-    VkDescriptorPool GetDescriptorPool() const { return descriptor_pool_; }
-    VkQueue GetGraphicsQueue() const { return graphics_queue_; }
-    uint32_t GetGraphicsQueueFamilyIndex() const { return graphics_queue_family_index_; }
-    uint32_t GetPresentQueueFamilyIndex() const { return present_queue_family_index_; }
-    VkCommandPool GetCommandPool() const { return command_pool_; }
-    VkSurfaceKHR GetSurface() const { return surface_; }
+    // 各種Vulkanオブジェクト取得
+    VkInstance GetVkInstance() const { return m_vkInstance; }
+    VkDevice   GetVkDevice() const { return m_vkDevice; }
+    VkPhysicalDevice GetVkPhysicalDevice() const { return m_vkPhysicalDevice; }
+    VkDescriptorPool GetVkDescriptorPool() const { return m_descriptorPool; }
+   
+    VkQueue GetGraphicsQueue() const    { return m_graphicsQueue; }
+    uint32_t GetGraphicsFamily() const  { return m_graphicsQueueFamilyIndex; }
+    uint32_t GetPresentFamily() const  { return m_presentQueueFamilyIndex; }
 
+    VkCommandPool GetCommandPool() const { return m_commandPool; }
+    VkSurfaceKHR GetSurface() const     { return m_surface; }
+
+    // コマンドバッファの作成
     std::shared_ptr<CommandBuffer> CreateCommandBuffer();
 
-    struct FrameContext {
-        std::shared_ptr<CommandBuffer> command_buffer;
-        VkFence inflight_fence = VK_NULL_HANDLE;
-    };
-    uint32_t GetCurrentFrameIndex() const { return current_frame_index_; }
-
-
+    // ディスクリプタセットの確保
     VkDescriptorSet AllocateDescriptorSet(VkDescriptorSetLayout layout);
-    void FreeDescriptorSet(VkDescriptorSet descriptor_set);
+    // ディスクリプタセットの解放
+    void FreeDescriptorSet(VkDescriptorSet descriptorSet);
 
+    // 描画フレーム単位で取り扱うコンテキスト情報
+    struct FrameContext
+    {
+        std::shared_ptr<CommandBuffer> commandBuffer;
+        VkFence     inflightFence = VK_NULL_HANDLE;
+    };
+    // 現在のフレームインデックスを取得
+    uint32_t GetCurrentFrameIndex() const { return m_currentFrameIndex; }
+    // 描画可能なスワップチェインイメージの切り替え
     VkResult AcquireNextImage();
 
+    // 現在のフレームコンテキストのコマンドを実行し、プレゼンテーションを発行
     void SubmitPresent();
-    void SubmitAndWait(std::shared_ptr<CommandBuffer> command_buffer);
+
+    // 指定されたコマンドバッファを実行し、完了を待機
+    void SubmitAndWait(std::shared_ptr<CommandBuffer> commandBuffer);
+
+    // 現在フレームコンテキストの取得
     FrameContext* GetCurrentFrameContext();
 
-    std::unique_ptr<Swapchain>& GetSwapchain() { return swapchain_; }
-    uint32_t FindMemoryType(const VkMemoryRequirements& requirements, VkMemoryPropertyFlags propeties) const;
+    // スワップチェインの取得
+    std::unique_ptr<Swapchain>& GetSwapchain() { return m_swapchain; }
+
+    // メモリタイプの取得
+    uint32_t FindMemoryType(const VkMemoryRequirements& requirements, VkMemoryPropertyFlags properties) const;
+    
+    // ユニフォームバッファオフセットのアライメント制約
+    uint32_t MinUniformOffsetAlignment() const;
+
+    // ストレージバッファオフセットのアライメント制約
+    uint32_t MinStorageBufferOffsetAlignment() const;
+
+    // CPU-GPUの間で非コヒーレントなメモリにおける最小の同期単位
+    uint32_t NonCoherentAtomSize() const;
+
+    // Function Callback(s)
     std::function<void(std::vector<const char*>&)> GetWindowSystemExtensions;
 
-    void SetDebugObjectName(void* object_handle, VkObjectType type, const char* name);
+    // オブジェクトに名前を設定する
+    void SetDebugObjectName(void* objectHandle, VkObjectType type, const char* name);
 
 private:
     VulkanContext() = default;
     ~VulkanContext() = default;
-
 private:
-    void CreateInstance(const char* app_name);
+    void CreateInstance(const char* appName);
     void CreateSurface();
-
     void PickPhysicalDevice();
     void CreateLogicalDevice();
-
+    void CreateDebugMessenger();
     void CreateCommandPool();
     void CreateDescriptorPool();
 
@@ -75,44 +105,45 @@ private:
     void DestroyFrameContexts();
 
     void AdvanceFrame();
-    void BuildFeatures();
+    void BuildVkFeatures();
 
-    void CreateDebugMessenger();
+    ISurfaceProvider* m_surfaceProvider{};
+    VkInstance      m_vkInstance{};
 
-private:
-    ISurfaceProvider* surface_provider_{};
-    VkInstance instance_{};
-    VkPhysicalDevice physical_device_{};
-    VkDevice device_{};
-    VkQueue graphics_queue_{};
-    uint32_t graphics_queue_family_index_{};
-    uint32_t present_queue_family_index_{};
-    VkPhysicalDeviceMemoryProperties memory_properties_{};
-    VkPhysicalDeviceProperties device_properties_{};
-    VkSurfaceKHR surface_{};
-    VkCommandPool command_pool_{};
-    VkDescriptorPool descriptor_pool_{};
-    std::vector<FrameContext> frame_contexts_;
-    std::unique_ptr<Swapchain> swapchain_;
+    VkPhysicalDevice m_vkPhysicalDevice{};
+    VkDevice        m_vkDevice{};
+    VkQueue         m_graphicsQueue{};
+    uint32_t        m_graphicsQueueFamilyIndex{};
+    uint32_t        m_presentQueueFamilyIndex{};
+    VkPhysicalDeviceMemoryProperties m_memoryProperties{};
+    VkPhysicalDeviceProperties m_physicalDeviceProperties{};
 
-    VkDebugUtilsMessengerEXT debug_messenger_{};
-    PFN_vkSetDebugUtilsObjectNameEXT pfn_set_debug_utils_object_name_ext_{};
+    VkSurfaceKHR    m_surface{};
+    VkCommandPool   m_commandPool{};
+    VkDescriptorPool m_descriptorPool{};
+    std::vector<FrameContext> m_frameContext;
+    std::unique_ptr<Swapchain> m_swapchain;
 
-    uint32_t current_frame_index_{0};
+    VkDebugUtilsMessengerEXT m_debugMessenger{};
+    PFN_vkSetDebugUtilsObjectNameEXT m_pfnSetDebugUtilsObjectNameEXT{};
 
-    VkPhysicalDeviceFeatures2 physical_device_features_ {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2,
+    uint32_t m_currentFrameIndex = 0;
+
+    // --------
+    VkPhysicalDeviceFeatures2 m_physDevFeatures{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2
     };
-    VkPhysicalDeviceVulkan11Features vulkan11_features_ {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES,
+    VkPhysicalDeviceVulkan11Features m_vulkan11Features{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_1_FEATURES
     };
-    VkPhysicalDeviceVulkan12Features vulkan12_features_ {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES,
+    VkPhysicalDeviceVulkan12Features m_vulkan12Features{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_2_FEATURES
     };
-    VkPhysicalDeviceVulkan13Features vulkan13_features_ {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES,
+    VkPhysicalDeviceVulkan13Features m_vulkan13Features{
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_VULKAN_1_3_FEATURES
     };
-    VkPhysicalDeviceShaderAtomicFloatFeaturesEXT atomic_float_features_ {
-        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT,
+    VkPhysicalDeviceShaderAtomicFloatFeaturesEXT m_atomicFloatFeatures
+    {
+        .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT
     };
 };

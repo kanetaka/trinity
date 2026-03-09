@@ -1,53 +1,52 @@
-#pragma once
+﻿#pragma once
 #include "core/vulkan_context.h"
 #include "core/surface_provider.h"
+#include <map>
+#include <string>
 
 class VulkanContext;
-
-class Swapchain {
+class Swapchain
+{
 public:
     Swapchain() = default;
 
-public:
-    bool Recreate(uint32_t new_width, uint32_t new_height);
+    bool Recreate(uint32_t newWidth, uint32_t newHeight);
     void Cleanup();
 
     VkResult AcquireNextImage();
-    VkResult QueuePresent(VkQueue queue_present);
+    VkResult QueuePresent(VkQueue queuePresent);
 
-    operator const VkSwapchainKHR() { return swapchain_; }
+    operator const VkSwapchainKHR()       { return m_swapchain; }
 
-	VkSurfaceFormatKHR GetImageFormat() const { return image_format_; }
-	VkExtent2D GetImageExtent() const { return image_extent_; }
+    VkSurfaceFormatKHR GetFormat() const    { return m_imageFormat; }
+    VkExtent2D  GetExtent() const           { return m_imageExtent; }
 
-	uint32_t GetCurrentIndex() const { return current_index_; }
-	uint32_t GetImageCount() const { return static_cast<uint32_t>(images_.size()); }
-	VkImage GetCurrentImage() const { return images_[current_index_]; }
-	VkImageView GetCurrentImageView() const { return image_views_[current_index_]; }
+    uint32_t GetCurrentIndex() const { return m_currentIndex; }
+    uint32_t GetImageCount() const { return uint32_t(m_images.size()); }
+    VkImage  GetCurrentImage() const { return m_images[m_currentIndex]; }
+    VkImageView  GetCurrentView() const { return m_imageViews[m_currentIndex]; }
 
-    VkSemaphore GetRenderCompleteSemaphore() const;
     VkSemaphore GetPresentCompleteSemaphore() const;
-	std::vector<VkImageView> GetImageViews() const { return image_views_; }
-
+    VkSemaphore GetRenderCompleteSemaphore() const;
+    std::vector<VkImageView> GetImageViews() const { return m_imageViews; }
 private:
     void CreateFrameContext();
     void DestroyFrameContext();
 
-private:
-    VkSwapchainKHR swapchain_{ VK_NULL_HANDLE };
-	uint32_t current_index_{ 0 };
+    VkSwapchainKHR m_swapchain = VK_NULL_HANDLE;
+    uint32_t m_currentIndex = 0;
 
-	VkSurfaceFormatKHR image_format_{};
-    VkExtent2D image_extent_{};
-    std::vector<VkImage> images_{};
-    std::vector<VkImageView> image_views_{};
+    VkSurfaceFormatKHR m_imageFormat{};
+    VkExtent2D m_imageExtent{};
+    std::vector<VkImage> m_images;
+    std::vector<VkImageView> m_imageViews;
 
-    struct FrameContext {
-		VkSemaphore render_complete{ VK_NULL_HANDLE };
-		VkSemaphore present_complete{ VK_NULL_HANDLE };
+    struct FrameContext
+    {
+      VkSemaphore renderComplete = VK_NULL_HANDLE;
+      VkSemaphore presentComplete = VK_NULL_HANDLE;
     };
-    std::vector<FrameContext> frames_{};
-	std::vector<VkSemaphore> present_semaphores_{};
-
+    std::vector<FrameContext> m_frames;
+    std::vector<VkSemaphore> m_presentSemaphoreList;
     friend class VulkanContext;
 };

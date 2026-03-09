@@ -1,9 +1,35 @@
-#pragma once
-#include "trinity_app.h"
+﻿#pragma once
+#include "common/sample_app.h"
+#include <string>
+#include <vector>
+#include <array>
+#include <stdexcept>
+#include <glm/glm.hpp>
 
-class TriangleApp : public ITrinityApp {
+#include "core/vulkan_context.h"
+#include "core/swapchain.h"
+#include "core/buffer_resource.h"
+
+class TriangleApp : public ISampleApp
+{
 public:
-  virtual void Initialize() override {}
-  virtual void DrawFrame() override;
-  virtual void Cleanup() override {}
+    virtual void OnInitialize() override;
+    virtual void OnDrawFrame() override;
+    virtual void OnCleanup() override;
+#if defined(__ANDROID__)
+    virtual void OnSurfaceChanged() override;
+#endif
+
+    struct Vertex
+    {
+        glm::vec3 position;
+        glm::vec3 color;
+    };
+private:
+    void InitializeTriangleVertexBuffer();
+    void InitializeGraphicsPipeline();
+
+    std::shared_ptr<VertexBuffer> m_vertexBuffer;
+    VkPipeline m_pipeline = VK_NULL_HANDLE;
+    VkPipelineLayout m_pipelineLayout = VK_NULL_HANDLE;
 };

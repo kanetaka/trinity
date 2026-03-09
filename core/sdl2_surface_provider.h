@@ -4,11 +4,11 @@
 
 class Sdl2SurfaceProvider : public ISurfaceProvider {
 public:
-	explicit Sdl2SurfaceProvider(SDL_Window* window);
-	VkSurfaceKHR  CreateSurface(VkInstance instance) override;
-	uint32_t GetFrameBufferWidth() const override;
-	uint32_t GetFrameBufferHeight() const override;
+  explicit Sdl2SurfaceProvider(SDL_Window *window);
+  VkSurfaceKHR CreateSurface(VkInstance instance) override;
+  uint32_t GetFramebufferWidth() const override;
+  uint32_t GetFramebufferHeight() const override;
 
 private:
-	SDL_Window* window_;
+  SDL_Window *window_;
 };

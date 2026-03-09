@@ -27,30 +27,21 @@ include_directories(${CMAKE_SOURCE_DIR})
 link_directories(${VK_SDK_PATH}/Lib)
 
 # Header files (for IDE organization)
-set(HEADERS
-    triangle_app.h
-    trinity_app.h
-    core/vulkan_context.h
-    core/command_buffer.h
-    core/image_barrier.h
-    core/swapchain.h
-    core/surface_provider.h
-    core/sdl2_surface_provider.h
-)
+file(GLOB HEADERS "*.h")
+file(GLOB_RECURSE CORE_HEADERS "core/*.h")
+file(GLOB_RECURSE RENDER_HEADERS "render/*.h")
+file(GLOB_RECURSE COMMON_HEADERS "common/*.h")
+list(APPEND HEADERS ${CORE_HEADERS} ${RENDER_HEADERS} ${COMMON_HEADERS})
 
 # Source files
-set(SOURCES
-    main.cpp
-    triangle_app.cpp
-    core/vulkan_context.cpp
-    core/command_buffer.cpp
-    core/image_barrier.cpp
-    core/swapchain.cpp
-    core/sdl2_surface_provider.cpp
-)
+file(GLOB SOURCES "*.cpp")
+file(GLOB_RECURSE CORE_SOURCES "core/*.cpp")
+file(GLOB_RECURSE COMMON_SOURCES "common/*.cpp")
+list(APPEND SOURCES ${CORE_SOURCES} ${COMMON_SOURCES})
 
 # Create executable
 add_executable(trinity ${HEADERS} ${SOURCES})
+target_compile_definitions(trinity PRIVATE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 
 # Link libraries
 target_link_libraries(trinity
@@ -62,7 +53,7 @@ target_link_libraries(trinity
 # Set this as a GUI application (equivalent to gui_app : true in meson)
 if(WIN32)
     set_target_properties(trinity PROPERTIES
-        WIN32_EXECUTABLE TRUE
+        WIN32_EXECUTABLE FALSE
     )
     
     # Fix runtime library conflicts and suppress PDB warnings
