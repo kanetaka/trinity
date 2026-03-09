@@ -33,7 +33,7 @@ int runGame() {
 
   try {
     window =
-        SDL_CreateWindow("Triangle", 1280, 720,
+        SDL_CreateWindow("Trinity", 1280, 720,
                          SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
     if (!window) {
@@ -57,10 +57,10 @@ int runGame() {
       }
     };
 
-    vulkanCtx.Initialize("Triangle", &surfaceProvider);
+    vulkanCtx.Initialize("Trinity", &surfaceProvider);
     vulkanCtx.RecreateSwapchain();
 
-    GsApp theApp{GetAssetRootPath().string() + "/splat.ply"};
+    GsApp theApp{GetAssetRootPath().string() + "/models/gs/sample.ply"};
     theApp.OnInitialize();
 
     bool isRunning = true;
