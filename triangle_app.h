@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "common/sample_app.h"
+#include "common/trinity_app.h"
 #include <string>
 #include <vector>
 #include <array>
@@ -10,7 +10,7 @@
 #include "core/swapchain.h"
 #include "core/buffer_resource.h"
 
-class TriangleApp : public ISampleApp
+class TriangleApp : public ITrinityApp
 {
 public:
     virtual void OnInitialize() override;

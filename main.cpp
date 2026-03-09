@@ -2,15 +2,15 @@
 #include <windows.h>
 #endif
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_vulkan.h>
+#include <SDL3/SDL.h>
+#include <SDL3/SDL_vulkan.h>
 #include <array>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <vector>
 
-#include "core/sdl2_surface_provider.h"
+#include "core/sdl3_surface_provider.h"
 #include "core/swapchain.h"
 #include "core/vulkan_context.h"
 
@@ -24,67 +24,57 @@
 namespace fs = std::filesystem;
 
 int runGame() {
-  std::cout << "runGame started. SDL_Init..." << std::endl;
   if (SDL_Init(SDL_INIT_VIDEO) < 0) {
     std::cerr << "SDL_Init failed" << std::endl;
     return -1;
   }
 
-  std::cout << "Creating SDL window..." << std::endl;
   SDL_Window *window = nullptr;
 
   try {
-    window = SDL_CreateWindow("Triangle", SDL_WINDOWPOS_UNDEFINED,
-                              SDL_WINDOWPOS_UNDEFINED, 1280, 720,
-                              SDL_WINDOW_VULKAN | SDL_WINDOW_ALLOW_HIGHDPI);
+    window =
+        SDL_CreateWindow("Triangle", 1280, 720,
+                         SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
     if (!window) {
       throw std::runtime_error("SDL_CreateWindow failed");
     }
 
-    Sdl2SurfaceProvider surfaceProvider(window);
+    Sdl3SurfaceProvider surfaceProvider(window);
 
-    std::cout << "Initializing VulkanContext..." << std::endl;
     auto &vulkanCtx = VulkanContext::Get();
 
     vulkanCtx.GetWindowSystemExtensions = [=](auto &extensionList) {
-      unsigned int extCount = 0;
-      SDL_Vulkan_GetInstanceExtensions(window, &extCount, nullptr);
-      if (extCount > 0) {
+      uint32_t extCount = 0;
+      char const *const *extensions =
+          SDL_Vulkan_GetInstanceExtensions(&extCount);
+      if (extCount > 0 && extensions != nullptr) {
         size_t currentSize = extensionList.size();
         extensionList.resize(currentSize + extCount);
-        SDL_Vulkan_GetInstanceExtensions(window, &extCount,
-                                         extensionList.data() + currentSize);
+        for (uint32_t i = 0; i < extCount; ++i) {
+          extensionList[currentSize + i] = extensions[i];
+        }
       }
     };
 
     vulkanCtx.Initialize("Triangle", &surfaceProvider);
-    std::cout << "Recreating swapchain..." << std::endl;
     vulkanCtx.RecreateSwapchain();
 
-    std::cout << "Initializing TriangleApp..." << std::endl;
     TriangleApp theApp{};
     theApp.OnInitialize();
 
-    std::cout << "Starting main event loop..." << std::endl;
     bool isRunning = true;
-    uint32_t frameCount = 0;
     while (isRunning) {
       SDL_Event event;
       while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_QUIT) {
+        if (event.type == SDL_EVENT_QUIT) {
           isRunning = false;
         }
       }
 
       theApp.OnDrawFrame();
-      frameCount++;
-      if (frameCount % 600 == 0) {
-        std::cout << "Frame " << frameCount << std::endl;
-      }
     }
     // cleanup
-    std::cout << "Cleaning up..." << std::endl;
     theApp.OnCleanup();
     vulkanCtx.Cleanup();
 

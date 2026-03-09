@@ -1,10 +1,10 @@
 ﻿#pragma once
 
 // サンプルプログラム用既定インターフェース
-class ISampleApp 
+class ITrinityApp 
 {
 public:
-    virtual ~ISampleApp() = default;
+    virtual ~ITrinityApp() = default;
     virtual void OnInitialize() = 0;
     virtual void OnDrawFrame() = 0;
     virtual void OnCleanup() = 0;

@@ -19,6 +19,12 @@ if(NOT VK_SDK_PATH)
     message(FATAL_ERROR "VK_SDK_PATH environment variable is not set. Please set it to your Vulkan SDK installation path.")
 endif()
 
+# Add Vulkan SDK to the prefix path so find_package can locate SDL3
+list(APPEND CMAKE_PREFIX_PATH ${VK_SDK_PATH})
+
+# Find SDL3
+find_package(SDL3 REQUIRED)
+
 # Include directories
 include_directories(${VK_SDK_PATH}/Include)
 include_directories(${CMAKE_SOURCE_DIR})
@@ -45,9 +51,9 @@ target_compile_definitions(trinity PRIVATE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 
 # Link libraries
 target_link_libraries(trinity
-    SDL2main
-    SDL2
+    PRIVATE
     vulkan-1
+    SDL3::SDL3
 )
 
 # Set this as a GUI application (equivalent to gui_app : true in meson)
