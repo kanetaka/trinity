@@ -19,12 +19,12 @@
 
 #include "glm/glm.hpp"
 
-#include "triangle_app.h"
+#include "gs_app.h"
 
 namespace fs = std::filesystem;
 
 int runGame() {
-  if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+  if (!SDL_Init(SDL_INIT_VIDEO)) {
     std::cerr << "SDL_Init failed" << std::endl;
     return -1;
   }
@@ -60,15 +60,23 @@ int runGame() {
     vulkanCtx.Initialize("Triangle", &surfaceProvider);
     vulkanCtx.RecreateSwapchain();
 
-    TriangleApp theApp{};
+    GsApp theApp{GetAssetRootPath().string() + "/splat.ply"};
     theApp.OnInitialize();
 
     bool isRunning = true;
     while (isRunning) {
       SDL_Event event;
+      const Uint8 *state = (const Uint8 *)SDL_GetKeyboardState(nullptr);
+      // Rough delta time for now
+      theApp.ProcessInput(state, 0.016f);
+
       while (SDL_PollEvent(&event)) {
         if (event.type == SDL_EVENT_QUIT) {
           isRunning = false;
+        } else if (event.type == SDL_EVENT_MOUSE_MOTION) {
+          if (event.motion.state & SDL_BUTTON_LMASK) {
+            theApp.ProcessMouseMotion(event.motion.xrel, event.motion.yrel);
+          }
         }
       }
 

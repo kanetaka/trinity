@@ -56,6 +56,25 @@ target_link_libraries(trinity
     SDL3::SDL3
 )
 
+# Compile shaders
+find_program(GLSLC_EXECUTABLE NAMES glslc PATHS ${VK_SDK_PATH}/Bin)
+if(GLSLC_EXECUTABLE)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/assets)
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/assets/splat.vert.spv
+               ${CMAKE_SOURCE_DIR}/assets/splat.frag.spv
+        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/shaders/splat.vert -o ${CMAKE_SOURCE_DIR}/assets/splat.vert.spv
+        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/shaders/splat.frag -o ${CMAKE_SOURCE_DIR}/assets/splat.frag.spv
+        DEPENDS ${CMAKE_SOURCE_DIR}/shaders/splat.vert ${CMAKE_SOURCE_DIR}/shaders/splat.frag
+        COMMENT "Compiling 3DGS shaders..."
+    )
+    add_custom_target(compile_shaders ALL DEPENDS 
+        ${CMAKE_SOURCE_DIR}/assets/splat.vert.spv 
+        ${CMAKE_SOURCE_DIR}/assets/splat.frag.spv
+    )
+    add_dependencies(trinity compile_shaders)
+endif()
+
 # Set this as a GUI application (equivalent to gui_app : true in meson)
 if(WIN32)
     set_target_properties(trinity PROPERTIES
