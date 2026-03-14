@@ -34,8 +34,7 @@ bool BufferResource<T>::CreateBuffer(const VkBufferCreateInfo& createInfo, VkMem
         VkDevice device = context.GetVkDevice();
 
         auto result = vkCreateBuffer(device, &createInfo, nullptr, &buffer_);
-        if(result != VK_SUCCESS)
-        {
+        if(result != VK_SUCCESS) {
                 return false;
         }
 
@@ -262,8 +261,7 @@ bool StorageBuffer::Initialize(VkDeviceSize size, AccessMode mode)
                 .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
         };
         VkMemoryPropertyFlags memProps = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-        if (mode == AccessMode::CPUAccessible)
-        {
+        if (mode == AccessMode::CPUAccessible) {
                 memProps = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
         }
         SetAccessFlags(VK_ACCESS_NONE);

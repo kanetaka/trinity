@@ -12,8 +12,7 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
         VkSurfaceCapabilitiesKHR caps;
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_physical_device, surface, &caps);
         VkExtent2D extent = caps.currentExtent;
-        if (extent.width == UINT32_MAX)
-        {
+        if (extent.width == UINT32_MAX) {
                 extent.width = width;
                 extent.height = height;
         }
@@ -25,16 +24,13 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
 
         // 出力フォーマットの選択
         VkSurfaceFormatKHR format = formats[0];
-        for (auto& surface_format : formats)
-        {
-                if (surface_format.colorSpace != VK_COLORSPACE_SRGB_NONLINEAR_KHR)
-                {
+        for (auto& surface_format : formats) {
+                if (surface_format.colorSpace != VK_COLORSPACE_SRGB_NONLINEAR_KHR) {
                         continue;
                 }
 
                 if (surface_format.format == VK_FORMAT_B8G8R8A8_UNORM ||
-                        surface_format.format == VK_FORMAT_R8G8B8A8_UNORM)
-                {
+                        surface_format.format == VK_FORMAT_R8G8B8A8_UNORM) {
                         format = surface_format;
                         break;
                 }
@@ -63,14 +59,12 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
         VkSwapchainKHR swapchain{};
         if (auto res = vkCreateSwapchainKHR(vk_device, &info, nullptr, &swapchain); res != VK_SUCCESS)
                 throw std::runtime_error("failed to create swapchain");
-        if (swapchain_ != VK_NULL_HANDLE)
-        {
+        if (swapchain_ != VK_NULL_HANDLE) {
                 // 古いものを破棄する
                 vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
                 swapchain_ = VK_NULL_HANDLE;
 
-                for (auto& view : image_views_)
-                {
+                for (auto& view : image_views_) {
                         vkDestroyImageView(vk_device, view, nullptr);
                 }
                 image_views_.clear();
@@ -86,8 +80,7 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
         images_.resize(image_count);
         vkGetSwapchainImagesKHR(vk_device, swapchain_, &image_count, images_.data());
 
-        for (uint32_t i = 0; i < images_.size(); ++i)
-        {
+        for (uint32_t i = 0; i < images_.size(); ++i) {
                 VkImageViewCreateInfo image_view_ci{
                         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
                         .image = images_[i],
@@ -122,12 +115,10 @@ void Swapchain::Cleanup()
         auto vk_device = vulkan_ctx.GetVkDevice();
         DestroyFrameContext();
 
-        for (auto& view : image_views_)
-        {
+        for (auto& view : image_views_) {
                 vkDestroyImageView(vk_device, view, nullptr);
         }
-        if (swapchain_)
-        {
+        if (swapchain_) {
                 vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
                 swapchain_ = VK_NULL_HANDLE;
         }
@@ -147,15 +138,13 @@ VkResult Swapchain::AcquireNextImage()
 
         auto result = vkAcquireNextImageKHR(
             vk_device, swapchain_, UINT64_MAX, acquire_semaphore, VK_NULL_HANDLE, &current_index_);
-        if (result != VK_SUCCESS)
-        {
+        if (result != VK_SUCCESS) {
             present_semaphore_list_.push_back(acquire_semaphore);
             return result;
         }
 
         VkSemaphore old_semaphore = frames_[current_index_].presentComplete;
-        if (old_semaphore != VK_NULL_HANDLE)
-        {
+        if (old_semaphore != VK_NULL_HANDLE) {
             present_semaphore_list_.push_back(old_semaphore);
         }
         frames_[current_index_].presentComplete = acquire_semaphore;
@@ -195,8 +184,7 @@ void Swapchain::CreateFrameContext()
     auto vk_device = vulkan_ctx.GetVkDevice();
     frames_.resize(images_.size());
     uint32_t index = 0;
-    for (auto& frame : frames_)
-    {
+    for (auto& frame : frames_) {
         VkSemaphoreCreateInfo sem_ci{
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
         };
@@ -205,8 +193,7 @@ void Swapchain::CreateFrameContext()
 
     uint32_t present_complete_semaphore_count = images_.size() + 1;
     present_semaphore_list_.reserve(present_complete_semaphore_count);
-    for (uint32_t i = 0; i < present_complete_semaphore_count; ++i)
-    {
+    for (uint32_t i = 0; i < present_complete_semaphore_count; ++i) {
         VkSemaphoreCreateInfo semaphore_ci{
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
         };
@@ -220,14 +207,12 @@ void Swapchain::DestroyFrameContext()
 {
     auto& vulkan_ctx = VulkanContext::Get();
     auto vk_device = vulkan_ctx.GetVkDevice();
-    for (auto& frame : frames_)
-    {
+    for (auto& frame : frames_) {
         vkDestroySemaphore(vk_device, frame.presentComplete, nullptr);
         vkDestroySemaphore(vk_device, frame.renderComplete, nullptr);
     }
     frames_.clear();
-    for (auto& sem : present_semaphore_list_)
-    {
+    for (auto& sem : present_semaphore_list_) {
         vkDestroySemaphore(vk_device, sem, nullptr);
     }
     present_semaphore_list_.clear();

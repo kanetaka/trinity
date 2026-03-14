@@ -26,8 +26,7 @@ namespace loader
                 VkDevice device = VulkanContext::Get().GetVkDevice();
                 VkShaderModule shaderModule{};
                 auto result = vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule);
-                if (result != VK_SUCCESS)
-                {
+                if (result != VK_SUCCESS) {
                         throw std::runtime_error("failed to create shader module from: " + shaderSpvPath.string());
                 }
                 return shaderModule;
