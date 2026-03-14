@@ -1,13 +1,13 @@
-﻿#pragma once
+#pragma once
 #include <filesystem>
 
-// アセットのルートパスを設定します
+// Sets the asset root path
 void SetAssetRootPath(const std::filesystem::path& path);
 
-// 現在のアセットルートパスを取得します
+// Gets the current asset root path
 std::filesystem::path GetAssetRootPath();
 
-// アセット種別
+// Asset type
 enum class AssetType
 {
     Shader = 0,
@@ -15,5 +15,5 @@ enum class AssetType
     Model,
     AssetTypeMax,
 };
-// アセット種別指定ありのファイルパスを取得します
+// Gets the file path for a specific asset type
 std::filesystem::path GetAssetPath(AssetType type, const std::filesystem::path& fileName);

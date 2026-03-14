@@ -2,8 +2,7 @@
 #include <stdexcept>
 #include <cassert>
 
-bool Swapchain::Recreate(uint32_t width, uint32_t height)
-{
+bool Swapchain::Recreate(uint32_t width, uint32_t height) {
         auto& vulkan_ctx = VulkanContext::Get();
         auto vk_physical_device = vulkan_ctx.GetVkPhysicalDevice();
         auto vk_device = vulkan_ctx.GetVkDevice();
@@ -22,7 +21,7 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
         std::vector<VkSurfaceFormatKHR> formats(count);
         vkGetPhysicalDeviceSurfaceFormatsKHR(vk_physical_device, surface, &count, formats.data());
 
-        // 出力フォーマットの選択
+        // Select surface format
         VkSurfaceFormatKHR format = formats[0];
         for (auto& surface_format : formats) {
                 if (surface_format.colorSpace != VK_COLORSPACE_SRGB_NONLINEAR_KHR) {
@@ -53,14 +52,14 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
         info.clipped = VK_TRUE;
         info.oldSwapchain = swapchain_;
 
-        // GPUがアイドル状態になってからスワップチェインの(再)作成
+        // Create/Recreate swapchain after waiting for GPU to be idle
         vkDeviceWaitIdle(vk_device);
 
         VkSwapchainKHR swapchain{};
         if (auto res = vkCreateSwapchainKHR(vk_device, &info, nullptr, &swapchain); res != VK_SUCCESS)
                 throw std::runtime_error("failed to create swapchain");
         if (swapchain_ != VK_NULL_HANDLE) {
-                // 古いものを破棄する
+                // Destroy the old swapchain
                 vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
                 swapchain_ = VK_NULL_HANDLE;
 
@@ -109,8 +108,7 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
         return true;
 }
 
-void Swapchain::Cleanup()
-{
+void Swapchain::Cleanup() {
         auto& vulkan_ctx = VulkanContext::Get();
         auto vk_device = vulkan_ctx.GetVkDevice();
         DestroyFrameContext();
@@ -126,12 +124,11 @@ void Swapchain::Cleanup()
         image_views_.clear();
 }
 
-VkResult Swapchain::AcquireNextImage()
-{
+VkResult Swapchain::AcquireNextImage() {
         auto& vulkan_ctx = VulkanContext::Get();
         auto vk_device = vulkan_ctx.GetVkDevice();
 
-        // プレゼンテーション完了待ちで使用するセマフォの取得
+        // Get the semaphore used to wait for presentation completion
         assert(!present_semaphore_list_.empty());
         VkSemaphore acquire_semaphore = present_semaphore_list_.back();
         present_semaphore_list_.pop_back();
@@ -152,8 +149,7 @@ VkResult Swapchain::AcquireNextImage()
         return result;
 }
 
-VkResult Swapchain::QueuePresent(VkQueue queuePresent)
-{
+VkResult Swapchain::QueuePresent(VkQueue queuePresent) {
         VkPresentInfoKHR present_info{};
         present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         present_info.swapchainCount = 1;
@@ -168,18 +164,15 @@ VkResult Swapchain::QueuePresent(VkQueue queuePresent)
         return result;
 }
 
-VkSemaphore Swapchain::GetPresentCompleteSemaphore() const
-{
+VkSemaphore Swapchain::GetPresentCompleteSemaphore() const {
     return frames_[current_index_].presentComplete;
 }
 
-VkSemaphore Swapchain::GetRenderCompleteSemaphore() const
-{
+VkSemaphore Swapchain::GetRenderCompleteSemaphore() const {
     return frames_[current_index_].renderComplete;
 }
 
-void Swapchain::CreateFrameContext()
-{
+void Swapchain::CreateFrameContext() {
     auto& vulkan_ctx = VulkanContext::Get();
     auto vk_device = vulkan_ctx.GetVkDevice();
     frames_.resize(images_.size());
@@ -203,8 +196,7 @@ void Swapchain::CreateFrameContext()
     }
 }
 
-void Swapchain::DestroyFrameContext()
-{
+void Swapchain::DestroyFrameContext() {
     auto& vulkan_ctx = VulkanContext::Get();
     auto vk_device = vulkan_ctx.GetVkDevice();
     for (auto& frame : frames_) {

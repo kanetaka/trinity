@@ -2,7 +2,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "gs_app.h"
-#include "core/actor.h"
+#include "core/entity.h"
 #include "core/renderer.h"
 #include "core/splat_component.h"
 #include "core/vulkan_context.h"
@@ -15,7 +15,7 @@
 GsApp::GsApp(const std::string &plyFile)
         : ply_file_(plyFile), camera_(glm::vec3(0.0f, 0.0f, 5.0f),
                                                                      glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
-            updating_actors_(false) {
+            updating_entities_(false) {
 }
 
 GsApp::~GsApp() {
@@ -26,21 +26,21 @@ void GsApp::OnInitialize() {
     auto extent = VulkanContext::Get().GetSwapchain()->GetExtent();
     renderer_->Initialize((float)extent.width, (float)extent.height);
 
-    // Create Splat Actor
-    Actor* splat_actor = new Actor(this);
-    AddActor(splat_actor);
-    new SplatComponent(splat_actor, ply_file_);
+    // Create Splat Entity
+    Entity* splat_entity = new Entity(this);
+    AddEntity(splat_entity);
+    new SplatComponent(splat_entity, ply_file_);
 }
 
 void GsApp::OnCleanup() {
-    // Delete all actors first, as components may refer to renderer
-    while (!actors_.empty()) {
-        delete actors_.back();
-        actors_.pop_back();
+    // Delete all entities first, as components may refer to renderer
+    while (!entities_.empty()) {
+        delete entities_.back();
+        entities_.pop_back();
     }
-    while (!pending_actors_.empty()) {
-        delete pending_actors_.back();
-        pending_actors_.pop_back();
+    while (!pending_entities_.empty()) {
+        delete pending_entities_.back();
+        pending_entities_.pop_back();
     }
 
     if (renderer_) {
@@ -61,60 +61,60 @@ void GsApp::OnDrawFrame() {
     renderer_->SetProjectionMatrix(camera_.GetProjectionMatrix(width_ / height_));
     renderer_->UpdateUniformBuffer();
 
-    UpdateActors(deltaTime);
+    UpdateEntities(deltaTime);
     renderer_->Draw();
 }
 
-void GsApp::UpdateActors(float delta_time) {
-    updating_actors_ = true;
-    for (auto actor : actors_) {
-        actor->Update(delta_time);
+void GsApp::UpdateEntities(float delta_time) {
+    updating_entities_ = true;
+    for (auto entity : entities_) {
+        entity->Update(delta_time);
     }
-    updating_actors_ = false;
+    updating_entities_ = false;
 
-    for (auto actor : pending_actors_) {
-        actors_.push_back(actor);
+    for (auto entity : pending_entities_) {
+        entities_.push_back(entity);
     }
-    pending_actors_.clear();
+    pending_entities_.clear();
 
-    std::vector<Actor*> dead_actors;
-    for (auto actor : actors_) {
-        if (actor->GetState() == Actor::EDead) {
-            dead_actors.push_back(actor);
+    std::vector<Entity*> dead_entities;
+    for (auto entity : entities_) {
+        if (entity->GetState() == Entity::EDead) {
+            dead_entities.push_back(entity);
         }
     }
 
-    for (auto actor : dead_actors) {
-        RemoveActor(actor);
-        delete actor;
+    for (auto entity : dead_entities) {
+        RemoveEntity(entity);
+        delete entity;
     }
 }
 
-void GsApp::AddActor(Actor* actor) {
-    if (updating_actors_) {
-        pending_actors_.push_back(actor);
+void GsApp::AddEntity(Entity* entity) {
+    if (updating_entities_) {
+        pending_entities_.push_back(entity);
     } else {
-        actors_.push_back(actor);
+        entities_.push_back(entity);
     }
 }
 
-void GsApp::RemoveActor(Actor* actor) {
-    auto iter = std::find(pending_actors_.begin(), pending_actors_.end(), actor);
-    if (iter != pending_actors_.end()) {
-        pending_actors_.erase(iter);
+void GsApp::RemoveEntity(Entity* entity) {
+    auto iter = std::find(pending_entities_.begin(), pending_entities_.end(), entity);
+    if (iter != pending_entities_.end()) {
+        pending_entities_.erase(iter);
     }
 
-    iter = std::find(actors_.begin(), actors_.end(), actor);
-    if (iter != actors_.end()) {
-        actors_.erase(iter);
+    iter = std::find(entities_.begin(), entities_.end(), entity);
+    if (iter != entities_.end()) {
+        entities_.erase(iter);
     }
 }
 
 void GsApp::ProcessInput(const Uint8 *state, float deltaTime) {
     camera_.ProcessKeyboard(state, deltaTime);
-    // Also pass to actors
-    for (auto actor : actors_) {
-        actor->ProcessInput(state);
+    // Also pass to entities
+    for (auto entity : entities_) {
+        entity->ProcessInput(state);
     }
 }
 

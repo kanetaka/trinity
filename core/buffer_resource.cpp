@@ -1,4 +1,4 @@
-﻿#include "core/buffer_resource.h"
+#include "core/buffer_resource.h"
 
 template<typename T>
 void BufferResource<T>::Cleanup()
@@ -38,7 +38,7 @@ bool BufferResource<T>::CreateBuffer(const VkBufferCreateInfo& createInfo, VkMem
         return false;
     }
 
-    // メモリ要件を取得
+    // Get memory requirements
     VkMemoryRequirements memRequirements;
     vkGetBufferMemoryRequirements(device, buffer_, &memRequirements);
 
@@ -269,7 +269,7 @@ bool StorageBuffer::Initialize(VkDeviceSize size, AccessMode mode)
 }
 
 
-// 各クラスのテンプレートをインスタンス化
+// Explicit template instantiation
 template class BufferResource<VertexBuffer>;
 template class BufferResource<IndexBuffer>;
 template class BufferResource<UniformBuffer>;

@@ -1,6 +1,6 @@
-﻿#pragma once
+#pragma once
 
-// サンプルプログラム用既定インターフェース
+// Default interface for sample programs
 class ITrinityApp
 {
 public:

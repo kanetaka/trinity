@@ -1,8 +1,8 @@
 #include <cstdint>
 #include "component.h"
-#include "actor.h"
+#include "entity.h"
 
-Component::Component(Actor* owner, int update_order)
+Component::Component(Entity* owner, int update_order)
         : owner_(owner), update_order_(update_order) {
     owner_->AddComponent(this);
 }

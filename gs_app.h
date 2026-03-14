@@ -8,7 +8,7 @@
 #include "common/trinity_app.h"
 #include "core/camera.h"
 
-class Actor;
+class Entity;
 class Renderer;
 
 class GsApp : public ITrinityApp {
@@ -20,8 +20,8 @@ public:
     void OnDrawFrame() override;
     void OnCleanup() override;
 
-    void AddActor(Actor* actor);
-    void RemoveActor(Actor* actor);
+    void AddEntity(Entity* entity);
+    void RemoveEntity(Entity* entity);
 
     Renderer* GetRenderer() { return renderer_.get(); }
     Camera& GetCamera() { return camera_; }
@@ -34,16 +34,16 @@ public:
     void ProcessMouseMotion(float xrel, float yrel);
 
 private:
-    void UpdateActors(float delta_time);
+    void UpdateEntities(float delta_time);
 
     std::string ply_file_;
     Camera camera_;
 
     std::unique_ptr<Renderer> renderer_;
-    std::vector<Actor*> actors_;
-    std::vector<Actor*> pending_actors_;
+    std::vector<Entity*> entities_;
+    std::vector<Entity*> pending_entities_;
 
-    bool updating_actors_ = false;
+    bool updating_entities_ = false;
 
     float width_ = 1280.0f;
     float height_ = 720.0f;

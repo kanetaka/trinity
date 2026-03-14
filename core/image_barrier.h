@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 class IImageResource;
 
@@ -11,26 +11,26 @@ struct ImageLayoutTransition
     VkPipelineStageFlags srcStage;
     VkPipelineStageFlags dstStage;
 
-    // Undefined状態から描画先としてのレイアウトへ
+    // From undefined to color attachment layout
     static ImageLayoutTransition FromUndefinedToColorAttachment();
 
-    // PresentSrc状態から描画先としてのレイアウトへ
+    // From present source to color attachment layout
     static ImageLayoutTransition FromPresentSrcToColorAttachment();
 
-    // 描画先からPresentSrcの状態レイアウトへ
+    // From color attachment to present source layout
     static ImageLayoutTransition FromColorToPresent();
 
-    // 初期状態から転送先レイアウトへ
+    // From initial layout to transfer destination
     static ImageLayoutTransition FromUndefToTransferDst();
 
-    // 転送先レイアウトから転送元レイアウトへ
+    // From transfer destination to transfer source
     static ImageLayoutTransition FromTransferDstToTransferSrc();
 
     static ImageLayoutTransition ToShaderReadonlyOptimal(const IImageResource* image);
 
-    // ストレージイメージとしてシェーダーから読み書きできるように、
-    // 画像のレイアウトとアクセスマスクを VK_IMAGE_LAYOUT_GENERAL に遷移する。
-    // Compute Shader および Fragment Shader からの読み書きを想定しており、
-    // それらのステージへの依存関係を確保する。
+    // Transition layout and access mask to VK_IMAGE_LAYOUT_GENERAL 
+    // to allow read/write access from shaders as storage image.
+    // Assumes access from compute and fragment shaders,
+    // ensuring dependencies for these stages.
     static ImageLayoutTransition ToStorageImageGeneralLayout(const IImageResource* image);
 };

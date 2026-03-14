@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <memory>
@@ -18,16 +18,16 @@ public:
     static constexpr uint32_t MaxInflightFrames = 2;
     static VulkanContext& Get();
 
-    // 初期化
+    // Initialization
     void Initialize(const char* appName, ISurfaceProvider* surfaceProvider);
 
-    // 終了処理
+    // Cleanup
     void Cleanup();
 
-    // スワップチェインの作成
+    // Create/Recreate swapchain
     void RecreateSwapchain();
 
-    // 各種Vulkanオブジェクト取得
+    // Get various Vulkan objects
     VkInstance GetVkInstance() const { return vk_instance_; }
     VkDevice   GetVkDevice() const { return vk_device_; }
     VkPhysicalDevice GetVkPhysicalDevice() const { return vk_physical_device_; }
@@ -40,53 +40,53 @@ public:
     VkCommandPool GetCommandPool() const { return command_pool_; }
     VkSurfaceKHR GetSurface() const     { return surface_; }
 
-    // コマンドバッファの作成
+    // Create command buffer
     std::shared_ptr<CommandBuffer> CreateCommandBuffer();
 
-    // ディスクリプタセットの確保
+    // Allocate descriptor set
     VkDescriptorSet AllocateDescriptorSet(VkDescriptorSetLayout layout);
-    // ディスクリプタセットの解放
+    // Free descriptor set
     void FreeDescriptorSet(VkDescriptorSet descriptorSet);
 
-    // 描画フレーム単位で取り扱うコンテキスト情報
+    // Context information handled per rendering frame
     struct FrameContext
     {
         std::shared_ptr<CommandBuffer> commandBuffer;
         VkFence     inflightFence = VK_NULL_HANDLE;
     };
-    // 現在のフレームインデックスを取得
+    // Get current frame index
     uint32_t GetCurrentFrameIndex() const { return current_frame_index_; }
-    // 描画可能なスワップチェインイメージの切り替え
+    // Acquire next available swapchain image
     VkResult AcquireNextImage();
 
-    // 現在のフレームコンテキストのコマンドを実行し、プレゼンテーションを発行
+    // Submit command buffer and present image
     void SubmitPresent();
 
-    // 指定されたコマンドバッファを実行し、完了を待機
+    // Submit specified command buffer and wait for completion
     void SubmitAndWait(std::shared_ptr<CommandBuffer> commandBuffer);
 
-    // 現在フレームコンテキストの取得
+    // Get current frame context
     FrameContext* GetCurrentFrameContext();
 
-    // スワップチェインの取得
+    // Get swapchain
     std::unique_ptr<Swapchain>& GetSwapchain() { return swapchain_; }
 
-    // メモリタイプの取得
+    // Find suitable memory type index
     uint32_t FindMemoryType(const VkMemoryRequirements& requirements, VkMemoryPropertyFlags properties) const;
 
-    // ユニフォームバッファオフセットのアライメント制約
+    // Minimum alignment for uniform buffer offsets
     uint32_t MinUniformOffsetAlignment() const;
 
-    // ストレージバッファオフセットのアライメント制約
+    // Minimum alignment for storage buffer offsets
     uint32_t MinStorageBufferOffsetAlignment() const;
 
-    // CPU-GPUの間で非コヒーレントなメモリにおける最小の同期単位
+    // Minimum synchronization alignment for non-coherent memory between CPU and GPU
     uint32_t NonCoherentAtomSize() const;
 
     // Function Callback(s)
     std::function<void(std::vector<const char*>&)> GetWindowSystemExtensions;
 
-    // オブジェクトに名前を設定する
+    // Set debug name for Vulkan object
     void SetDebugObjectName(void* objectHandle, VkObjectType type, const char* name);
 
 private:

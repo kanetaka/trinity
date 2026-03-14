@@ -1,4 +1,4 @@
-﻿#include "core/image_resource.h"
+#include "core/image_resource.h"
 #include <stdexcept>
 
 bool DepthBuffer::Initialize(VkExtent2D extent, VkFormat depthFormat)
@@ -28,7 +28,7 @@ bool DepthBuffer::Initialize(VkExtent2D extent, VkFormat depthFormat)
         return false;
     }
 
-    // メモリ要件の取得
+    // Get memory requirements
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements(device, image_, &memRequirements);
 
@@ -52,7 +52,7 @@ bool DepthBuffer::Initialize(VkExtent2D extent, VkFormat depthFormat)
         .baseArrayLayer = 0, .layerCount = 1,
     };
 
-    // ビューの作成
+    // Create image view
     VkImageViewCreateInfo viewCreateInfo{
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .image = image_,
@@ -116,7 +116,7 @@ bool Texture2D::Initialize(VkExtent2D extent, VkFormat format, uint32_t mipLevel
         return false;
     }
 
-    // メモリ要件の取得
+    // Get memory requirements
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements(device, image_, &memRequirements);
     VkMemoryPropertyFlags memProps = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
@@ -139,7 +139,7 @@ bool Texture2D::Initialize(VkExtent2D extent, VkFormat format, uint32_t mipLevel
         .baseArrayLayer = 0, .layerCount = 1,
     };
 
-    // ビューの作成
+    // Create image view
     VkImageViewCreateInfo viewCreateInfo{
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .image = image_,
@@ -211,7 +211,7 @@ bool StorageImage2D::Initialize(VkExtent2D extent, VkFormat format, uint32_t mip
         return false;
     }
 
-    // メモリ要件の取得
+    // Get memory requirements
     VkMemoryRequirements memRequirements;
     vkGetImageMemoryRequirements(device, image_, &memRequirements);
     VkMemoryPropertyFlags memProps = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
@@ -228,7 +228,7 @@ bool StorageImage2D::Initialize(VkExtent2D extent, VkFormat format, uint32_t mip
         return false;
     }
 
-    // ビューの作成
+    // Create image view
     subresource_range_ = {
         .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
         .baseMipLevel = 0, .levelCount = mipLevels,
@@ -282,7 +282,7 @@ VkDescriptorImageInfo StorageImage2D::GetStorageReadWriteDescriptorInfo(VkSample
 }
 
 
-// 各クラスのテンプレートをインスタンス化
+// Explicit template instantiation
 template class ImageResource<DepthBuffer>;
 template class ImageResource<Texture2D>;
 template class ImageResource<StorageImage2D>;

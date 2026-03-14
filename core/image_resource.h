@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "core/vulkan_context.h"
 #include "core/gpu_resource_base.h"
 
@@ -62,7 +62,7 @@ public:
 
     VkImageView GetVkImageView() const { return image_view_; }
 
-    // Create, Initialize を1度で処理するための作成関数
+    // Static factory method for creation and initialization
     static std::shared_ptr<DepthBuffer> Create(VkExtent2D extent, VkFormat depthFormat)
     {
         auto image = GpuResourceBase::Create();
@@ -87,7 +87,7 @@ public:
 
     VkDescriptorImageInfo GetDescriptorInfo(VkSampler sampler) const;
 
-    // Create, Initialize を1度で処理するための作成関数
+    // Static factory method for creation and initialization
     static std::shared_ptr<Texture2D> Create(VkExtent2D extent, VkFormat format, uint32_t mipLevels)
     {
         auto image = GpuResourceBase::Create();
@@ -116,7 +116,7 @@ public:
     VkDescriptorImageInfo GetTextureReadDescriptorInfo(VkSampler sampler) const;
     VkDescriptorImageInfo GetStorageReadWriteDescriptorInfo(VkSampler sampler) const;
 
-    // Create, Initialize を1度で処理するための作成関数
+    // Static factory method for creation and initialization
     static std::shared_ptr<StorageImage2D> Create(VkExtent2D extent, VkFormat format, uint32_t mipLevels)
     {
         auto image = GpuResourceBase::Create();

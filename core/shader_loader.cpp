@@ -1,4 +1,4 @@
-﻿#include "core/shader_loader.h"
+#include "core/shader_loader.h"
 #include <vector>
 #include <fstream>
 
@@ -6,7 +6,7 @@ namespace loader
 {
     VkShaderModule LoadShaderModule(const std::filesystem::path& shaderSpvPath)
     {
-        // ファイルをバイナリで読み込み
+        // Read file in binary mode
         std::ifstream file(shaderSpvPath, std::ios::ate | std::ios::binary);
         if (!file.is_open()) {
             throw std::runtime_error("failed to open shader file: " + shaderSpvPath.string());
@@ -17,7 +17,7 @@ namespace loader
         file.seekg(0).read(buffer.data(), fileSize);
         file.close();
 
-        // VkShaderModuleCreateInfo にバイナリデータを設定
+        // Set binary data to VkShaderModuleCreateInfo
         VkShaderModuleCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = buffer.size();

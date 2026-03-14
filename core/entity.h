@@ -10,7 +10,7 @@
 class GsApp;
 class Component;
 
-class Actor {
+class Entity {
 public:
     enum State {
         EActive,
@@ -18,15 +18,15 @@ public:
         EDead
     };
 
-    Actor(GsApp* game);
-    virtual ~Actor();
+    Entity(GsApp* game);
+    virtual ~Entity();
 
     void Update(float delta_time);
     void UpdateComponents(float delta_time);
-    virtual void UpdateActor(float delta_time);
+    virtual void UpdateEntity(float delta_time);
 
     void ProcessInput(const uint8_t* key_state);
-    virtual void ActorInput(const uint8_t* key_state);
+    virtual void EntityInput(const uint8_t* key_state);
 
     const glm::vec3& GetPosition() const { return position_; }
     void SetPosition(const glm::vec3& pos) { position_ = pos; recompute_world_transform_ = true; }

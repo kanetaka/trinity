@@ -1,4 +1,4 @@
-﻿#include "core/graphics_pipeline_builder.h"
+#include "core/graphics_pipeline_builder.h"
 #include "core/vulkan_context.h"
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder() {
@@ -84,7 +84,7 @@ GraphicsPipelineBuilder::SetViewport(VkExtent2D extent) {
                                 .minDepth = 0.0f,
                                 .maxDepth = 1.0f};
 
-    // VK_KHR_Maintenance1 による上下反転
+    // Y-flip using VK_KHR_Maintenance1
     viewport_.y = float(extent.height);
     viewport_.height = -float(extent.height);
 

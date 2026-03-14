@@ -2,7 +2,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 
-#include "actor.h"
+#include "entity.h"
 #include "component.h"
 #include "gs_app.h"
 #include "core/renderer.h"
@@ -17,48 +17,48 @@
 class GsApp;
 class Component;
 
-Actor::Actor(GsApp* game)
+Entity::Entity(GsApp* game)
         : state_(EActive), position_(0.0f, 0.0f, 0.0f), rotation_(glm::identity<glm::quat>()),
             scale_(1.0f), recompute_world_transform_(true), game_(game) {
-    // game_->AddActor(this); // This should be called by GsApp or similar
+    // game_->AddEntity(this); // This should be called by GsApp or similar
 }
 
-Actor::~Actor() {
-    // game_->RemoveActor(this);
+Entity::~Entity() {
+    // game_->RemoveEntity(this);
     while (!components_.empty()) {
         delete components_.back();
     }
 }
 
-void Actor::Update(float delta_time) {
+void Entity::Update(float delta_time) {
     if (state_ == EActive) {
         ComputeWorldTransform();
         UpdateComponents(delta_time);
-        UpdateActor(delta_time);
+        UpdateEntity(delta_time);
         ComputeWorldTransform();
     }
 }
 
-void Actor::UpdateComponents(float delta_time) {
+void Entity::UpdateComponents(float delta_time) {
     for (auto comp : components_) {
         comp->Update(delta_time);
     }
 }
 
-void Actor::UpdateActor(float delta_time) {}
+void Entity::UpdateEntity(float delta_time) {}
 
-void Actor::ProcessInput(const uint8_t* key_state) {
+void Entity::ProcessInput(const uint8_t* key_state) {
     if (state_ == EActive) {
         for (auto comp : components_) {
             comp->ProcessInput(key_state);
         }
-        ActorInput(key_state);
+        EntityInput(key_state);
     }
 }
 
-void Actor::ActorInput(const uint8_t* key_state) {}
+void Entity::EntityInput(const uint8_t* key_state) {}
 
-void Actor::ComputeWorldTransform() {
+void Entity::ComputeWorldTransform() {
     if (recompute_world_transform_) {
         recompute_world_transform_ = false;
         // Scale, then rotate, then translate
@@ -73,7 +73,7 @@ void Actor::ComputeWorldTransform() {
     }
 }
 
-void Actor::AddComponent(Component* component) {
+void Entity::AddComponent(Component* component) {
     // Find the insertion point before the first element with a higher update order
     int my_order = component->GetUpdateOrder();
     auto iter = components_.begin();
@@ -85,7 +85,7 @@ void Actor::AddComponent(Component* component) {
     components_.insert(iter, component);
 }
 
-void Actor::RemoveComponent(Component* component) {
+void Entity::RemoveComponent(Component* component) {
     auto iter = std::find(components_.begin(), components_.end(), component);
     if (iter != components_.end()) {
         components_.erase(iter);

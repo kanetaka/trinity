@@ -44,8 +44,7 @@ VulkanContext &VulkanContext::Get() {
     return instance;
 }
 
-void VulkanContext::Initialize(const char *app_name,
-                                                             ISurfaceProvider *surface_provider) {
+void VulkanContext::Initialize(const char *app_name, ISurfaceProvider *surface_provider) {
     surface_provider_ = surface_provider;
     CreateInstance(app_name);
 
@@ -58,7 +57,7 @@ void VulkanContext::Initialize(const char *app_name,
 }
 
 void VulkanContext::Cleanup() {
-    // デバイスがアイドル状態になってから破棄処理を進める
+    // Wait for the device to be idle before proceeding with cleanup
     vkDeviceWaitIdle(vk_device_);
 
     DestroyFrameContexts();
@@ -66,8 +65,7 @@ void VulkanContext::Cleanup() {
     vkDestroyDescriptorPool(vk_device_, descriptor_pool_, nullptr);
 
     if (debug_messenger_ != VK_NULL_HANDLE) {
-        auto func = VK_GET_INSTANCE_PROC_ADDR(vk_instance_,
-                                                                                    vkDestroyDebugUtilsMessengerEXT);
+        auto func = VK_GET_INSTANCE_PROC_ADDR(vk_instance_, vkDestroyDebugUtilsMessengerEXT);
         if (func != nullptr) {
             func(vk_instance_, debug_messenger_, nullptr);
         }
@@ -116,7 +114,7 @@ VkResult VulkanContext::AcquireNextImage() {
     if (result == VK_SUCCESS) {
         vkResetFences(vk_device_, 1, &fence);
     } else if (result == VK_ERROR_OUT_OF_DATE_KHR) {
-        // 最小化時の対策
+        // Handle window minimization
         auto width = surface_provider_->GetFramebufferWidth();
         auto height = surface_provider_->GetFramebufferHeight();
         if (width > 0 && height > 0) {
@@ -148,7 +146,7 @@ void VulkanContext::SubmitPresent() {
             vkQueueSubmit(graphics_queue_, 1, &submit_info, frame.inflightFence);
     assert(result != VK_ERROR_DEVICE_LOST);
 
-    // GraphicsQueue が既にPresentをサポートしていることはチェック済み
+    // Graphics queue has already been checked for presentation support
     swapchain_->QueuePresent(graphics_queue_);
     AdvanceFrame();
 }
@@ -185,7 +183,7 @@ uint32_t VulkanContext::FindMemoryType(const VkMemoryRequirements &requirements,
                 properties;
 
         if (is_type_compatible && has_desired_properties) {
-            // メモリプロパティを満たし、memoryTypeBitsに含まれている
+            // Memory type matches properties and is included in memoryTypeBits
             return i;
         }
     }
@@ -237,10 +235,10 @@ void VulkanContext::CreateInstance(const char *app_name) {
     std::vector<const char *> layer_list;
 
 #if DEBUG || _DEBUG
-    // 開発時にはVK_EXT_debug_utils を有効化
+    // Enable VK_EXT_debug_utils for development
     extension_list.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
 
-    // 開発時には検証レイヤーを有効化
+    // Enable validation layers for development
     layer_list.push_back("VK_LAYER_KHRONOS_validation");
 #endif
     GetWindowSystemExtensions(extension_list);
@@ -260,7 +258,7 @@ void VulkanContext::CreateInstance(const char *app_name) {
 void VulkanContext::CreateSurface() {
     surface_ = surface_provider_->CreateSurface(vk_instance_);
 
-    // グラフィックスキューはこのサーフェースへPresentを発行できるか
+    // Check if the graphics queue family supports presentation to the surface
     VkBool32 present = false;
     vkGetPhysicalDeviceSurfaceSupportKHR(
             vk_physical_device_, graphics_queue_family_index_, surface_, &present);
@@ -282,7 +280,7 @@ void VulkanContext::PickPhysicalDevice() {
 }
 
 void VulkanContext::CreateLogicalDevice() {
-    // グラフィックスのキューインデックスを調査
+    // Find graphics queue family index
     uint32_t queue_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(vk_physical_device_, &queue_count,
                                                                                      nullptr);
@@ -304,11 +302,11 @@ void VulkanContext::CreateLogicalDevice() {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
 
-    // 上下方向を合わせるために有効とする
+    // Enable for Y-flip (VK_KHR_maintenance1)
     device_extensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
 
 #if defined(CHAPTER_COMPUTE_SHADER)
-    // floatでatomicAddを使える場合に追加しておく.
+    // Add extension if shaderBufferFloat32AtomicAdd is supported
     if (atomic_float_features_.shaderBufferFloat32AtomicAdd) {
         device_extensions.push_back(VK_EXT_SHADER_ATOMIC_FLOAT_EXTENSION_NAME);
     }
@@ -427,7 +425,7 @@ void VulkanContext::AdvanceFrame() {
     current_frame_index_ = (current_frame_index_ + 1) % MaxInflightFrames;
 }
 
-// Vulkan の構造体 pNext を繋ぐ処理簡略化のためのテンプレート
+// Helper template to simplify building the pNext chain for Vulkan structs
 template <typename T> void BuildVkExtensionChain(T &last) {
     last.pNext = nullptr;
 }
@@ -437,12 +435,12 @@ void BuildVkExtensionChain(T &current, U &next, Rest &...rest) {
     BuildVkExtensionChain(next, rest...);
 }
 void VulkanContext::BuildVkFeatures() {
-    // デバイスからサポート範囲の情報を取得した後で、使いたいものを有効化する
-    // ここでサポートされない機能を有効にすると,デバイス作成時にエラーとなる
+    // Enable desired features after getting support info from the device.
+    // Enabling unsupported features will cause errors during device creation.
 #if !defined(CHAPTER_COMPUTE_SHADER)
     BuildVkExtensionChain(phys_dev_features_, vulkan11_features_,
                                                 vulkan12_features_, vulkan13_features_);
-    // サポート状態を取得
+    // Get support status
     vkGetPhysicalDeviceFeatures2(vk_physical_device_, &phys_dev_features_);
 
     vulkan13_features_.dynamicRendering = VK_TRUE;
@@ -453,15 +451,15 @@ void VulkanContext::BuildVkFeatures() {
     BuildVkExtensionChain(phys_dev_features_, vulkan11_features_,
                                                 vulkan12_features_, vulkan13_features_,
                                                 atomic_float_features_);
-    // サポート状態を取得
+    // Get support status
     vkGetPhysicalDeviceFeatures2(vk_physical_device_, &phys_dev_features_);
 
     vulkan13_features_.dynamicRendering = VK_TRUE;
     vulkan13_features_.synchronization2 = VK_TRUE;
 #endif
 
-    // 一部の環境(APU)で、robustBufferAccess=trueだと警告が出てしまう
-    // - このサンプルではオフでも問題ないのでフラグを落とす
+    // Some environments (APUs) may warn if robustBufferAccess=true
+    // - Disable it as it's not needed for this sample
     phys_dev_features_.features.robustBufferAccess = VK_FALSE;
 }
 

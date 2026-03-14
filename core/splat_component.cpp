@@ -2,7 +2,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "core/splat_component.h"
-#include "core/actor.h"
+#include "core/entity.h"
 #include "gs_app.h"
 #include "core/renderer.h"
 #include "core/ply_loader.h"
@@ -16,7 +16,7 @@
 #include <execution>
 #include <glm/gtc/matrix_transform.hpp>
 
-SplatComponent::SplatComponent(Actor* owner, const std::string& ply_file)
+SplatComponent::SplatComponent(Entity* owner, const std::string& ply_file)
         : Component(owner), ply_file_(ply_file) {
     LoadSplats();
     CreateBuffers();

@@ -10,12 +10,12 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 
-class Actor;
+class Entity;
 class CommandBuffer;
 
 class SplatComponent : public Component {
 public:
-    SplatComponent(Actor* owner, const std::string& ply_file);
+    SplatComponent(Entity* owner, const std::string& ply_file);
     ~SplatComponent() override;
 
     void Update(float delta_time) override;

@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "core/vulkan_context.h"
 #include "core/gpu_resource_base.h"
 
@@ -60,7 +60,7 @@ public:
 
     bool Initialize(VkDeviceSize size, VkMemoryPropertyFlags memProps);
 
-    // Create, Initialize を1度で処理するための作成関数
+    // Static factory method for creation and initialization
     static std::shared_ptr<VertexBuffer> Create(VkDeviceSize size, VkMemoryPropertyFlags memProps)
     {
         auto buffer = GpuResourceBase::Create();
@@ -82,7 +82,7 @@ public:
 
     bool Initialize(VkDeviceSize size, VkMemoryPropertyFlags memProps);
 
-    // Create, Initialize を1度で処理するための作成関数
+    // Static factory method for creation and initialization
     static std::shared_ptr<IndexBuffer> Create(VkDeviceSize size, VkMemoryPropertyFlags memProps)
     {
         auto buffer = GpuResourceBase::Create();
@@ -103,7 +103,7 @@ public:
 
     bool Initialize(VkDeviceSize size);
 
-    // Create, Initialize を1度で処理するための作成関数
+    // Static factory method for creation and initialization
     static std::shared_ptr<UniformBuffer> Create(VkDeviceSize size)
     {
         auto buffer = GpuResourceBase::Create();
@@ -124,7 +124,7 @@ public:
 
     bool Initialize(VkDeviceSize size);
 
-    // Create, Initialize を1度で処理するための作成関数
+    // Static factory method for creation and initialization
     static std::shared_ptr<DynamicUniformBuffer> Create(VkDeviceSize size)
     {
         auto buffer = GpuResourceBase::Create();
@@ -138,7 +138,7 @@ private:
     uint32_t block_size_ = 0;
 };
 
-// ステージングバッファ
+// Staging Buffer
 class StagingBuffer : public BufferResource<StagingBuffer>
 {
     friend class GpuResourceBase<StagingBuffer>;
@@ -153,7 +153,7 @@ public:
 
     bool Initialize(VkDeviceSize size);
 
-    // Create, Initialize を1度で処理するための作成関数
+    // Static factory method for creation and initialization
     static std::shared_ptr<StagingBuffer> Create(VkDeviceSize size)
     {
         auto buffer = GpuResourceBase::Create();
@@ -184,7 +184,7 @@ public:
     template<typename T>
     T* MapTyped() { return reinterpret_cast<T*>(Map()); }
 
-    // Create, Initialize を1度で処理するための作成関数
+    // Static factory method for creation and initialization
     static std::shared_ptr<StorageBuffer> Create(VkDeviceSize size, AccessMode mode)
     {
         auto buffer = GpuResourceBase::Create();

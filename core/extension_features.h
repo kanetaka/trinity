@@ -1,8 +1,8 @@
-﻿#pragma once
+#pragma once
 #include "core/vulkan_context.h"
 
 
-// Vulkan の構造体 pNext を繋ぐ処理簡略化のためのテンプレート
+// Helper templates for Vulkan pNext chain construction
 template<typename T>
 void BuildVkExtensionChain(T& last)
 {
@@ -20,18 +20,18 @@ class IExtensionFeatureProvider
 public:
     virtual ~IExtensionFeatureProvider() = default;
 
-    // 有効にするインスタンス拡張機能の名前リストを返す
+    // Returns a list of instance extensions to enable
     virtual void GetRequiredInstanceExtensions(std::vector<const char*>& extensionList) = 0;
 
-    // 有効にするデバイス拡張機能の名前リストを返す
+    // Returns a list of device extensions to enable
     virtual void GetRequiredDeviceExtensions(std::vector<const char*>& extensionList) = 0;
 
-    // pNext で繋ぐためのポインタを返す
+    // Returns a pointer to be used for the pNext chain
     void* GetDeviceFeatures() {
         return reinterpret_cast<void*>(&phys_dev_features_);
     }
 
-    // m_physDevFeaturesからの拡張機能のリンクを構成する
+    // Constructs the extension link chain from m_physDevFeatures
     virtual void BuildFeatures(VulkanContext* vulkanCtx) = 0;
 
 protected:

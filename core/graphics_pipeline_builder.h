@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <vector>
 #include <vulkan/vulkan.h>
@@ -7,54 +7,54 @@ class GraphicsPipelineBuilder {
 public:
     GraphicsPipelineBuilder();
 
-    // 各ステージ追加
+    // Add shader stages
     GraphicsPipelineBuilder &AddShaderStage(VkShaderStageFlagBits stage,
                                                                                     VkShaderModule module,
                                                                                     const char *entry = "main");
 
-    // 頂点入力レイアウト
+    // Vertex input layout
     GraphicsPipelineBuilder &
     SetVertexInput(const VkVertexInputBindingDescription *bindings,
                                  uint32_t bindingCount,
                                  const VkVertexInputAttributeDescription *attributes,
                                  uint32_t attributeCount);
 
-    // ビューポートとシザー
+    // Viewport and scissor
     GraphicsPipelineBuilder &SetViewport(VkExtent2D extent);
     GraphicsPipelineBuilder &SetViewport(VkViewport &viewport, VkRect2D scissor);
 
-    // ブレンディング設定
+    // Blending configuration
     void SetColorBlendAttachmentState(
             const VkPipelineColorBlendAttachmentState &state);
     GraphicsPipelineBuilder &EnableAlphaBlend();
 
-    // ラスタライズ設定
+    // Rasterization configuration
     void
     SetRasterizationState(const VkPipelineRasterizationStateCreateInfo &state);
 
-    // デプス・ステンシル設定
+    // Depth and stencil configuration
     void SetDepthStencilState(const VkPipelineDepthStencilStateCreateInfo &state);
 
-    // レイアウト
+    // Pipeline layout
     GraphicsPipelineBuilder &SetPipelineLayout(VkPipelineLayout layout);
 
-    // VkRenderPassを使用する場合の設定
+    // Configuration for using VkRenderPass
     GraphicsPipelineBuilder &UseRenderPass(VkRenderPass renderPass,
                                                                                  uint32_t subpass);
 
-    // DynamicRenderingを使用する場合の設定
+    // Configuration for using dynamic rendering
     GraphicsPipelineBuilder &
     UseDynamicRendering(VkFormat colorFormat,
                                             VkFormat depthFormat = VK_FORMAT_UNDEFINED);
 
-    // パイプライン作成
+    // Build the pipeline
     VkPipeline Build();
 
-    // 入力アセンブリを変更(テッセレーションなどで使用)
+    // Change input assembly (e.g., for tessellation)
     GraphicsPipelineBuilder &
     SetInputAssembly(const VkPipelineInputAssemblyStateCreateInfo &state);
 
-    // テッセレーション情報の設定
+    // Tessellation configuration
     GraphicsPipelineBuilder &
     SetTessellation(bool enable,
                                     const VkPipelineTessellationStateCreateInfo &state);
