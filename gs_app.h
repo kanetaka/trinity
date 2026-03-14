@@ -1,57 +1,50 @@
 #pragma once
-#include "common/trinity_app.h"
-#include "core/buffer_resource.h"
-#include "core/camera.h"
-#include "core/splat_types.h"
+#include <vulkan/vulkan.h>
+#include <SDL3/SDL.h>
 #include <memory>
-#include <string>
 #include <vector>
+#include <string>
+#include <chrono>
+#include "common/trinity_app.h"
+#include "core/camera.h"
+
+class Actor;
+class Renderer;
 
 class GsApp : public ITrinityApp {
 public:
     GsApp(const std::string &plyFile);
-    ~GsApp() override;
+    virtual ~GsApp() override;
 
     void OnInitialize() override;
     void OnDrawFrame() override;
     void OnCleanup() override;
 
+    void AddActor(Actor* actor);
+    void RemoveActor(Actor* actor);
+
+    Renderer* GetRenderer() { return renderer_.get(); }
+    Camera& GetCamera() { return camera_; }
+
 #if defined(__ANDROID__)
     void OnSurfaceChanged() override;
 #endif
 
-    // Let the main loop pass input to us
     void ProcessInput(const Uint8 *state, float deltaTime);
     void ProcessMouseMotion(float xrel, float yrel);
 
 private:
-    void LoadSplats();
-    void CreateBuffers();
-    void CreateDescriptorSetLayout();
-    void CreateDescriptorPool();
-    void CreateDescriptorSets();
-    void InitializeGraphicsPipeline();
-    void SortSplats();
-    void UpdateUniformBuffer();
+    void UpdateActors(float delta_time);
 
     std::string ply_file_;
     Camera camera_;
 
-    std::vector<gs::GPUSplat> gpu_splats_;
-    std::vector<gs::SplatSortEntry> splat_indices_;
+    std::unique_ptr<Renderer> renderer_;
+    std::vector<Actor*> actors_;
+    std::vector<Actor*> pending_actors_;
 
-    std::shared_ptr<StorageBuffer> splat_buffer_;
-    std::shared_ptr<StorageBuffer> index_buffer_;
-    std::shared_ptr<UniformBuffer> uniform_buffer_;
+    bool updating_actors_ = false;
 
-    VkDescriptorSetLayout descriptor_set_layout_ = VK_NULL_HANDLE;
-    VkDescriptorPool descriptor_pool_ = VK_NULL_HANDLE;
-    VkDescriptorSet descriptor_set_ = VK_NULL_HANDLE;
-
-    VkPipeline pipeline_ = VK_NULL_HANDLE;
-    VkPipelineLayout pipeline_layout_ = VK_NULL_HANDLE;
-
-    // Viewport caching for uniform buffer
     float width_ = 1280.0f;
     float height_ = 720.0f;
 };
