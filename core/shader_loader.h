@@ -4,5 +4,5 @@
 
 namespace loader
 {
-        VkShaderModule LoadShaderModule(const std::filesystem::path& shaderSpvPath);
+    VkShaderModule LoadShaderModule(const std::filesystem::path& shaderSpvPath);
 };
