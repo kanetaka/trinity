@@ -1,4 +1,4 @@
-﻿#include "core/sampler.h"
+#include "core/sampler.h"
 #include <stdexcept>
 
 void Sampler::Initialize(

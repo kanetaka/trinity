@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #include "core/vulkan_context.h"
 #include "core/surface_provider.h"
 #include <map>

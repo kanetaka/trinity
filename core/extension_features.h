@@ -31,7 +31,7 @@ public:
         return reinterpret_cast<void*>(&phys_dev_features_);
     }
 
-    // Constructs the extension link chain from m_physDevFeatures
+    // Constructs the extension link chain from phys_dev_features_
     virtual void BuildFeatures(VulkanContext* vulkanCtx) = 0;
 
 protected:

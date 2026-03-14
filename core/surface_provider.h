@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 # define NOMINMAX
 #endif

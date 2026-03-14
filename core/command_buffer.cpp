@@ -1,4 +1,4 @@
-﻿#include "core/command_buffer.h"
+#include "core/command_buffer.h"
 
 CommandBuffer::CommandBuffer(VkCommandBuffer commandBuffer)
 {

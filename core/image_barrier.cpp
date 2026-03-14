@@ -1,4 +1,4 @@
-﻿#include "core/vulkan_context.h"
+#include "core/vulkan_context.h"
 #include "core/image_resource.h"
 #include "core/image_barrier.h"
 
