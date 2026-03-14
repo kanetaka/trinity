@@ -1,4 +1,4 @@
-﻿#if defined(_WIN32)
+#if defined(_WIN32)
 #include <windows.h>
 #endif
 
@@ -23,112 +23,112 @@
 
 namespace fs = std::filesystem;
 
-int runGame() {
-  if (!SDL_Init(SDL_INIT_VIDEO)) {
-    std::cerr << "SDL_Init failed" << std::endl;
-    return -1;
-  }
-
-  SDL_Window *window = nullptr;
-
-  try {
-    window =
-        SDL_CreateWindow("Trinity", 1280, 720,
-                         SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
-
-    if (!window) {
-      throw std::runtime_error("SDL_CreateWindow failed");
+int RunGame() {
+    if (!SDL_Init(SDL_INIT_VIDEO)) {
+        std::cerr << "SDL_Init failed" << std::endl;
+        return -1;
     }
 
-    Sdl3SurfaceProvider surfaceProvider(window);
+    SDL_Window *window = nullptr;
 
-    auto &vulkanCtx = VulkanContext::Get();
+    try {
+        window =
+                SDL_CreateWindow("Trinity", 1280, 720,
+                                                 SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
-    vulkanCtx.GetWindowSystemExtensions = [=](auto &extensionList) {
-      uint32_t extCount = 0;
-      char const *const *extensions =
-          SDL_Vulkan_GetInstanceExtensions(&extCount);
-      if (extCount > 0 && extensions != nullptr) {
-        size_t currentSize = extensionList.size();
-        extensionList.resize(currentSize + extCount);
-        for (uint32_t i = 0; i < extCount; ++i) {
-          extensionList[currentSize + i] = extensions[i];
+        if (!window) {
+            throw std::runtime_error("SDL_CreateWindow failed");
         }
-      }
-    };
 
-    vulkanCtx.Initialize("Trinity", &surfaceProvider);
-    vulkanCtx.RecreateSwapchain();
+        Sdl3SurfaceProvider surface_provider(window);
 
-    GsApp theApp{GetAssetRootPath().string() + "/models/gs/sample.ply"};
-    theApp.OnInitialize();
+        auto &vulkan_ctx = VulkanContext::Get();
 
-    bool isRunning = true;
-    while (isRunning) {
-      SDL_Event event;
-      const Uint8 *state = (const Uint8 *)SDL_GetKeyboardState(nullptr);
-      // Rough delta time for now
-      theApp.ProcessInput(state, 0.016f);
+        vulkan_ctx.GetWindowSystemExtensions = [=](auto &extension_list) {
+            uint32_t ext_count = 0;
+            char const *const *extensions =
+                    SDL_Vulkan_GetInstanceExtensions(&ext_count);
+            if (ext_count > 0 && extensions != nullptr) {
+                size_t current_size = extension_list.size();
+                extension_list.resize(current_size + ext_count);
+                for (uint32_t i = 0; i < ext_count; ++i) {
+                    extension_list[current_size + i] = extensions[i];
+                }
+            }
+        };
 
-      while (SDL_PollEvent(&event)) {
-        if (event.type == SDL_EVENT_QUIT) {
-          isRunning = false;
-        } else if (event.type == SDL_EVENT_MOUSE_MOTION) {
-          if (event.motion.state & SDL_BUTTON_LMASK) {
-            theApp.ProcessMouseMotion(event.motion.xrel, event.motion.yrel);
-          }
+        vulkan_ctx.Initialize("Trinity", &surface_provider);
+        vulkan_ctx.RecreateSwapchain();
+
+        GsApp the_app{GetAssetRootPath().string() + "/models/gs/sample.ply"};
+        the_app.OnInitialize();
+
+        bool is_running = true;
+        while (is_running) {
+            SDL_Event event;
+            const Uint8 *state = (const Uint8 *)SDL_GetKeyboardState(nullptr);
+            // Rough delta time for now
+            the_app.ProcessInput(state, 0.016f);
+
+            while (SDL_PollEvent(&event)) {
+                if (event.type == SDL_EVENT_QUIT) {
+                    is_running = false;
+                } else if (event.type == SDL_EVENT_MOUSE_MOTION) {
+                    if (event.motion.state & SDL_BUTTON_LMASK) {
+                        the_app.ProcessMouseMotion(event.motion.xrel, event.motion.yrel);
+                    }
+                }
+            }
+
+            the_app.OnDrawFrame();
         }
-      }
+        // cleanup
+        the_app.OnCleanup();
+        vulkan_ctx.Cleanup();
 
-      theApp.OnDrawFrame();
+    } catch (const std::exception &e) {
+        std::cerr << "Fatal Error: " << e.what() << std::endl;
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error", e.what(),
+                                                         window);
     }
-    // cleanup
-    theApp.OnCleanup();
-    vulkanCtx.Cleanup();
 
-  } catch (const std::exception &e) {
-    std::cerr << "Fatal Error: " << e.what() << std::endl;
-    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error", e.what(),
-                             window);
-  }
+    if (window)
+        SDL_DestroyWindow(window);
+    SDL_Quit();
 
-  if (window)
-    SDL_DestroyWindow(window);
-  SDL_Quit();
-
-  return 0;
+    return 0;
 }
 
 #if defined(_WIN32)
 int main(int argc, char *argv[]) {
-  // カレントディレクトリを変更
-  wchar_t exePath[MAX_PATH];
-  GetModuleFileNameW(nullptr, exePath, MAX_PATH);
-  fs::path exeDir = fs::path(exePath).parent_path();
-  SetCurrentDirectoryW(exeDir.c_str());
+    // Change current directory
+    wchar_t exe_path[MAX_PATH];
+    GetModuleFileNameW(nullptr, exe_path, MAX_PATH);
+    fs::path exe_dir = fs::path(exe_path).parent_path();
+    SetCurrentDirectoryW(exe_dir.c_str());
 
-  fs::path assetDir = exeDir / "../../../assets";
-  SetAssetRootPath(assetDir);
+    fs::path asset_dir = exe_dir / "../../../assets";
+    SetAssetRootPath(asset_dir);
 
-  return runGame();
+    return RunGame();
 }
 #elif defined(__linux__)
 int main(int argc, char *argv[]) {
-  // カレントディレクトリを変更
-  char exePath[PATH_MAX] = {0};
-  ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
-  if (len == -1) {
-    std::cerr << "Failed to read /proc/self/exe" << std::endl;
-  }
-  exePath[len] = '\0'; // NULLで終端
-  fs::path exeDir = fs::path(exePath).parent_path();
-  chdir(exeDir.c_str());
+    // Change current directory
+    char exe_path[PATH_MAX] = {0};
+    ssize_t len = readlink("/proc/self/exe", exe_path, sizeof(exe_path) - 1);
+    if (len == -1) {
+        std::cerr << "Failed to read /proc/self/exe" << std::endl;
+    }
+    exe_path[len] = '\0'; // Null-terminate
+    fs::path exe_dir = fs::path(exe_path).parent_path();
+    chdir(exe_dir.c_str());
 
-  fs::path assetDir = exeDir / "../assets";
-  SetAssetRootPath(assetDir);
+    fs::path asset_dir = exe_dir / "../assets";
+    SetAssetRootPath(asset_dir);
 
-  return runGame();
+    return RunGame();
 }
 #else
-int main(int argc, char *argv[]) { return runGame(); }
+int main(int argc, char *argv[]) { return RunGame(); }
 #endif

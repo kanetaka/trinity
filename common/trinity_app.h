@@ -1,16 +1,16 @@
 ﻿#pragma once
 
 // サンプルプログラム用既定インターフェース
-class ITrinityApp 
+class ITrinityApp
 {
 public:
-    virtual ~ITrinityApp() = default;
-    virtual void OnInitialize() = 0;
-    virtual void OnDrawFrame() = 0;
-    virtual void OnCleanup() = 0;
+        virtual ~ITrinityApp() = default;
+        virtual void OnInitialize() = 0;
+        virtual void OnDrawFrame() = 0;
+        virtual void OnCleanup() = 0;
 
 #if defined(__ANDROID__)
-    virtual void OnSurfaceChanged() = 0;
+        virtual void OnSurfaceChanged() = 0;
 #endif
 };
 
