@@ -8,15 +8,16 @@
 
 namespace gs {
 
-struct Property {
+struct Property
+{
     std::string name;
     std::string type;
     size_t byteSize;
     size_t offset;
 };
 
-bool PlyLoader::LoadPly(const std::string &filepath,
-                                                std::vector<FullSplat> &out_splats) {
+bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out_splats)
+{
     std::ifstream file(filepath, std::ios::binary);
     if (!file.is_open()) {
         std::cerr << "Failed to open PLY file: " << filepath << std::endl;

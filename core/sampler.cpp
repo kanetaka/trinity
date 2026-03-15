@@ -10,7 +10,7 @@ void Sampler::Initialize(
     float minLod,
     float maxLod)
 {
-    auto& vulkanCtx = VulkanContext::Get();
+    auto& vulkan_ctx = VulkanContext::Get();
     VkSamplerCreateInfo createInfo{
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
         .magFilter = magFilter,
@@ -24,7 +24,7 @@ void Sampler::Initialize(
         .maxLod = maxLod,
     };
 
-    auto result = vkCreateSampler(vulkanCtx.GetVkDevice(), &createInfo, nullptr, &sampler_);
+    auto result = vkCreateSampler(vulkan_ctx.GetVkDevice(), &createInfo, nullptr, &sampler_);
     if (result != VK_SUCCESS) {
         throw std::runtime_error("failed to sampler !");
     }
@@ -32,9 +32,9 @@ void Sampler::Initialize(
 
 void Sampler::Cleanup()
 {
-    auto& vulkanCtx = VulkanContext::Get();
+    auto& vulkan_ctx = VulkanContext::Get();
     if (sampler_ != VK_NULL_HANDLE) {
-        vkDestroySampler(vulkanCtx.GetVkDevice(), sampler_, nullptr);
+        vkDestroySampler(vulkan_ctx.GetVkDevice(), sampler_, nullptr);
     }
     sampler_ = VK_NULL_HANDLE;
 }

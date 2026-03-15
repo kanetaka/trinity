@@ -1,6 +1,7 @@
 #pragma once
 
-class ITrinityApp {
+class ITrinityApp
+{
 public:
     virtual ~ITrinityApp() = default;
     virtual void Initialize() = 0;

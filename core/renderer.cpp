@@ -6,7 +6,7 @@
 #include "core/graphics_pipeline_builder.h"
 #include "core/buffer_resource.h"
 #include "gs_app.h"
-#include "splat_component.h"
+#include "component.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -15,7 +15,8 @@ Renderer::Renderer(GsApp* game)
 
 Renderer::~Renderer() {}
 
-bool Renderer::Initialize(float screen_width, float screen_height) {
+bool Renderer::Initialize(float screen_width, float screen_height)
+{
     screen_width_ = screen_width;
     screen_height_ = screen_height;
 
@@ -29,7 +30,8 @@ bool Renderer::Initialize(float screen_width, float screen_height) {
     return true;
 }
 
-void Renderer::Shutdown() {
+void Renderer::Shutdown()
+{
     auto device = VulkanContext::Get().GetVkDevice();
     vkDeviceWaitIdle(device);
 
@@ -56,7 +58,8 @@ void Renderer::Shutdown() {
     }
 }
 
-void Renderer::Draw() {
+void Renderer::Draw()
+{
     auto& vulkan_ctx = VulkanContext::Get();
 
     if (vulkan_ctx.AcquireNextImage() != VK_SUCCESS) {
@@ -99,8 +102,8 @@ void Renderer::Draw() {
     vkCmdBindPipeline(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         pipeline_);
 
-    for (auto sc : splat_components_) {
-        sc->Draw(command_buffer, pipeline_layout_);
+    for (auto comp : components_) {
+        comp->Draw(command_buffer, pipeline_layout_);
     }
 
     vkCmdEndRendering(*command_buffer);
@@ -113,18 +116,21 @@ void Renderer::Draw() {
     vulkan_ctx.SubmitPresent();
 }
 
-void Renderer::AddSplatComponent(SplatComponent* splat_comp) {
-    splat_components_.push_back(splat_comp);
+void Renderer::AddComponent(Component* component)
+{
+    components_.push_back(component);
 }
 
-void Renderer::RemoveSplatComponent(SplatComponent* splat_comp) {
-    auto iter = std::find(splat_components_.begin(), splat_components_.end(), splat_comp);
-    if (iter != splat_components_.end()) {
-        splat_components_.erase(iter);
+void Renderer::RemoveComponent(Component* component)
+{
+    auto iter = std::find(components_.begin(), components_.end(), component);
+    if (iter != components_.end()) {
+        components_.erase(iter);
     }
 }
 
-VkDescriptorSet Renderer::AllocateDescriptorSet() {
+VkDescriptorSet Renderer::AllocateDescriptorSet()
+{
     auto device = VulkanContext::Get().GetVkDevice();
     VkDescriptorSetAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
@@ -139,7 +145,8 @@ VkDescriptorSet Renderer::AllocateDescriptorSet() {
     return set;
 }
 
-void Renderer::UpdateSplatDescriptorSet(VkDescriptorSet set, const std::shared_ptr<StorageBuffer>& splat_buffer, const std::shared_ptr<StorageBuffer>& index_buffer) {
+void Renderer::UpdateSplatDescriptorSet(VkDescriptorSet set, const std::shared_ptr<StorageBuffer>& splat_buffer, const std::shared_ptr<StorageBuffer>& index_buffer)
+{
     auto device = VulkanContext::Get().GetVkDevice();
 
     VkDescriptorBufferInfo ubo_info{};
@@ -188,14 +195,16 @@ void Renderer::UpdateSplatDescriptorSet(VkDescriptorSet set, const std::shared_p
     vkUpdateDescriptorSets(device, static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
 }
 
-struct CameraUBO {
+struct CameraUBO
+{
     glm::mat4 view;
     glm::mat4 proj;
     glm::vec2 viewport;
     glm::vec2 padding;
 };
 
-void Renderer::UpdateUniformBuffer() {
+void Renderer::UpdateUniformBuffer()
+{
     CameraUBO ubo{};
     ubo.view = view_;
     ubo.proj = projection_;
@@ -206,7 +215,8 @@ void Renderer::UpdateUniformBuffer() {
     uniform_buffer_->Unmap();
 }
 
-bool Renderer::CreateDescriptorSetLayout() {
+bool Renderer::CreateDescriptorSetLayout()
+{
     auto device = VulkanContext::Get().GetVkDevice();
 
     VkDescriptorSetLayoutBinding ubo_binding{};
@@ -241,10 +251,12 @@ bool Renderer::CreateDescriptorSetLayout() {
     return true;
 }
 
-bool Renderer::CreateDescriptorPool() {
+bool Renderer::CreateDescriptorPool()
+{
     auto device = VulkanContext::Get().GetVkDevice();
 
-    std::vector<VkDescriptorPoolSize> pool_sizes = {
+    std::vector<VkDescriptorPoolSize> pool_sizes =
+    {
             {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10},
             {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 20}};
 
@@ -255,13 +267,15 @@ bool Renderer::CreateDescriptorPool() {
     pool_info.maxSets = 10;
 
     if (vkCreateDescriptorPool(device, &pool_info, nullptr, &descriptor_pool_) !=
-            VK_SUCCESS) {
+            VK_SUCCESS)
+    {
         return false;
     }
     return true;
 }
 
-bool Renderer::InitializeGraphicsPipeline() {
+bool Renderer::InitializeGraphicsPipeline()
+{
     auto& vulkan_ctx = VulkanContext::Get();
     auto device = vulkan_ctx.GetVkDevice();
     auto extent = vulkan_ctx.GetSwapchain()->GetExtent();
@@ -277,8 +291,8 @@ bool Renderer::InitializeGraphicsPipeline() {
     pipeline_layout_info.setLayoutCount = 1;
     pipeline_layout_info.pSetLayouts = &descriptor_set_layout_;
 
-    if (vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr,
-                                                         &pipeline_layout_) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr, &pipeline_layout_) != VK_SUCCESS)
+    {
         return false;
     }
 
@@ -289,8 +303,7 @@ bool Renderer::InitializeGraphicsPipeline() {
                     .SetVertexInput(nullptr, 0, nullptr, 0)
                     .SetViewport(extent)
                     .SetPipelineLayout(pipeline_layout_)
-                    .UseDynamicRendering(vulkan_ctx.GetSwapchain()->GetFormat().format,
-                                                             VK_FORMAT_UNDEFINED)
+                    .UseDynamicRendering(vulkan_ctx.GetSwapchain()->GetFormat().format, VK_FORMAT_UNDEFINED)
                     .EnableAlphaBlend()
                     .Build();
 

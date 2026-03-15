@@ -3,14 +3,13 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-class GraphicsPipelineBuilder {
+class GraphicsPipelineBuilder
+{
 public:
     GraphicsPipelineBuilder();
 
     // Add shader stages
-    GraphicsPipelineBuilder &AddShaderStage(VkShaderStageFlagBits stage,
-                                                                                    VkShaderModule module,
-                                                                                    const char *entry = "main");
+    GraphicsPipelineBuilder &AddShaderStage(VkShaderStageFlagBits stage, VkShaderModule module, const char *entry = "main");
 
     // Vertex input layout
     GraphicsPipelineBuilder &
@@ -39,13 +38,11 @@ public:
     GraphicsPipelineBuilder &SetPipelineLayout(VkPipelineLayout layout);
 
     // Configuration for using VkRenderPass
-    GraphicsPipelineBuilder &UseRenderPass(VkRenderPass renderPass,
-                                                                                 uint32_t subpass);
+    GraphicsPipelineBuilder &UseRenderPass(VkRenderPass renderPass, uint32_t subpass);
 
     // Configuration for using dynamic rendering
     GraphicsPipelineBuilder &
-    UseDynamicRendering(VkFormat colorFormat,
-                                            VkFormat depthFormat = VK_FORMAT_UNDEFINED);
+    UseDynamicRendering(VkFormat colorFormat, VkFormat depthFormat = VK_FORMAT_UNDEFINED);
 
     // Build the pipeline
     VkPipeline Build();
@@ -55,9 +52,7 @@ public:
     SetInputAssembly(const VkPipelineInputAssemblyStateCreateInfo &state);
 
     // Tessellation configuration
-    GraphicsPipelineBuilder &
-    SetTessellation(bool enable,
-                                    const VkPipelineTessellationStateCreateInfo &state);
+    GraphicsPipelineBuilder & SetTessellation(bool enable, const VkPipelineTessellationStateCreateInfo &state);
 
 private:
     VkDevice device_;

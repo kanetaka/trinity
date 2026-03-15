@@ -13,7 +13,8 @@
 class Entity;
 class CommandBuffer;
 
-class SplatComponent : public Component {
+class SplatComponent : public Component
+{
 public:
     SplatComponent(Entity* owner, const std::string& ply_file);
     ~SplatComponent() override;

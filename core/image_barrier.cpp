@@ -4,7 +4,8 @@
 
 ImageLayoutTransition ImageLayoutTransition::FromUndefinedToColorAttachment()
 {
-        return {
+        return
+        {
                 .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
                 .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                 .srcAccessMask = 0,
@@ -16,7 +17,8 @@ ImageLayoutTransition ImageLayoutTransition::FromUndefinedToColorAttachment()
 
 ImageLayoutTransition ImageLayoutTransition::FromPresentSrcToColorAttachment()
 {
-    return {
+    return
+    {
             .oldLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
             .newLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
             .srcAccessMask = 0,
@@ -28,7 +30,8 @@ ImageLayoutTransition ImageLayoutTransition::FromPresentSrcToColorAttachment()
 
 ImageLayoutTransition ImageLayoutTransition::FromColorToPresent()
 {
-        return {
+        return
+        {
                 .oldLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL,
                 .newLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR,
                 .srcAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT,
@@ -40,7 +43,8 @@ ImageLayoutTransition ImageLayoutTransition::FromColorToPresent()
 
 ImageLayoutTransition ImageLayoutTransition::FromUndefToTransferDst()
 {
-        return {
+        return
+        {
                 .oldLayout = VK_IMAGE_LAYOUT_UNDEFINED,
                 .newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 .srcAccessMask = 0,
@@ -52,7 +56,8 @@ ImageLayoutTransition ImageLayoutTransition::FromUndefToTransferDst()
 
 ImageLayoutTransition ImageLayoutTransition::FromTransferDstToTransferSrc()
 {
-        return {
+        return
+        {
                 .oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
                 .newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
                 .srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT,
@@ -64,7 +69,8 @@ ImageLayoutTransition ImageLayoutTransition::FromTransferDstToTransferSrc()
 
 ImageLayoutTransition ImageLayoutTransition::ToShaderReadonlyOptimal(const IImageResource* image)
 {
-        return {
+        return
+        {
                 .oldLayout = image->GetLayout(),
                 .newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL,
                 .srcAccessMask = image->GetAccessFlags(),
@@ -76,7 +82,8 @@ ImageLayoutTransition ImageLayoutTransition::ToShaderReadonlyOptimal(const IImag
 
 ImageLayoutTransition ImageLayoutTransition::ToStorageImageGeneralLayout(const IImageResource* image)
 {
-        return {
+        return
+        {
                 .oldLayout = image->GetLayout(),
                 .newLayout = VK_IMAGE_LAYOUT_GENERAL,
                 .srcAccessMask = image->GetAccessFlags(),

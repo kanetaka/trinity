@@ -25,9 +25,10 @@
 
 VKAPI_ATTR VkBool32 VKAPI_CALL
 VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
-                                        VkDebugUtilsMessageTypeFlagsEXT type,
-                                        const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
-                                        void *pUserData) {
+    VkDebugUtilsMessageTypeFlagsEXT type,
+    const VkDebugUtilsMessengerCallbackDataEXT *pCallbackData,
+    void* pUserData)
+{
     std::stringstream ss;
     ss << "[Validation Layer] " << pCallbackData->pMessage << std::endl;
 
@@ -39,12 +40,14 @@ VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     return VK_FALSE;
 }
 
-VulkanContext &VulkanContext::Get() {
+VulkanContext &VulkanContext::Get()
+{
     static VulkanContext instance;
     return instance;
 }
 
-void VulkanContext::Initialize(const char *app_name, ISurfaceProvider *surface_provider) {
+void VulkanContext::Initialize(const char *app_name, ISurfaceProvider *surface_provider)
+{
     surface_provider_ = surface_provider;
     CreateInstance(app_name);
 
@@ -56,7 +59,8 @@ void VulkanContext::Initialize(const char *app_name, ISurfaceProvider *surface_p
     CreateDescriptorPool();
 }
 
-void VulkanContext::Cleanup() {
+void VulkanContext::Cleanup()
+{
     // Wait for the device to be idle before proceeding with cleanup
     vkDeviceWaitIdle(vk_device_);
 
@@ -64,20 +68,24 @@ void VulkanContext::Cleanup() {
     vkDestroyCommandPool(vk_device_, command_pool_, nullptr);
     vkDestroyDescriptorPool(vk_device_, descriptor_pool_, nullptr);
 
-    if (debug_messenger_ != VK_NULL_HANDLE) {
+    if (debug_messenger_ != VK_NULL_HANDLE)
+    {
         auto func = VK_GET_INSTANCE_PROC_ADDR(vk_instance_, vkDestroyDebugUtilsMessengerEXT);
-        if (func != nullptr) {
+        if (func != nullptr)
+        {
             func(vk_instance_, debug_messenger_, nullptr);
         }
         debug_messenger_ = VK_NULL_HANDLE;
     }
 
-    if (swapchain_) {
+    if (swapchain_)
+    {
         swapchain_->Cleanup();
         swapchain_.reset();
     }
 
-    if (surface_ != VK_NULL_HANDLE) {
+    if (surface_ != VK_NULL_HANDLE)
+    {
         vkDestroySurfaceKHR(vk_instance_, surface_, nullptr);
         surface_ = VK_NULL_HANDLE;
     }
@@ -88,12 +96,15 @@ void VulkanContext::Cleanup() {
     vk_instance_ = VK_NULL_HANDLE;
 }
 
-void VulkanContext::RecreateSwapchain() {
-    if (swapchain_ == nullptr) {
+void VulkanContext::RecreateSwapchain()
+{
+    if (swapchain_ == nullptr)
+    {
         swapchain_ = std::make_unique<Swapchain>();
     }
 
-    if (surface_ == VK_NULL_HANDLE) {
+    if (surface_ == VK_NULL_HANDLE)
+    {
         CreateSurface();
     }
 
@@ -105,19 +116,23 @@ void VulkanContext::RecreateSwapchain() {
     CreateFrameContexts();
 }
 
-VkResult VulkanContext::AcquireNextImage() {
-    auto *frame = GetCurrentFrameContext();
+VkResult VulkanContext::AcquireNextImage()
+{
+    auto* frame = GetCurrentFrameContext();
     auto fence = frame->inflightFence;
     vkWaitForFences(vk_device_, 1, &fence, VK_TRUE, UINT64_MAX);
 
     auto result = swapchain_->AcquireNextImage();
-    if (result == VK_SUCCESS) {
+    if (result == VK_SUCCESS)
+    {
         vkResetFences(vk_device_, 1, &fence);
-    } else if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+    } else if (result == VK_ERROR_OUT_OF_DATE_KHR)
+    {
         // Handle window minimization
         auto width = surface_provider_->GetFramebufferWidth();
         auto height = surface_provider_->GetFramebufferHeight();
-        if (width > 0 && height > 0) {
+        if (width > 0 && height > 0)
+        {
             swapchain_->Recreate(width, height);
         }
     }
@@ -125,7 +140,8 @@ VkResult VulkanContext::AcquireNextImage() {
     return result;
 }
 
-void VulkanContext::SubmitPresent() {
+void VulkanContext::SubmitPresent()
+{
     auto &frame = frame_context_[GetCurrentFrameIndex()];
 
     VkPipelineStageFlags wait_stage_mask =
@@ -152,7 +168,8 @@ void VulkanContext::SubmitPresent() {
 }
 
 void VulkanContext::SubmitAndWait(
-        std::shared_ptr<CommandBuffer> command_buffer) {
+        std::shared_ptr<CommandBuffer> command_buffer)
+{
     auto command_buf = command_buffer->Get();
     VkSubmitInfo submit_info{};
     submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -160,7 +177,8 @@ void VulkanContext::SubmitAndWait(
     submit_info.pCommandBuffers = &command_buf;
 
     VkFence fence;
-    VkFenceCreateInfo create_info{
+    VkFenceCreateInfo create_info
+    {
             .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
     };
     vkCreateFence(vk_device_, &create_info, nullptr, &fence);
@@ -170,19 +188,22 @@ void VulkanContext::SubmitAndWait(
     vkDestroyFence(vk_device_, fence, nullptr);
 }
 
-VulkanContext::FrameContext *VulkanContext::GetCurrentFrameContext() {
+VulkanContext::FrameContext *VulkanContext::GetCurrentFrameContext()
+{
     return &frame_context_[current_frame_index_];
 }
 
-uint32_t VulkanContext::FindMemoryType(const VkMemoryRequirements &requirements,
-                                                                             VkMemoryPropertyFlags properties) const {
-    for (uint32_t i = 0; i < memory_properties_.memoryTypeCount; i++) {
+uint32_t VulkanContext::FindMemoryType(const VkMemoryRequirements &requirements, VkMemoryPropertyFlags properties) const
+{
+    for (uint32_t i = 0; i < memory_properties_.memoryTypeCount; i++)
+    {
         const bool is_type_compatible = (requirements.memoryTypeBits & (1 << i)) != 0;
         const bool has_desired_properties =
                 (memory_properties_.memoryTypes[i].propertyFlags & properties) ==
                 properties;
 
-        if (is_type_compatible && has_desired_properties) {
+        if (is_type_compatible && has_desired_properties)
+        {
             // Memory type matches properties and is included in memoryTypeBits
             return i;
         }
@@ -191,27 +212,32 @@ uint32_t VulkanContext::FindMemoryType(const VkMemoryRequirements &requirements,
     throw std::runtime_error("failed to find suitable memory type!");
 }
 
-uint32_t VulkanContext::MinUniformOffsetAlignment() const {
+uint32_t VulkanContext::MinUniformOffsetAlignment() const
+{
     const auto &limits = physical_device_properties_.limits;
     return limits.minUniformBufferOffsetAlignment;
 }
 
-uint32_t VulkanContext::MinStorageBufferOffsetAlignment() const {
+uint32_t VulkanContext::MinStorageBufferOffsetAlignment() const
+{
     const auto &limits = physical_device_properties_.limits;
     return limits.minStorageBufferOffsetAlignment;
     ;
 }
 
-uint32_t VulkanContext::NonCoherentAtomSize() const {
+uint32_t VulkanContext::NonCoherentAtomSize() const
+{
     const auto &limits = physical_device_properties_.limits;
     return limits.nonCoherentAtomSize;
 }
 
-void VulkanContext::SetDebugObjectName(void *object_handle, VkObjectType type,
-                                                                             const char *name) {
+void VulkanContext::SetDebugObjectName(void *object_handle, VkObjectType type, const char* name)
+{
 #if _DEBUG || DEBUG
-    if (pfn_set_debug_utils_object_name_ext_) {
-        VkDebugUtilsObjectNameInfoEXT name_info{
+    if (pfn_set_debug_utils_object_name_ext_)
+    {
+        VkDebugUtilsObjectNameInfoEXT name_info
+        {
                 .sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_OBJECT_NAME_INFO_EXT,
                 .objectType = type,
                 .objectHandle = reinterpret_cast<uint64_t>(object_handle),
@@ -222,7 +248,8 @@ void VulkanContext::SetDebugObjectName(void *object_handle, VkObjectType type,
 #endif
 }
 
-void VulkanContext::CreateInstance(const char *app_name) {
+void VulkanContext::CreateInstance(const char *app_name)
+{
     VkApplicationInfo app_info{};
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
     app_info.pApplicationName = app_name;
@@ -255,19 +282,22 @@ void VulkanContext::CreateInstance(const char *app_name) {
         throw std::runtime_error("failed to create instance");
 }
 
-void VulkanContext::CreateSurface() {
+void VulkanContext::CreateSurface()
+{
     surface_ = surface_provider_->CreateSurface(vk_instance_);
 
     // Check if the graphics queue family supports presentation to the surface
     VkBool32 present = false;
     vkGetPhysicalDeviceSurfaceSupportKHR(
             vk_physical_device_, graphics_queue_family_index_, surface_, &present);
-    if (present == VK_FALSE) {
+    if (present == VK_FALSE)
+    {
         throw std::runtime_error("not supported presentation");
     }
 }
 
-void VulkanContext::PickPhysicalDevice() {
+void VulkanContext::PickPhysicalDevice()
+{
     uint32_t count = 0;
     vkEnumeratePhysicalDevices(vk_instance_, &count, nullptr);
     std::vector<VkPhysicalDevice> devices(count);
@@ -275,11 +305,11 @@ void VulkanContext::PickPhysicalDevice() {
     vk_physical_device_ = devices[0];
 
     vkGetPhysicalDeviceMemoryProperties(vk_physical_device_, &memory_properties_);
-    vkGetPhysicalDeviceProperties(vk_physical_device_,
-                                                                &physical_device_properties_);
+    vkGetPhysicalDeviceProperties(vk_physical_device_, &physical_device_properties_);
 }
 
-void VulkanContext::CreateLogicalDevice() {
+void VulkanContext::CreateLogicalDevice()
+{
     // Find graphics queue family index
     uint32_t queue_count = 0;
     vkGetPhysicalDeviceQueueFamilyProperties(vk_physical_device_, &queue_count,
@@ -289,8 +319,10 @@ void VulkanContext::CreateLogicalDevice() {
                                                                                      queues.data());
 
     graphics_queue_family_index_ = ~0u;
-    for (uint32_t i = 0; const auto &props : queues) {
-        if (props.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+    for (uint32_t i = 0; const auto &props : queues)
+    {
+        if (props.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+        {
             graphics_queue_family_index_ = i;
             break;
         }
@@ -298,7 +330,8 @@ void VulkanContext::CreateLogicalDevice() {
     }
 
     BuildVkFeatures();
-    std::vector<const char *> device_extensions = {
+    std::vector<const char*> device_extensions =
+    {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME,
     };
 
@@ -332,7 +365,9 @@ void VulkanContext::CreateLogicalDevice() {
     auto result =
             vkCreateDevice(vk_physical_device_, &device_info, nullptr, &vk_device_);
     if (result != VK_SUCCESS)
+    {
         throw std::runtime_error("failed to create logical device");
+    }
 
     vkGetDeviceQueue(vk_device_, graphics_queue_family_index_, 0, &graphics_queue_);
 
@@ -341,15 +376,16 @@ void VulkanContext::CreateLogicalDevice() {
 #endif
 }
 
-void VulkanContext::CreateDebugMessenger() {
+void VulkanContext::CreateDebugMessenger()
+{
     VkDebugUtilsMessengerCreateInfoEXT create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
     create_info.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
-                                                             VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
-                                                             VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
     create_info.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
-                                                     VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
-                                                     VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT |
+        VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     create_info.pfnUserCallback = VulkanDebugCallback;
 
     auto vk_create_debug_utils_messenger =
@@ -358,7 +394,8 @@ void VulkanContext::CreateDebugMessenger() {
 
     if (vk_create_debug_utils_messenger &&
             vk_create_debug_utils_messenger(vk_instance_, &create_info, nullptr,
-                                                                    &debug_messenger_) != VK_SUCCESS) {
+                                                                    &debug_messenger_) != VK_SUCCESS)
+    {
         throw std::runtime_error("failed to set up debug messenger!");
     }
 
@@ -367,8 +404,10 @@ void VulkanContext::CreateDebugMessenger() {
                     vk_instance_, "vkSetDebugUtilsObjectNameEXT");
 }
 
-void VulkanContext::CreateCommandPool() {
-    VkCommandPoolCreateInfo command_pool_ci{
+void VulkanContext::CreateCommandPool()
+{
+    VkCommandPoolCreateInfo command_pool_ci
+    {
             .sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO,
     };
     command_pool_ci.queueFamilyIndex = graphics_queue_family_index_;
@@ -376,8 +415,10 @@ void VulkanContext::CreateCommandPool() {
     vkCreateCommandPool(vk_device_, &command_pool_ci, nullptr, &command_pool_);
 }
 
-void VulkanContext::CreateDescriptorPool() {
-    std::vector<VkDescriptorPoolSize> pool_sizes = {
+void VulkanContext::CreateDescriptorPool()
+{
+    std::vector<VkDescriptorPoolSize> pool_sizes =
+    {
             {.type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, .descriptorCount = 4096},
             {.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER,
              .descriptorCount = 4096},
@@ -387,7 +428,8 @@ void VulkanContext::CreateDescriptorPool() {
             {.type = VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, .descriptorCount = 4096},
     };
 
-    VkDescriptorPoolCreateInfo pool_info{
+    VkDescriptorPoolCreateInfo pool_info
+    {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO,
             .flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT,
             .maxSets = 4096,
@@ -395,51 +437,59 @@ void VulkanContext::CreateDescriptorPool() {
             .pPoolSizes = pool_sizes.data(),
     };
 
-    if (vkCreateDescriptorPool(vk_device_, &pool_info, nullptr,
-                                                         &descriptor_pool_) != VK_SUCCESS) {
+    if (vkCreateDescriptorPool(vk_device_, &pool_info, nullptr, &descriptor_pool_) != VK_SUCCESS)
+    {
         throw std::runtime_error("failed to create descriptor pool!");
     }
 }
 
-void VulkanContext::CreateFrameContexts() {
+void VulkanContext::CreateFrameContexts()
+{
     frame_context_.resize(MaxInflightFrames);
-    for (auto &frame : frame_context_) {
+    for (auto& frame : frame_context_)
+    {
         frame.commandBuffer = CreateCommandBuffer();
 
-        VkFenceCreateInfo fence_ci{
-                .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
-                .flags = VK_FENCE_CREATE_SIGNALED_BIT,
+        VkFenceCreateInfo fence_ci
+        {
+            .sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO,
+            .flags = VK_FENCE_CREATE_SIGNALED_BIT,
         };
         vkCreateFence(vk_device_, &fence_ci, nullptr, &frame.inflightFence);
     }
 }
 
-void VulkanContext::DestroyFrameContexts() {
-    for (auto &frame : frame_context_) {
+void VulkanContext::DestroyFrameContexts()
+{
+    for (auto &frame : frame_context_)
+    {
         vkDestroyFence(vk_device_, frame.inflightFence, nullptr);
     }
     frame_context_.clear();
 }
 
-void VulkanContext::AdvanceFrame() {
+void VulkanContext::AdvanceFrame()
+{
     current_frame_index_ = (current_frame_index_ + 1) % MaxInflightFrames;
 }
 
 // Helper template to simplify building the pNext chain for Vulkan structs
-template <typename T> void BuildVkExtensionChain(T &last) {
+template <typename T> void BuildVkExtensionChain(T &last)
+{
     last.pNext = nullptr;
 }
 template <typename T, typename U, typename... Rest>
-void BuildVkExtensionChain(T &current, U &next, Rest &...rest) {
+void BuildVkExtensionChain(T &current, U &next, Rest &...rest)
+{
     current.pNext = &next;
     BuildVkExtensionChain(next, rest...);
 }
-void VulkanContext::BuildVkFeatures() {
+void VulkanContext::BuildVkFeatures()
+{
     // Enable desired features after getting support info from the device.
     // Enabling unsupported features will cause errors during device creation.
 #if !defined(CHAPTER_COMPUTE_SHADER)
-    BuildVkExtensionChain(phys_dev_features_, vulkan11_features_,
-                                                vulkan12_features_, vulkan13_features_);
+    BuildVkExtensionChain(phys_dev_features_, vulkan11_features_, vulkan12_features_, vulkan13_features_);
     // Get support status
     vkGetPhysicalDeviceFeatures2(vk_physical_device_, &phys_dev_features_);
 
@@ -463,8 +513,10 @@ void VulkanContext::BuildVkFeatures() {
     phys_dev_features_.features.robustBufferAccess = VK_FALSE;
 }
 
-std::shared_ptr<CommandBuffer> VulkanContext::CreateCommandBuffer() {
-    VkCommandBufferAllocateInfo command_ai{
+std::shared_ptr<CommandBuffer> VulkanContext::CreateCommandBuffer()
+{
+    VkCommandBufferAllocateInfo command_ai
+    {
             .sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO,
             .commandPool = command_pool_,
             .level = VK_COMMAND_BUFFER_LEVEL_PRIMARY,
@@ -477,8 +529,10 @@ std::shared_ptr<CommandBuffer> VulkanContext::CreateCommandBuffer() {
 }
 
 VkDescriptorSet
-VulkanContext::AllocateDescriptorSet(VkDescriptorSetLayout layout) {
-    VkDescriptorSetAllocateInfo alloc_info{
+VulkanContext::AllocateDescriptorSet(VkDescriptorSetLayout layout)
+{
+    VkDescriptorSetAllocateInfo alloc_info
+    {
             .sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO,
             .descriptorPool = descriptor_pool_,
             .descriptorSetCount = 1,
@@ -487,13 +541,15 @@ VulkanContext::AllocateDescriptorSet(VkDescriptorSetLayout layout) {
 
     VkDescriptorSet descriptor_set;
     if (vkAllocateDescriptorSets(vk_device_, &alloc_info, &descriptor_set) !=
-            VK_SUCCESS) {
+            VK_SUCCESS)
+    {
         throw std::runtime_error("failed to allocate descriptor set!");
     }
 
     return descriptor_set;
 }
 
-void VulkanContext::FreeDescriptorSet(VkDescriptorSet descriptor_set) {
+void VulkanContext::FreeDescriptorSet(VkDescriptorSet descriptor_set)
+{
     vkFreeDescriptorSets(vk_device_, descriptor_pool_, 1, &descriptor_set);
 }

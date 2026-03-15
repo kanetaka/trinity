@@ -11,7 +11,8 @@
 class Entity;
 class Renderer;
 
-class GsApp : public ITrinityApp {
+class GsApp : public ITrinityApp
+{
 public:
     GsApp(const std::string &plyFile);
     virtual ~GsApp() override;

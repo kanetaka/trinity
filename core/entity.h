@@ -10,9 +10,11 @@
 class GsApp;
 class Component;
 
-class Entity {
+class Entity
+{
 public:
-    enum State {
+    enum State
+    {
         EActive,
         EPaused,
         EDead

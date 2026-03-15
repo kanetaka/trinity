@@ -4,7 +4,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 
-class Camera {
+class Camera
+{
 public:
     Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch);
 
@@ -32,5 +33,5 @@ public:
     float Zoom;
 
 private:
-    void updateCameraVectors();
+    void UpdateCameraVectors();
 };

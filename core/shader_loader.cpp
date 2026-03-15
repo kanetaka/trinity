@@ -8,7 +8,8 @@ namespace loader
     {
         // Read file in binary mode
         std::ifstream file(shaderSpvPath, std::ios::ate | std::ios::binary);
-        if (!file.is_open()) {
+        if (!file.is_open())
+        {
             throw std::runtime_error("failed to open shader file: " + shaderSpvPath.string());
         }
 
@@ -26,7 +27,8 @@ namespace loader
         VkDevice device = VulkanContext::Get().GetVkDevice();
         VkShaderModule shaderModule{};
         auto result = vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule);
-        if (result != VK_SUCCESS) {
+        if (result != VK_SUCCESS)
+        {
             throw std::runtime_error("failed to create shader module from: " + shaderSpvPath.string());
         }
         return shaderModule;

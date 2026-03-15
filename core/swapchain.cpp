@@ -2,7 +2,8 @@
 #include <stdexcept>
 #include <cassert>
 
-bool Swapchain::Recreate(uint32_t width, uint32_t height) {
+bool Swapchain::Recreate(uint32_t width, uint32_t height)
+{
         auto& vulkan_ctx = VulkanContext::Get();
         auto vk_physical_device = vulkan_ctx.GetVkPhysicalDevice();
         auto vk_device = vulkan_ctx.GetVkDevice();
@@ -11,7 +12,8 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height) {
         VkSurfaceCapabilitiesKHR caps;
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_physical_device, surface, &caps);
         VkExtent2D extent = caps.currentExtent;
-        if (extent.width == UINT32_MAX) {
+        if (extent.width == UINT32_MAX)
+        {
                 extent.width = width;
                 extent.height = height;
         }
@@ -24,12 +26,14 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height) {
         // Select surface format
         VkSurfaceFormatKHR format = formats[0];
         for (auto& surface_format : formats) {
-                if (surface_format.colorSpace != VK_COLORSPACE_SRGB_NONLINEAR_KHR) {
+                if (surface_format.colorSpace != VK_COLORSPACE_SRGB_NONLINEAR_KHR)
+                {
                         continue;
                 }
 
                 if (surface_format.format == VK_FORMAT_B8G8R8A8_UNORM ||
-                        surface_format.format == VK_FORMAT_R8G8B8A8_UNORM) {
+                        surface_format.format == VK_FORMAT_R8G8B8A8_UNORM)
+                {
                         format = surface_format;
                         break;
                 }
@@ -57,19 +61,23 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height) {
 
         VkSwapchainKHR swapchain{};
         if (auto res = vkCreateSwapchainKHR(vk_device, &info, nullptr, &swapchain); res != VK_SUCCESS)
-                throw std::runtime_error("failed to create swapchain");
-        if (swapchain_ != VK_NULL_HANDLE) {
-                // Destroy the old swapchain
-                vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
-                swapchain_ = VK_NULL_HANDLE;
-
-                for (auto& view : image_views_) {
-                        vkDestroyImageView(vk_device, view, nullptr);
-                }
-                image_views_.clear();
-
-                DestroyFrameContext();
+        {
+            throw std::runtime_error("failed to create swapchain");
         }
+		if (swapchain_ != VK_NULL_HANDLE)
+		{
+			// Destroy the old swapchain
+			vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
+			swapchain_ = VK_NULL_HANDLE;
+
+			for (auto& view : image_views_)
+			{
+				vkDestroyImageView(vk_device, view, nullptr);
+			}
+			image_views_.clear();
+
+			DestroyFrameContext();
+		}
 
         swapchain_ = swapchain;
         image_format_ = format;
@@ -79,26 +87,30 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height) {
         images_.resize(image_count);
         vkGetSwapchainImagesKHR(vk_device, swapchain_, &image_count, images_.data());
 
-        for (uint32_t i = 0; i < images_.size(); ++i) {
-                VkImageViewCreateInfo image_view_ci{
-                        .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-                        .image = images_[i],
-                        .viewType = VK_IMAGE_VIEW_TYPE_2D,
-                        .format = format.format,
-                        .components = {
-                                VK_COMPONENT_SWIZZLE_IDENTITY,
-                                VK_COMPONENT_SWIZZLE_IDENTITY,
-                                VK_COMPONENT_SWIZZLE_IDENTITY,
-                                VK_COMPONENT_SWIZZLE_IDENTITY,
-                        },
-                        .subresourceRange = {
-                                .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-                                .baseMipLevel = 0,
-                                .levelCount = 1,
-                                .baseArrayLayer = 0,
-                                .layerCount = 1,
-                        }
-                };
+        for (uint32_t i = 0; i < images_.size(); ++i)
+        {
+			VkImageViewCreateInfo image_view_ci
+			{
+					.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+					.image = images_[i],
+					.viewType = VK_IMAGE_VIEW_TYPE_2D,
+					.format = format.format,
+					.components =
+				    {
+					    VK_COMPONENT_SWIZZLE_IDENTITY,
+					    VK_COMPONENT_SWIZZLE_IDENTITY,
+						VK_COMPONENT_SWIZZLE_IDENTITY,
+						VK_COMPONENT_SWIZZLE_IDENTITY,
+					},
+					.subresourceRange =
+                    {
+						.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+						.baseMipLevel = 0,
+						.levelCount = 1,
+						.baseArrayLayer = 0,
+						.layerCount = 1,
+					}
+			};
                 VkImageView view;
                 vkCreateImageView(vk_device, &image_view_ci, nullptr, &view);
                 image_views_.push_back(view);
@@ -113,18 +125,21 @@ void Swapchain::Cleanup() {
         auto vk_device = vulkan_ctx.GetVkDevice();
         DestroyFrameContext();
 
-        for (auto& view : image_views_) {
-                vkDestroyImageView(vk_device, view, nullptr);
-        }
-        if (swapchain_) {
-                vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
-                swapchain_ = VK_NULL_HANDLE;
-        }
+		for (auto& view : image_views_)
+		{
+			vkDestroyImageView(vk_device, view, nullptr);
+		}
+		if (swapchain_)
+		{
+			vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
+			swapchain_ = VK_NULL_HANDLE;
+		}
         images_.clear();
         image_views_.clear();
 }
 
-VkResult Swapchain::AcquireNextImage() {
+VkResult Swapchain::AcquireNextImage()
+{
         auto& vulkan_ctx = VulkanContext::Get();
         auto vk_device = vulkan_ctx.GetVkDevice();
 
@@ -135,13 +150,15 @@ VkResult Swapchain::AcquireNextImage() {
 
         auto result = vkAcquireNextImageKHR(
             vk_device, swapchain_, UINT64_MAX, acquire_semaphore, VK_NULL_HANDLE, &current_index_);
-        if (result != VK_SUCCESS) {
+        if (result != VK_SUCCESS)
+        {
             present_semaphore_list_.push_back(acquire_semaphore);
             return result;
         }
 
         VkSemaphore old_semaphore = frames_[current_index_].presentComplete;
-        if (old_semaphore != VK_NULL_HANDLE) {
+        if (old_semaphore != VK_NULL_HANDLE)
+        {
             present_semaphore_list_.push_back(old_semaphore);
         }
         frames_[current_index_].presentComplete = acquire_semaphore;
@@ -149,7 +166,8 @@ VkResult Swapchain::AcquireNextImage() {
         return result;
 }
 
-VkResult Swapchain::QueuePresent(VkQueue queuePresent) {
+VkResult Swapchain::QueuePresent(VkQueue queuePresent)
+{
         VkPresentInfoKHR present_info{};
         present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         present_info.swapchainCount = 1;
@@ -164,21 +182,26 @@ VkResult Swapchain::QueuePresent(VkQueue queuePresent) {
         return result;
 }
 
-VkSemaphore Swapchain::GetPresentCompleteSemaphore() const {
+VkSemaphore Swapchain::GetPresentCompleteSemaphore() const
+{
     return frames_[current_index_].presentComplete;
 }
 
-VkSemaphore Swapchain::GetRenderCompleteSemaphore() const {
+VkSemaphore Swapchain::GetRenderCompleteSemaphore() const
+{
     return frames_[current_index_].renderComplete;
 }
 
-void Swapchain::CreateFrameContext() {
+void Swapchain::CreateFrameContext()
+{
     auto& vulkan_ctx = VulkanContext::Get();
     auto vk_device = vulkan_ctx.GetVkDevice();
     frames_.resize(images_.size());
     uint32_t index = 0;
-    for (auto& frame : frames_) {
-        VkSemaphoreCreateInfo sem_ci{
+    for (auto& frame : frames_)
+    {
+        VkSemaphoreCreateInfo sem_ci
+        {
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
         };
         vkCreateSemaphore(vk_device, &sem_ci, nullptr, &frame.renderComplete);
@@ -186,8 +209,10 @@ void Swapchain::CreateFrameContext() {
 
     uint32_t present_complete_semaphore_count = images_.size() + 1;
     present_semaphore_list_.reserve(present_complete_semaphore_count);
-    for (uint32_t i = 0; i < present_complete_semaphore_count; ++i) {
-        VkSemaphoreCreateInfo semaphore_ci{
+    for (uint32_t i = 0; i < present_complete_semaphore_count; ++i)
+    {
+        VkSemaphoreCreateInfo semaphore_ci
+        {
             .sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO,
         };
         VkSemaphore semaphore;
@@ -196,15 +221,18 @@ void Swapchain::CreateFrameContext() {
     }
 }
 
-void Swapchain::DestroyFrameContext() {
+void Swapchain::DestroyFrameContext()
+{
     auto& vulkan_ctx = VulkanContext::Get();
     auto vk_device = vulkan_ctx.GetVkDevice();
-    for (auto& frame : frames_) {
+    for (auto& frame : frames_)
+    {
         vkDestroySemaphore(vk_device, frame.presentComplete, nullptr);
         vkDestroySemaphore(vk_device, frame.renderComplete, nullptr);
     }
     frames_.clear();
-    for (auto& sem : present_semaphore_list_) {
+    for (auto& sem : present_semaphore_list_)
+    {
         vkDestroySemaphore(vk_device, sem, nullptr);
     }
     present_semaphore_list_.clear();

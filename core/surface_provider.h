@@ -4,7 +4,8 @@
 #endif
 #include <vulkan/vulkan.h>
 
-class ISurfaceProvider {
+class ISurfaceProvider
+{
 public:
     virtual ~ISurfaceProvider() = default;
     virtual VkSurfaceKHR CreateSurface(VkInstance instance) = 0;

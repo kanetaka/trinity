@@ -8,11 +8,12 @@
 #include <glm/glm.hpp>
 
 class GsApp;
-class SplatComponent;
+class Component;
 class UniformBuffer;
 class StorageBuffer;
 
-class Renderer {
+class Renderer
+{
 public:
     Renderer(GsApp* game);
     ~Renderer();
@@ -22,8 +23,8 @@ public:
 
     void Draw();
 
-    void AddSplatComponent(SplatComponent* splat_comp);
-    void RemoveSplatComponent(SplatComponent* splat_comp);
+    void AddComponent(Component* component);
+    void RemoveComponent(Component* component);
 
     void SetViewMatrix(const glm::mat4& view) { view_ = view; }
     void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
@@ -45,7 +46,7 @@ private:
 
     GsApp* game_;
 
-    std::vector<SplatComponent*> splat_components_;
+    std::vector<Component*> components_;
 
     VkDescriptorSetLayout descriptor_set_layout_ = VK_NULL_HANDLE;
     VkDescriptorPool descriptor_pool_ = VK_NULL_HANDLE;

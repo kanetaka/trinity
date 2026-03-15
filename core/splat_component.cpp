@@ -17,26 +17,32 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 SplatComponent::SplatComponent(Entity* owner, const std::string& ply_file)
-        : Component(owner), ply_file_(ply_file) {
+        : Component(owner), ply_file_(ply_file)
+{
     LoadSplats();
     CreateBuffers();
     CreateDescriptorSets();
     
-    owner_->GetGame()->GetRenderer()->AddSplatComponent(this);
+    owner_->GetGame()->GetRenderer()->AddComponent(this);
 }
 
-SplatComponent::~SplatComponent() {
-    if (owner_ && owner_->GetGame() && owner_->GetGame()->GetRenderer()) {
-        owner_->GetGame()->GetRenderer()->RemoveSplatComponent(this);
+SplatComponent::~SplatComponent()
+{
+    if (owner_ && owner_->GetGame() && owner_->GetGame()->GetRenderer())
+    {
+        owner_->GetGame()->GetRenderer()->RemoveComponent(this);
     }
 }
 
-void SplatComponent::Update(float delta_time) {
+void SplatComponent::Update(float delta_time)
+{
     SortSplats();
 }
 
-void SplatComponent::Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipelineLayout pipeline_layout) {
-    if (splat_indices_.empty() || descriptor_set_ == VK_NULL_HANDLE) {
+void SplatComponent::Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipelineLayout pipeline_layout)
+{
+    if (splat_indices_.empty() || descriptor_set_ == VK_NULL_HANDLE)
+    {
         return;
     }
 
@@ -47,16 +53,19 @@ void SplatComponent::Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipe
     vkCmdDraw(*command_buffer, 4, static_cast<uint32_t>(splat_indices_.size()), 0, 0);
 }
 
-void SplatComponent::LoadSplats() {
+void SplatComponent::LoadSplats()
+{
     std::vector<gs::FullSplat> splats;
-    if (!gs::PlyLoader::LoadPly(ply_file_, splats)) {
+    if (!gs::PlyLoader::LoadPly(ply_file_, splats))
+    {
         return;
     }
 
     gpu_splats_.reserve(splats.size());
     splat_indices_.reserve(splats.size());
 
-    for (uint32_t i = 0; i < splats.size(); ++i) {
+    for (uint32_t i = 0; i < splats.size(); ++i)
+    {
         const auto& s = splats[i];
         gs::GPUSplat gpu_splat;
         gpu_splat.position_opacity = glm::vec4(s.position, s.opacity);
@@ -69,7 +78,8 @@ void SplatComponent::LoadSplats() {
     }
 }
 
-void SplatComponent::CreateBuffers() {
+void SplatComponent::CreateBuffers()
+{
     if (gpu_splats_.empty()) return;
 
     VkDeviceSize splat_size = gpu_splats_.size() * sizeof(gs::GPUSplat);
@@ -83,39 +93,46 @@ void SplatComponent::CreateBuffers() {
     index_buffer_ = StorageBuffer::Create(index_size, StorageBuffer::AccessMode::CPUAccessible);
 }
 
-void SplatComponent::CreateDescriptorSets() {
+void SplatComponent::CreateDescriptorSets()
+{
     auto renderer = owner_->GetGame()->GetRenderer();
     descriptor_set_ = renderer->AllocateDescriptorSet();
-    if (descriptor_set_ != VK_NULL_HANDLE) {
+    if (descriptor_set_ != VK_NULL_HANDLE)
+    {
         renderer->UpdateSplatDescriptorSet(descriptor_set_, splat_buffer_, index_buffer_);
     }
 }
 
-void SplatComponent::SortSplats() {
+void SplatComponent::SortSplats()
+{
     if (splat_indices_.empty()) return;
 
     // Get view matrix from GsApp/Renderer
     glm::mat4 view = owner_->GetGame()->GetCamera().GetViewMatrix();
     
     // Simple CPU sort (as in original GsApp)
-    for (size_t i = 0; i < splat_indices_.size(); ++i) {
+    for (size_t i = 0; i < splat_indices_.size(); ++i)
+    {
         uint32_t initial_idx = splat_indices_[i].index;
         const auto& pos = gpu_splats_[initial_idx].position_opacity;
         glm::vec4 view_pos = view * glm::vec4(pos.x, pos.y, pos.z, 1.0f);
         splat_indices_[i].depth = view_pos.z;
     }
 
-    std::sort(std::execution::par_unseq, splat_indices_.begin(),
-                        splat_indices_.end(),
-                        [](const gs::SplatSortEntry& a, const gs::SplatSortEntry& b) {
-                            return a.depth < b.depth;
-                        });
+	std::sort(std::execution::par_unseq, splat_indices_.begin(),
+		splat_indices_.end(),
+		[](const gs::SplatSortEntry& a, const gs::SplatSortEntry& b)
+		{
+			return a.depth < b.depth;
+		});
 
     // Upload indices to SSBO
-    if (index_buffer_) {
+    if (index_buffer_)
+    {
         void* data = index_buffer_->Map();
         uint32_t* mapped_uints = reinterpret_cast<uint32_t*>(data);
-        for (size_t i = 0; i < splat_indices_.size(); ++i) {
+        for (size_t i = 0; i < splat_indices_.size(); ++i)
+        {
             mapped_uints[i] = splat_indices_[i].index;
         }
         index_buffer_->Unmap();

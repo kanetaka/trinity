@@ -19,18 +19,21 @@ class Component;
 
 Entity::Entity(GsApp* game)
         : state_(EActive), position_(0.0f, 0.0f, 0.0f), rotation_(glm::identity<glm::quat>()),
-            scale_(1.0f), recompute_world_transform_(true), game_(game) {
+            scale_(1.0f), recompute_world_transform_(true), game_(game)
+{
     // game_->AddEntity(this); // This should be called by GsApp or similar
 }
 
-Entity::~Entity() {
+Entity::~Entity()
+{
     // game_->RemoveEntity(this);
     while (!components_.empty()) {
         delete components_.back();
     }
 }
 
-void Entity::Update(float delta_time) {
+void Entity::Update(float delta_time)
+{
     if (state_ == EActive) {
         ComputeWorldTransform();
         UpdateComponents(delta_time);
@@ -39,17 +42,21 @@ void Entity::Update(float delta_time) {
     }
 }
 
-void Entity::UpdateComponents(float delta_time) {
-    for (auto comp : components_) {
+void Entity::UpdateComponents(float delta_time)
+{
+    for (auto comp : components_)
+    {
         comp->Update(delta_time);
     }
 }
 
 void Entity::UpdateEntity(float delta_time) {}
 
-void Entity::ProcessInput(const uint8_t* key_state) {
+void Entity::ProcessInput(const uint8_t* key_state)
+{
     if (state_ == EActive) {
-        for (auto comp : components_) {
+        for (auto comp : components_)
+        {
             comp->ProcessInput(key_state);
         }
         EntityInput(key_state);
@@ -58,8 +65,10 @@ void Entity::ProcessInput(const uint8_t* key_state) {
 
 void Entity::EntityInput(const uint8_t* key_state) {}
 
-void Entity::ComputeWorldTransform() {
-    if (recompute_world_transform_) {
+void Entity::ComputeWorldTransform()
+{
+    if (recompute_world_transform_)
+    {
         recompute_world_transform_ = false;
         // Scale, then rotate, then translate
         world_transform_ = glm::translate(glm::mat4(1.0f), position_);
@@ -67,27 +76,33 @@ void Entity::ComputeWorldTransform() {
         world_transform_ = glm::scale(world_transform_, glm::vec3(scale_));
 
         // Inform components world transform updated
-        for (auto comp : components_) {
+        for (auto comp : components_)
+        {
             comp->OnUpdateWorldTransform();
         }
     }
 }
 
-void Entity::AddComponent(Component* component) {
+void Entity::AddComponent(Component* component)
+{
     // Find the insertion point before the first element with a higher update order
     int my_order = component->GetUpdateOrder();
     auto iter = components_.begin();
-    for (; iter != components_.end(); ++iter) {
-        if (my_order < (*iter)->GetUpdateOrder()) {
+    for (; iter != components_.end(); ++iter)
+    {
+        if (my_order < (*iter)->GetUpdateOrder())
+        {
             break;
         }
     }
     components_.insert(iter, component);
 }
 
-void Entity::RemoveComponent(Component* component) {
+void Entity::RemoveComponent(Component* component)
+{
     auto iter = std::find(components_.begin(), components_.end(), component);
-    if (iter != components_.end()) {
+    if (iter != components_.end())
+    {
         components_.erase(iter);
     }
 }

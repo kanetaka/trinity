@@ -8,7 +8,8 @@ namespace gs {
 
 // Structured data for a single 3D Gaussian Splat
 // This layout matches exactly what will be sent to the GPU Storage Buffer
-struct Splat {
+struct Splat
+{
     glm::vec3 position;
     float scale_x;
 
@@ -30,7 +31,8 @@ struct Splat {
 
 // Simplified splat data to upload to GPU
 // We pre-calculate or restructure data to be optimal for GPU access
-struct GPUSplat {
+struct GPUSplat
+{
     glm::vec4 position_opacity; // xyz = position, w = opacity
     glm::vec4 rot_scale_0;    // xyz = rotation (xyz), w = scale_x (or we can just
                                                         // use quat)
@@ -43,7 +45,8 @@ struct GPUSplat {
 };
 
 // Full features splat for CPU side parsing
-struct FullSplat {
+struct FullSplat
+{
     glm::vec3 position;
     glm::vec3 normal;
     float sh_dc[3];
@@ -54,7 +57,8 @@ struct FullSplat {
 };
 
 // Simple structure for sorting
-struct SplatSortEntry {
+struct SplatSortEntry
+{
     uint32_t index;
     float depth;
 };
