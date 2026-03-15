@@ -16,12 +16,12 @@
 #include <execution>
 #include <glm/gtc/matrix_transform.hpp>
 
-SplatComponent::SplatComponent(Entity* owner, const std::string& ply_file)
+SplatComponent::SplatComponent(Entity* owner, const std::string& ply_file, Renderer* renderer)
         : Component(owner), ply_file_(ply_file)
 {
     LoadSplats();
     CreateBuffers();
-    CreateDescriptorSets();
+    CreateDescriptorSets(renderer);
 }
 
 SplatComponent::~SplatComponent()
@@ -30,7 +30,11 @@ SplatComponent::~SplatComponent()
 
 void SplatComponent::Update(float delta_time)
 {
-    SortSplats();
+}
+
+void SplatComponent::UpdateWithCamera(float delta_time, const Camera& camera)
+{
+    SortSplats(camera.GetViewMatrix());
 }
 
 void SplatComponent::Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipelineLayout pipeline_layout)
@@ -87,9 +91,9 @@ void SplatComponent::CreateBuffers()
     index_buffer_ = StorageBuffer::Create(index_size, StorageBuffer::AccessMode::CPUAccessible);
 }
 
-void SplatComponent::CreateDescriptorSets()
+void SplatComponent::CreateDescriptorSets(Renderer* renderer)
 {
-    auto renderer = owner_->GetApplication()->GetRenderer();
+    if (!renderer) return;
     descriptor_set_ = renderer->AllocateDescriptorSet();
     if (descriptor_set_ != VK_NULL_HANDLE)
     {
@@ -97,12 +101,9 @@ void SplatComponent::CreateDescriptorSets()
     }
 }
 
-void SplatComponent::SortSplats()
+void SplatComponent::SortSplats(const glm::mat4& view)
 {
     if (splat_indices_.empty()) return;
-
-    // Get view matrix from Application/Renderer
-    glm::mat4 view = owner_->GetApplication()->GetCamera().GetViewMatrix();
     
     // Simple CPU sort (as in original Application)
     for (size_t i = 0; i < splat_indices_.size(); ++i)

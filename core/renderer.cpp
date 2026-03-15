@@ -118,16 +118,17 @@ void Renderer::Draw(Entity* root)
 
 void Renderer::DrawEntity(Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer)
 {
-    if (entity->GetState() != Entity::EActive) return;
-
     for (auto comp : entity->GetComponents())
     {
         comp->Draw(command_buffer, pipeline_layout_);
     }
 
-    for (auto child : entity->GetChildren())
+    for (auto child_id : entity->GetChildren())
     {
-        DrawEntity(child, command_buffer);
+        if (auto* child = app_->GetEntity(child_id))
+        {
+            DrawEntity(child, command_buffer);
+        }
     }
 }
 

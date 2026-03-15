@@ -1,97 +1,143 @@
-#ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-#endif
-
 #include "entity.h"
 #include "component.h"
-#include "application.h"
-#include "core/renderer.h"
+#include "core/ecs/components.h"
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <vector>
-#include <cstdint>
 
-// Forward declarations
-class Application;
-class Component;
-
-Entity::Entity(Application* app)
-        : state_(EActive), position_(0.0f, 0.0f, 0.0f), rotation_(glm::identity<glm::quat>()),
-            scale_(1.0f), recompute_world_transform_(true), app_(app)
+Entity::Entity(ecs::Registry& registry, ecs::EntityId id)
+    : registry_(registry), id_(id)
 {
-    // game_->AddEntity(this); // This should be called by GsApp or similar
+    // Initialize components if they don't exist
+    if (!registry_.HasComponent<ecs::TransformComponent>(id_)) {
+        registry_.AddComponent<ecs::TransformComponent>(id_);
+    }
+    if (!registry_.HasComponent<ecs::HierarchyComponent>(id_)) {
+        registry_.AddComponent<ecs::HierarchyComponent>(id_);
+    }
 }
 
 Entity::~Entity()
 {
-    // Remove from parent
-    if (parent_)
-    {
-        parent_->RemoveChild(this);
+    for (auto comp : components_) {
+        delete comp;
     }
+    registry_.Destroy(id_);
+}
 
-    // Delete children
-    for (auto child : children_)
-    {
-        delete child;
-    }
-    children_.clear();
-
-    while (!components_.empty()) {
-        delete components_.back();
+void Entity::AddChild(ecs::EntityId child_id)
+{
+    auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
+    auto* child_hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(child_id);
+    
+    if (hierarchy && child_hierarchy) {
+        child_hierarchy->parent = id_;
+        hierarchy->children.push_back(child_id);
     }
 }
 
-void Entity::AddChild(Entity* child)
+void Entity::RemoveChild(ecs::EntityId child_id)
 {
-    child->SetParent(this);
-    children_.push_back(child);
-}
-
-void Entity::RemoveChild(Entity* child)
-{
-    auto iter = std::find(children_.begin(), children_.end(), child);
-    if (iter != children_.end())
-    {
-        (*iter)->parent_ = nullptr;
-        children_.erase(iter);
-    }
-}
-
-void Entity::SetParent(Entity* parent)
-{
-    if (parent_ == parent) return;
-
-    if (parent_)
-    {
-        // Manual removal to avoid recursion if called from parent
-        auto iter = std::find(parent_->children_.begin(), parent_->children_.end(), this);
-        if (iter != parent_->children_.end())
-        {
-            parent_->children_.erase(iter);
+    auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
+    if (hierarchy) {
+        auto it = std::find(hierarchy->children.begin(), hierarchy->children.end(), child_id);
+        if (it != hierarchy->children.end()) {
+            hierarchy->children.erase(it);
         }
     }
+}
 
-    parent_ = parent;
-    recompute_world_transform_ = true;
+void Entity::SetParent(ecs::EntityId parent_id)
+{
+    auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
+    if (hierarchy) {
+        hierarchy->parent = parent_id;
+    }
+}
+
+ecs::EntityId Entity::GetParent()
+{
+    auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
+    if (hierarchy) {
+        return hierarchy->parent;
+    }
+    return ecs::NullEntity;
+}
+
+const std::vector<ecs::EntityId>& Entity::GetChildren() const
+{
+    static const std::vector<ecs::EntityId> empty;
+    auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
+    if (hierarchy) {
+        return hierarchy->children;
+    }
+    return empty;
+}
+
+const glm::vec3& Entity::GetPosition() const {
+    return registry_.GetComponent<ecs::TransformComponent>(id_)->position;
+}
+
+void Entity::SetPosition(const glm::vec3& pos) {
+    auto* transform = registry_.GetComponent<ecs::TransformComponent>(id_);
+    transform->position = pos;
+    transform->recompute = true;
+}
+
+float Entity::GetScale() const {
+    return registry_.GetComponent<ecs::TransformComponent>(id_)->scale;
+}
+
+void Entity::SetScale(float scale) {
+    auto* transform = registry_.GetComponent<ecs::TransformComponent>(id_);
+    transform->scale = scale;
+    transform->recompute = true;
+}
+
+const glm::quat& Entity::GetRotation() const {
+    return registry_.GetComponent<ecs::TransformComponent>(id_)->rotation;
+}
+
+void Entity::SetRotation(const glm::quat& rotation) {
+    auto* transform = registry_.GetComponent<ecs::TransformComponent>(id_);
+    transform->rotation = rotation;
+    transform->recompute = true;
+}
+
+void Entity::ComputeWorldTransform() {
+    // This is now handled by TransformSystem
+}
+
+const glm::mat4& Entity::GetWorldTransform() const {
+    return registry_.GetComponent<ecs::TransformComponent>(id_)->world_transform;
+}
+
+glm::vec3 Entity::GetForward() const {
+    return GetRotation() * glm::vec3(1.0f, 0.0f, 0.0f);
+}
+
+void Entity::AddComponent(Component* component)
+{
+    components_.push_back(component);
+}
+
+void Entity::RemoveComponent(Component* component)
+{
+    auto it = std::find(components_.begin(), components_.end(), component);
+    if (it != components_.end()) {
+        components_.erase(it);
+    }
 }
 
 void Entity::Update(float delta_time)
 {
-    if (state_ == EActive) {
-        ComputeWorldTransform();
-        UpdateComponents(delta_time);
-        UpdateEntity(delta_time);
-        ComputeWorldTransform();
-
-        // Recursively update children
-        for (auto child : children_)
-        {
-            child->Update(delta_time);
-        }
-    }
+    UpdateComponents(delta_time);
+    UpdateEntity(delta_time);
+    
+    // Child update should be handled by the application or a system, 
+    // but for now keeping it recursive via ID lookup if needed.
+    // However, simplest is to let Application::UpdateEntities handle it if it iterates all.
 }
 
 void Entity::UpdateComponents(float delta_time)
@@ -106,66 +152,11 @@ void Entity::UpdateEntity(float delta_time) {}
 
 void Entity::ProcessInput(const uint8_t* key_state)
 {
-    if (state_ == EActive) {
-        for (auto comp : components_)
-        {
-            comp->ProcessInput(key_state);
-        }
-        EntityInput(key_state);
+    for (auto comp : components_)
+    {
+        comp->ProcessInput(key_state);
     }
+    EntityInput(key_state);
 }
 
 void Entity::EntityInput(const uint8_t* key_state) {}
-
-void Entity::ComputeWorldTransform()
-{
-    if (recompute_world_transform_)
-    {
-        recompute_world_transform_ = false;
-        // Scale, then rotate, then translate
-        world_transform_ = glm::translate(glm::mat4(1.0f), position_);
-        world_transform_ *= glm::mat4_cast(rotation_);
-        world_transform_ = glm::scale(world_transform_, glm::vec3(scale_));
-
-        if (parent_)
-        {
-            world_transform_ = parent_->GetWorldTransform() * world_transform_;
-        }
-
-        // Inform components world transform updated
-        for (auto comp : components_)
-        {
-            comp->OnUpdateWorldTransform();
-        }
-
-        // Children need to recompute as well
-        for (auto child : children_)
-        {
-            child->recompute_world_transform_ = true;
-        }
-    }
-}
-
-void Entity::AddComponent(Component* component)
-{
-    // Find the insertion point before the first element with a higher update order
-    int my_order = component->GetUpdateOrder();
-    auto iter = components_.begin();
-    for (; iter != components_.end(); ++iter)
-    {
-        if (my_order < (*iter)->GetUpdateOrder())
-        {
-            break;
-        }
-    }
-    components_.insert(iter, component);
-}
-
-void Entity::RemoveComponent(Component* component)
-{
-    auto iter = std::find(components_.begin(), components_.end(), component);
-    if (iter != components_.end())
-    {
-        components_.erase(iter);
-    }
-}

@@ -8,8 +8,10 @@
 #include "common/trinity_app.h"
 #include "core/camera.h"
 
+#include <unordered_map>
 class Entity;
 class Renderer;
+namespace ecs { class Registry; using EntityId = uint32_t; }
 
 class Application : public ITrinityApp
 {
@@ -25,6 +27,15 @@ public:
 
     Renderer* GetRenderer() { return renderer_.get(); }
     Camera& GetCamera() { return camera_; }
+    ecs::Registry& GetRegistry() { return *registry_; }
+
+    void RegisterEntity(ecs::EntityId id, Entity* entity) { entity_map_[id] = entity; }
+    void UnregisterEntity(ecs::EntityId id) { entity_map_.erase(id); }
+    Entity* GetEntity(ecs::EntityId id) { 
+        auto it = entity_map_.find(id);
+        return it != entity_map_.end() ? it->second : nullptr;
+    }
+
 
 #if defined(__ANDROID__)
     void OnSurfaceChanged() override;
@@ -40,7 +51,9 @@ private:
     Camera camera_;
 
     std::unique_ptr<Renderer> renderer_;
+    std::unique_ptr<ecs::Registry> registry_;
     std::unique_ptr<Entity> root_entity_;
+    std::unordered_map<ecs::EntityId, Entity*> entity_map_;
 
     bool updating_entities_ = false;
 

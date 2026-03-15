@@ -7,27 +7,24 @@
 #include <glm/gtc/quaternion.hpp>
 #include <cstdint>
 
+#include "core/ecs/registry.h"
+
 class Application;
 class Component;
 
 class Entity
 {
 public:
-    enum State
-    {
-        EActive,
-        EPaused,
-        EDead
-    };
-
-    Entity(Application* app);
+    Entity(ecs::Registry& registry, ecs::EntityId id);
     virtual ~Entity();
 
-    void AddChild(Entity* child);
-    void RemoveChild(Entity* child);
-    void SetParent(Entity* parent);
-    Entity* GetParent() { return parent_; }
-    const std::vector<Entity*>& GetChildren() const { return children_; }
+    ecs::EntityId GetId() const { return id_; }
+
+    void AddChild(ecs::EntityId child_id);
+    void RemoveChild(ecs::EntityId child_id);
+    void SetParent(ecs::EntityId parent_id);
+    ecs::EntityId GetParent();
+    const std::vector<ecs::EntityId>& GetChildren() const;
 
     void Update(float delta_time);
     void UpdateComponents(float delta_time);
@@ -36,38 +33,26 @@ public:
     void ProcessInput(const uint8_t* key_state);
     virtual void EntityInput(const uint8_t* key_state);
 
-    const glm::vec3& GetPosition() const { return position_; }
-    void SetPosition(const glm::vec3& pos) { position_ = pos; recompute_world_transform_ = true; }
-    float GetScale() const { return scale_; }
-    void SetScale(float scale) { scale_ = scale; recompute_world_transform_ = true; }
-    const glm::quat& GetRotation() const { return rotation_; }
-    void SetRotation(const glm::quat& rotation) { rotation_ = rotation; recompute_world_transform_ = true; }
+    const glm::vec3& GetPosition() const;
+    void SetPosition(const glm::vec3& pos);
+    float GetScale() const;
+    void SetScale(float scale);
+    const glm::quat& GetRotation() const;
+    void SetRotation(const glm::quat& rotation);
 
     void ComputeWorldTransform();
-    const glm::mat4& GetWorldTransform() const { return world_transform_; }
+    const glm::mat4& GetWorldTransform() const;
 
-    glm::vec3 GetForward() const { return rotation_ * glm::vec3(1.0f, 0.0f, 0.0f); }
+    glm::vec3 GetForward() const;
 
-    State GetState() const { return state_; }
-    void SetState(State state) { state_ = state; }
-
-    Application* GetApplication() { return app_; }
+    ecs::Registry& GetRegistry() { return registry_; }
 
     void AddComponent(Component* component);
     void RemoveComponent(Component* component);
     const std::vector<Component*>& GetComponents() const { return components_; }
 
 private:
-    State state_;
-
-    glm::mat4 world_transform_;
-    glm::vec3 position_;
-    glm::quat rotation_;
-    float scale_;
-    bool recompute_world_transform_;
-
+    ecs::EntityId id_;
     std::vector<Component*> components_;
-    Application* app_;
-    Entity* parent_ = nullptr;
-    std::vector<Entity*> children_;
+    ecs::Registry& registry_;
 };
