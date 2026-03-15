@@ -11,11 +11,11 @@
 class Entity;
 class Renderer;
 
-class GsApp : public ITrinityApp
+class Application : public ITrinityApp
 {
 public:
-    GsApp(const std::string &plyFile);
-    virtual ~GsApp() override;
+    Application(const std::string &plyFile);
+    virtual ~Application() override;
 
     void OnInitialize() override;
     void OnDrawFrame() override;

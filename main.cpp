@@ -19,11 +19,11 @@
 
 #include "glm/glm.hpp"
 
-#include "gs_app.h"
+#include "application.h"
 
 namespace fs = std::filesystem;
 
-int RunGame()
+int RunApplication()
 {
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
@@ -46,37 +46,37 @@ int RunGame()
 
         Sdl3SurfaceProvider surface_provider(window);
 
-        auto &vulkan_ctx = VulkanContext::Get();
+        auto& vulkan_ctx = VulkanContext::Get();
 
-        vulkan_ctx.GetWindowSystemExtensions = [=](auto &extension_list)
-            {
-            uint32_t ext_count = 0;
-            char const *const *extensions =
-                    SDL_Vulkan_GetInstanceExtensions(&ext_count);
-            if (ext_count > 0 && extensions != nullptr)
-            {
-                size_t current_size = extension_list.size();
-                extension_list.resize(current_size + ext_count);
-                for (uint32_t i = 0; i < ext_count; ++i)
-                {
-                    extension_list[current_size + i] = extensions[i];
-                }
-            }
-        };
+		vulkan_ctx.GetWindowSystemExtensions = [=](auto& extension_list)
+			{
+				uint32_t ext_count = 0;
+				char const* const* extensions =
+					SDL_Vulkan_GetInstanceExtensions(&ext_count);
+				if (ext_count > 0 && extensions != nullptr)
+				{
+					size_t current_size = extension_list.size();
+					extension_list.resize(current_size + ext_count);
+					for (uint32_t i = 0; i < ext_count; ++i)
+					{
+						extension_list[current_size + i] = extensions[i];
+					}
+				}
+			};
 
         vulkan_ctx.Initialize("Trinity", &surface_provider);
         vulkan_ctx.RecreateSwapchain();
 
-        GsApp the_app{GetAssetRootPath().string() + "/models/gs/sample.ply"};
-        the_app.OnInitialize();
+        Application app{GetAssetRootPath().string() + "/models/gs/sample.ply"};
+        app.OnInitialize();
 
         bool is_running = true;
         while (is_running)
         {
             SDL_Event event;
-            const Uint8 *state = (const Uint8 *)SDL_GetKeyboardState(nullptr);
+            const Uint8* state = (const Uint8*)SDL_GetKeyboardState(nullptr);
             // Rough delta time for now
-            the_app.ProcessInput(state, 0.016f);
+            app.ProcessInput(state, 0.016f);
 
             while (SDL_PollEvent(&event))
             {
@@ -88,15 +88,15 @@ int RunGame()
                 {
                     if (event.motion.state & SDL_BUTTON_LMASK)
                     {
-                        the_app.ProcessMouseMotion(event.motion.xrel, event.motion.yrel);
+                        app.ProcessMouseMotion(event.motion.xrel, event.motion.yrel);
                     }
                 }
             }
 
-            the_app.OnDrawFrame();
+            app.OnDrawFrame();
         }
         // cleanup
-        the_app.OnCleanup();
+        app.OnCleanup();
         vulkan_ctx.Cleanup();
 
     } catch (const std::exception &e)
@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     fs::path asset_dir = exe_dir / "../../../assets";
     SetAssetRootPath(asset_dir);
 
-    return RunGame();
+    return RunApplication();
 }
 #elif defined(__linux__)
 int main(int argc, char *argv[])
@@ -145,8 +145,8 @@ int main(int argc, char *argv[])
     fs::path asset_dir = exe_dir / "../assets";
     SetAssetRootPath(asset_dir);
 
-    return RunGame();
+    return RunApplication();
 }
 #else
-int main(int argc, char *argv[]) { return RunGame(); }
+int main(int argc, char *argv[]) { return RunApplication(); }
 #endif

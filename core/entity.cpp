@@ -4,7 +4,7 @@
 
 #include "entity.h"
 #include "component.h"
-#include "gs_app.h"
+#include "application.h"
 #include "core/renderer.h"
 #include <algorithm>
 #include <glm/glm.hpp>
@@ -14,12 +14,12 @@
 #include <cstdint>
 
 // Forward declarations
-class GsApp;
+class Application;
 class Component;
 
-Entity::Entity(GsApp* game)
+Entity::Entity(Application* app)
         : state_(EActive), position_(0.0f, 0.0f, 0.0f), rotation_(glm::identity<glm::quat>()),
-            scale_(1.0f), recompute_world_transform_(true), game_(game)
+            scale_(1.0f), recompute_world_transform_(true), app_(app)
 {
     // game_->AddEntity(this); // This should be called by GsApp or similar
 }

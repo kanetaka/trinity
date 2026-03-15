@@ -1,7 +1,7 @@
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
-#include "gs_app.h"
+#include "application.h"
 #include "core/entity.h"
 #include "core/renderer.h"
 #include "core/splat_component.h"
@@ -12,17 +12,17 @@
 #include <algorithm>
 #include <chrono>
 
-GsApp::GsApp(const std::string &plyFile)
+Application::Application(const std::string &plyFile)
         : ply_file_(plyFile), camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
             updating_entities_(false)
 {
 }
 
-GsApp::~GsApp()
+Application::~Application()
 {
 }
 
-void GsApp::OnInitialize()
+void Application::OnInitialize()
 {
     renderer_ = std::make_unique<Renderer>(this);
     auto extent = VulkanContext::Get().GetSwapchain()->GetExtent();
@@ -34,7 +34,7 @@ void GsApp::OnInitialize()
     new SplatComponent(splat_entity, ply_file_);
 }
 
-void GsApp::OnCleanup()
+void Application::OnCleanup()
 {
     // Delete all entities first, as components may refer to renderer
     while (!entities_.empty())
@@ -45,7 +45,7 @@ void GsApp::OnCleanup()
     while (!pending_entities_.empty())
     {
         delete pending_entities_.back();
-        pending_entities_.pop_back();
+pending_entities_.pop_back();
     }
 
     if (renderer_)
@@ -55,7 +55,7 @@ void GsApp::OnCleanup()
     }
 }
 
-void GsApp::OnDrawFrame()
+void Application::OnDrawFrame()
 {
     static auto lastTime = std::chrono::high_resolution_clock::now();
     auto currentTime = std::chrono::high_resolution_clock::now();
@@ -72,7 +72,7 @@ void GsApp::OnDrawFrame()
     renderer_->Draw();
 }
 
-void GsApp::UpdateEntities(float delta_time)
+void Application::UpdateEntities(float delta_time)
 {
     updating_entities_ = true;
     for (auto entity : entities_)
@@ -103,7 +103,7 @@ void GsApp::UpdateEntities(float delta_time)
     }
 }
 
-void GsApp::AddEntity(Entity* entity)
+void Application::AddEntity(Entity* entity)
 {
     if (updating_entities_)
     {
@@ -115,7 +115,7 @@ void GsApp::AddEntity(Entity* entity)
     }
 }
 
-void GsApp::RemoveEntity(Entity* entity)
+void Application::RemoveEntity(Entity* entity)
 {
     auto iter = std::find(pending_entities_.begin(), pending_entities_.end(), entity);
     if (iter != pending_entities_.end())
@@ -130,7 +130,7 @@ void GsApp::RemoveEntity(Entity* entity)
     }
 }
 
-void GsApp::ProcessInput(const Uint8 *state, float deltaTime)
+void Application::ProcessInput(const Uint8 *state, float deltaTime)
 {
     camera_.ProcessKeyboard(state, deltaTime);
     // Also pass to entities
@@ -140,13 +140,13 @@ void GsApp::ProcessInput(const Uint8 *state, float deltaTime)
     }
 }
 
-void GsApp::ProcessMouseMotion(float xrel, float yrel)
+void Application::ProcessMouseMotion(float xrel, float yrel)
 {
     camera_.ProcessMouseMovement(xrel, -yrel); // Invert y
 }
 
 #if defined(__ANDROID__)
-void GsApp::OnSurfaceChanged()
+void Application::OnSurfaceChanged()
 {
     auto &vulkan_ctx = VulkanContext::Get();
     vulkan_ctx.RecreateSwapchain();

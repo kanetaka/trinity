@@ -7,7 +7,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <cstdint>
 
-class GsApp;
+class Application;
 class Component;
 
 class Entity
@@ -20,7 +20,7 @@ public:
         EDead
     };
 
-    Entity(GsApp* game);
+    Entity(Application* app);
     virtual ~Entity();
 
     void Update(float delta_time);
@@ -45,7 +45,7 @@ public:
     State GetState() const { return state_; }
     void SetState(State state) { state_ = state; }
 
-    GsApp* GetGame() { return game_; }
+    Application* GetApplication() { return app_; }
 
     void AddComponent(Component* component);
     void RemoveComponent(Component* component);
@@ -60,5 +60,5 @@ private:
     bool recompute_world_transform_;
 
     std::vector<Component*> components_;
-    GsApp* game_;
+    Application* app_;
 };

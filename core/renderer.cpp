@@ -5,13 +5,13 @@
 #include "core/asset_path.h"
 #include "core/graphics_pipeline_builder.h"
 #include "core/buffer_resource.h"
-#include "gs_app.h"
+#include "application.h"
 #include "component.h"
 #include <stdexcept>
 #include <algorithm>
 
-Renderer::Renderer(GsApp* game)
-        : game_(game), screen_width_(0), screen_height_(0) {}
+Renderer::Renderer(Application* app)
+        : app_(app), screen_width_(0), screen_height_(0) {}
 
 Renderer::~Renderer() {}
 

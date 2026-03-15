@@ -7,7 +7,7 @@
 #endif
 #include <glm/glm.hpp>
 
-class GsApp;
+class Application;
 class Component;
 class UniformBuffer;
 class StorageBuffer;
@@ -15,7 +15,7 @@ class StorageBuffer;
 class Renderer
 {
 public:
-    Renderer(GsApp* game);
+    Renderer(Application* app);
     ~Renderer();
 
     bool Initialize(float screen_width, float screen_height);
@@ -44,7 +44,7 @@ private:
     bool CreateDescriptorSets();
     bool InitializeGraphicsPipeline();
 
-    GsApp* game_;
+    Application* app_;
 
     std::vector<Component*> components_;
 

@@ -3,7 +3,7 @@
 #endif
 #include "core/splat_component.h"
 #include "core/entity.h"
-#include "gs_app.h"
+#include "application.h"
 #include "core/renderer.h"
 #include "core/ply_loader.h"
 #include "core/vulkan_context.h"
@@ -23,14 +23,14 @@ SplatComponent::SplatComponent(Entity* owner, const std::string& ply_file)
     CreateBuffers();
     CreateDescriptorSets();
     
-    owner_->GetGame()->GetRenderer()->AddComponent(this);
+    owner_->GetApplication()->GetRenderer()->AddComponent(this);
 }
 
 SplatComponent::~SplatComponent()
 {
-    if (owner_ && owner_->GetGame() && owner_->GetGame()->GetRenderer())
+    if (owner_ && owner_->GetApplication() && owner_->GetApplication()->GetRenderer())
     {
-        owner_->GetGame()->GetRenderer()->RemoveComponent(this);
+        owner_->GetApplication()->GetRenderer()->RemoveComponent(this);
     }
 }
 
@@ -95,7 +95,7 @@ void SplatComponent::CreateBuffers()
 
 void SplatComponent::CreateDescriptorSets()
 {
-    auto renderer = owner_->GetGame()->GetRenderer();
+    auto renderer = owner_->GetApplication()->GetRenderer();
     descriptor_set_ = renderer->AllocateDescriptorSet();
     if (descriptor_set_ != VK_NULL_HANDLE)
     {
@@ -107,10 +107,10 @@ void SplatComponent::SortSplats()
 {
     if (splat_indices_.empty()) return;
 
-    // Get view matrix from GsApp/Renderer
-    glm::mat4 view = owner_->GetGame()->GetCamera().GetViewMatrix();
+    // Get view matrix from Application/Renderer
+    glm::mat4 view = owner_->GetApplication()->GetCamera().GetViewMatrix();
     
-    // Simple CPU sort (as in original GsApp)
+    // Simple CPU sort (as in original Application)
     for (size_t i = 0; i < splat_indices_.size(); ++i)
     {
         uint32_t initial_idx = splat_indices_[i].index;
