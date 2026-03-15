@@ -27,23 +27,28 @@ find_package(SDL3 REQUIRED)
 
 # Include directories
 include_directories(${VK_SDK_PATH}/Include)
-include_directories(${CMAKE_SOURCE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/src)
+include_directories(${CMAKE_SOURCE_DIR}/src/app)
+include_directories(${CMAKE_SOURCE_DIR}/src/app/common)
+include_directories(${CMAKE_SOURCE_DIR}/src/core)
+include_directories(${CMAKE_SOURCE_DIR}/src/core/graphics)
+include_directories(${CMAKE_SOURCE_DIR}/src/core/graphics/pipeline)
+include_directories(${CMAKE_SOURCE_DIR}/src/core/graphics/resources)
+include_directories(${CMAKE_SOURCE_DIR}/src/core/graphics/surface)
+include_directories(${CMAKE_SOURCE_DIR}/src/core/ecs)
+include_directories(${CMAKE_SOURCE_DIR}/src/core/scene)
+include_directories(${CMAKE_SOURCE_DIR}/src/core/renderer)
+include_directories(${CMAKE_SOURCE_DIR}/src/components)
+include_directories(${CMAKE_SOURCE_DIR}/src/utils)
 
 # Library directories
 link_directories(${VK_SDK_PATH}/Lib)
 
 # Header files (for IDE organization)
-file(GLOB HEADERS "*.h")
-file(GLOB_RECURSE CORE_HEADERS "core/*.h")
-file(GLOB_RECURSE RENDER_HEADERS "render/*.h")
-file(GLOB_RECURSE COMMON_HEADERS "common/*.h")
-list(APPEND HEADERS ${CORE_HEADERS} ${RENDER_HEADERS} ${COMMON_HEADERS})
+file(GLOB_RECURSE HEADERS "src/*.h")
 
 # Source files
-file(GLOB SOURCES "*.cpp")
-file(GLOB_RECURSE CORE_SOURCES "core/*.cpp")
-file(GLOB_RECURSE COMMON_SOURCES "common/*.cpp")
-list(APPEND SOURCES ${CORE_SOURCES} ${COMMON_SOURCES})
+file(GLOB_RECURSE SOURCES "src/*.cpp")
 
 # Create executable
 add_executable(trinity ${HEADERS} ${SOURCES})
