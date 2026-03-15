@@ -8,7 +8,9 @@
 #include <glm/glm.hpp>
 
 class Application;
+class Entity;
 class Component;
+class CommandBuffer;
 class UniformBuffer;
 class StorageBuffer;
 
@@ -21,10 +23,7 @@ public:
     bool Initialize(float screen_width, float screen_height);
     void Shutdown();
 
-    void Draw();
-
-    void AddComponent(Component* component);
-    void RemoveComponent(Component* component);
+    void Draw(Entity* root);
 
     void SetViewMatrix(const glm::mat4& view) { view_ = view; }
     void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
@@ -43,10 +42,9 @@ private:
     bool CreateDescriptorPool();
     bool CreateDescriptorSets();
     bool InitializeGraphicsPipeline();
+    void DrawEntity(Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer);
 
     Application* app_;
-
-    std::vector<Component*> components_;
 
     VkDescriptorSetLayout descriptor_set_layout_ = VK_NULL_HANDLE;
     VkDescriptorPool descriptor_pool_ = VK_NULL_HANDLE;

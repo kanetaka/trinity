@@ -6,6 +6,7 @@
 #include "core/graphics_pipeline_builder.h"
 #include "core/buffer_resource.h"
 #include "application.h"
+#include "entity.h"
 #include "component.h"
 #include <stdexcept>
 #include <algorithm>
@@ -58,8 +59,9 @@ void Renderer::Shutdown()
     }
 }
 
-void Renderer::Draw()
+void Renderer::Draw(Entity* root)
 {
+    if (!root) return;
     auto& vulkan_ctx = VulkanContext::Get();
 
     if (vulkan_ctx.AcquireNextImage() != VK_SUCCESS) {
@@ -102,9 +104,7 @@ void Renderer::Draw()
     vkCmdBindPipeline(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
                                         pipeline_);
 
-    for (auto comp : components_) {
-        comp->Draw(command_buffer, pipeline_layout_);
-    }
+    DrawEntity(root, command_buffer);
 
     vkCmdEndRendering(*command_buffer);
 
@@ -116,16 +116,18 @@ void Renderer::Draw()
     vulkan_ctx.SubmitPresent();
 }
 
-void Renderer::AddComponent(Component* component)
+void Renderer::DrawEntity(Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer)
 {
-    components_.push_back(component);
-}
+    if (entity->GetState() != Entity::EActive) return;
 
-void Renderer::RemoveComponent(Component* component)
-{
-    auto iter = std::find(components_.begin(), components_.end(), component);
-    if (iter != components_.end()) {
-        components_.erase(iter);
+    for (auto comp : entity->GetComponents())
+    {
+        comp->Draw(command_buffer, pipeline_layout_);
+    }
+
+    for (auto child : entity->GetChildren())
+    {
+        DrawEntity(child, command_buffer);
     }
 }
 

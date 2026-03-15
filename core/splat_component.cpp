@@ -1,14 +1,14 @@
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
-#include "core/splat_component.h"
-#include "core/entity.h"
+#include "splat_component.h"
+#include "entity.h"
 #include "application.h"
-#include "core/renderer.h"
-#include "core/ply_loader.h"
-#include "core/vulkan_context.h"
-#include "core/asset_path.h"
-#include "core/command_buffer.h"
+#include "renderer.h"
+#include "ply_loader.h"
+#include "vulkan_context.h"
+#include "asset_path.h"
+#include "command_buffer.h"
 #include <SDL3/SDL.h>
 #include <iostream>
 #include <algorithm>
@@ -22,16 +22,10 @@ SplatComponent::SplatComponent(Entity* owner, const std::string& ply_file)
     LoadSplats();
     CreateBuffers();
     CreateDescriptorSets();
-    
-    owner_->GetApplication()->GetRenderer()->AddComponent(this);
 }
 
 SplatComponent::~SplatComponent()
 {
-    if (owner_ && owner_->GetApplication() && owner_->GetApplication()->GetRenderer())
-    {
-        owner_->GetApplication()->GetRenderer()->RemoveComponent(this);
-    }
 }
 
 void SplatComponent::Update(float delta_time)

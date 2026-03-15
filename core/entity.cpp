@@ -26,10 +26,56 @@ Entity::Entity(Application* app)
 
 Entity::~Entity()
 {
-    // game_->RemoveEntity(this);
+    // Remove from parent
+    if (parent_)
+    {
+        parent_->RemoveChild(this);
+    }
+
+    // Delete children
+    for (auto child : children_)
+    {
+        delete child;
+    }
+    children_.clear();
+
     while (!components_.empty()) {
         delete components_.back();
     }
+}
+
+void Entity::AddChild(Entity* child)
+{
+    child->SetParent(this);
+    children_.push_back(child);
+}
+
+void Entity::RemoveChild(Entity* child)
+{
+    auto iter = std::find(children_.begin(), children_.end(), child);
+    if (iter != children_.end())
+    {
+        (*iter)->parent_ = nullptr;
+        children_.erase(iter);
+    }
+}
+
+void Entity::SetParent(Entity* parent)
+{
+    if (parent_ == parent) return;
+
+    if (parent_)
+    {
+        // Manual removal to avoid recursion if called from parent
+        auto iter = std::find(parent_->children_.begin(), parent_->children_.end(), this);
+        if (iter != parent_->children_.end())
+        {
+            parent_->children_.erase(iter);
+        }
+    }
+
+    parent_ = parent;
+    recompute_world_transform_ = true;
 }
 
 void Entity::Update(float delta_time)
@@ -39,6 +85,12 @@ void Entity::Update(float delta_time)
         UpdateComponents(delta_time);
         UpdateEntity(delta_time);
         ComputeWorldTransform();
+
+        // Recursively update children
+        for (auto child : children_)
+        {
+            child->Update(delta_time);
+        }
     }
 }
 
@@ -75,10 +127,21 @@ void Entity::ComputeWorldTransform()
         world_transform_ *= glm::mat4_cast(rotation_);
         world_transform_ = glm::scale(world_transform_, glm::vec3(scale_));
 
+        if (parent_)
+        {
+            world_transform_ = parent_->GetWorldTransform() * world_transform_;
+        }
+
         // Inform components world transform updated
         for (auto comp : components_)
         {
             comp->OnUpdateWorldTransform();
+        }
+
+        // Children need to recompute as well
+        for (auto child : children_)
+        {
+            child->recompute_world_transform_ = true;
         }
     }
 }

@@ -23,6 +23,12 @@ public:
     Entity(Application* app);
     virtual ~Entity();
 
+    void AddChild(Entity* child);
+    void RemoveChild(Entity* child);
+    void SetParent(Entity* parent);
+    Entity* GetParent() { return parent_; }
+    const std::vector<Entity*>& GetChildren() const { return children_; }
+
     void Update(float delta_time);
     void UpdateComponents(float delta_time);
     virtual void UpdateEntity(float delta_time);
@@ -49,6 +55,7 @@ public:
 
     void AddComponent(Component* component);
     void RemoveComponent(Component* component);
+    const std::vector<Component*>& GetComponents() const { return components_; }
 
 private:
     State state_;
@@ -61,4 +68,6 @@ private:
 
     std::vector<Component*> components_;
     Application* app_;
+    Entity* parent_ = nullptr;
+    std::vector<Entity*> children_;
 };

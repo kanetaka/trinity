@@ -28,38 +28,29 @@ void Application::OnInitialize()
     auto extent = VulkanContext::Get().GetSwapchain()->GetExtent();
     renderer_->Initialize((float)extent.width, (float)extent.height);
 
-    // Create Splat Entity
+    root_entity_ = std::make_unique<Entity>(this);
+
+    // Create Splat Entity as a child of root
     Entity* splat_entity = new Entity(this);
-    AddEntity(splat_entity);
+    root_entity_->AddChild(splat_entity);
     new SplatComponent(splat_entity, ply_file_);
 }
 
 void Application::OnCleanup()
 {
-    // Delete all entities first, as components may refer to renderer
-    while (!entities_.empty())
-    {
-        delete entities_.back();
-        entities_.pop_back();
-    }
-    while (!pending_entities_.empty())
-    {
-        delete pending_entities_.back();
-pending_entities_.pop_back();
-    }
-
     if (renderer_)
     {
         renderer_->Shutdown();
         renderer_.reset();
     }
+    root_entity_.reset();
 }
 
 void Application::OnDrawFrame()
 {
     static auto lastTime = std::chrono::high_resolution_clock::now();
     auto currentTime = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<float> diff = currentTime - lastTime;
+    std::chrono::duration<float, std::chrono::seconds::period> diff = currentTime - lastTime;
     float deltaTime = diff.count();
     lastTime = currentTime;
 
@@ -68,75 +59,20 @@ void Application::OnDrawFrame()
     renderer_->SetProjectionMatrix(camera_.GetProjectionMatrix(width_ / height_));
     renderer_->UpdateUniformBuffer();
 
-    UpdateEntities(deltaTime);
-    renderer_->Draw();
-}
-
-void Application::UpdateEntities(float delta_time)
-{
-    updating_entities_ = true;
-    for (auto entity : entities_)
+    if (root_entity_)
     {
-        entity->Update(delta_time);
-    }
-    updating_entities_ = false;
-
-    for (auto entity : pending_entities_)
-    {
-        entities_.push_back(entity);
-    }
-    pending_entities_.clear();
-
-    std::vector<Entity*> dead_entities;
-    for (auto entity : entities_)
-    {
-        if (entity->GetState() == Entity::EDead)
-        {
-            dead_entities.push_back(entity);
-        }
+        root_entity_->Update(deltaTime);
     }
 
-    for (auto entity : dead_entities)
-    {
-        RemoveEntity(entity);
-        delete entity;
-    }
-}
-
-void Application::AddEntity(Entity* entity)
-{
-    if (updating_entities_)
-    {
-        pending_entities_.push_back(entity);
-    }
-    else
-    {
-        entities_.push_back(entity);
-    }
-}
-
-void Application::RemoveEntity(Entity* entity)
-{
-    auto iter = std::find(pending_entities_.begin(), pending_entities_.end(), entity);
-    if (iter != pending_entities_.end())
-    {
-        pending_entities_.erase(iter);
-    }
-
-    iter = std::find(entities_.begin(), entities_.end(), entity);
-    if (iter != entities_.end())
-    {
-        entities_.erase(iter);
-    }
+    renderer_->Draw(root_entity_.get());
 }
 
 void Application::ProcessInput(const Uint8 *state, float deltaTime)
 {
     camera_.ProcessKeyboard(state, deltaTime);
-    // Also pass to entities
-    for (auto entity : entities_)
+    if (root_entity_)
     {
-        entity->ProcessInput(state);
+        root_entity_->ProcessInput(state);
     }
 }
 

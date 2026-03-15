@@ -21,8 +21,7 @@ public:
     void OnDrawFrame() override;
     void OnCleanup() override;
 
-    void AddEntity(Entity* entity);
-    void RemoveEntity(Entity* entity);
+    Entity* GetRootEntity() { return root_entity_.get(); }
 
     Renderer* GetRenderer() { return renderer_.get(); }
     Camera& GetCamera() { return camera_; }
@@ -41,8 +40,7 @@ private:
     Camera camera_;
 
     std::unique_ptr<Renderer> renderer_;
-    std::vector<Entity*> entities_;
-    std::vector<Entity*> pending_entities_;
+    std::unique_ptr<Entity> root_entity_;
 
     bool updating_entities_ = false;
 
