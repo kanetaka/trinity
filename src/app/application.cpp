@@ -55,11 +55,11 @@ void Application::OnCleanup()
 
 void Application::OnDrawFrame()
 {
-	static auto lastTime = std::chrono::high_resolution_clock::now();
-	auto currentTime = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<float, std::chrono::seconds::period> diff = currentTime - lastTime;
-	float deltaTime = diff.count();
-	lastTime = currentTime;
+	static auto last_time = std::chrono::high_resolution_clock::now();
+	auto current_time = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<float, std::chrono::seconds::period> diff = current_time - last_time;
+	float delta_time = diff.count();
+	last_time = current_time;
 
 	// Update Renderer matrices
 	renderer_->SetViewMatrix(camera_.GetViewMatrix());
@@ -70,13 +70,13 @@ void Application::OnDrawFrame()
 
 	if (root_entity_)
 	{
-		root_entity_->Update(deltaTime);
+		root_entity_->Update(delta_time);
 		// Find SplatComponent and call UpdateWithCamera
 		for (auto child_id : root_entity_->GetChildren()) {
 			if (auto* child = GetEntity(child_id)) {
 				for (auto comp : child->GetComponents()) {
 					if (auto* splat = dynamic_cast<SplatComponent*>(comp)) {
-						splat->UpdateWithCamera(deltaTime, camera_);
+						splat->UpdateWithCamera(delta_time, camera_);
 					}
 				}
 			}
@@ -86,9 +86,9 @@ void Application::OnDrawFrame()
 	renderer_->Draw(root_entity_.get());
 }
 
-void Application::ProcessInput(const Uint8* state, float deltaTime)
+void Application::ProcessInput(const Uint8* state, float delta_time)
 {
-	camera_.ProcessKeyboard(state, deltaTime);
+	camera_.ProcessKeyboard(state, delta_time);
 	if (root_entity_)
 	{
 		root_entity_->ProcessInput(state);

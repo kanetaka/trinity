@@ -3,13 +3,15 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
-namespace ecs {
-
-static void UpdateTransformRecursive(Registry& registry, EntityId entity, const glm::mat4& parent_world) {
+namespace ecs
+{
+static void UpdateTransformRecursive(Registry& registry, EntityId entity, const glm::mat4& parent_world)
+{
     auto* transform = registry.GetComponent<TransformComponent>(entity);
     if (!transform) return;
 
-    if (transform->recompute) {
+    if (transform->recompute)
+    {
         transform->world_transform = glm::translate(glm::mat4(1.0f), transform->position);
         transform->world_transform *= glm::mat4_cast(transform->rotation);
         transform->world_transform = glm::scale(transform->world_transform, glm::vec3(transform->scale));
@@ -19,20 +21,26 @@ static void UpdateTransformRecursive(Registry& registry, EntityId entity, const 
     transform->world_transform = parent_world * transform->world_transform;
 
     auto* hierarchy = registry.GetComponent<HierarchyComponent>(entity);
-    if (hierarchy) {
-        for (auto child : hierarchy->children) {
+    if (hierarchy)
+    {
+        for (auto child : hierarchy->children)
+        {
             UpdateTransformRecursive(registry, child, transform->world_transform);
         }
     }
 }
 
-void TransformSystem::Update(Registry& registry) {
+void TransformSystem::Update(Registry& registry)
+{
     // Process all roots (entities with Transform but either no Hierarchy or parent is Null)
-    registry.ForEach<TransformComponent>([&](EntityId entity, TransformComponent& transform) {
+    registry.ForEach<TransformComponent>([&](EntityId entity, TransformComponent& transform)
+    {
         auto* hierarchy = registry.GetComponent<HierarchyComponent>(entity);
-        if (!hierarchy || hierarchy->parent == NullEntity) {
+        if (!hierarchy || hierarchy->parent == NullEntity)
+        {
             // It's a root
-            if (transform.recompute) {
+            if (transform.recompute)
+            {
                 transform.world_transform = glm::translate(glm::mat4(1.0f), transform.position);
                 transform.world_transform *= glm::mat4_cast(transform.rotation);
                 transform.world_transform = glm::scale(transform.world_transform, glm::vec3(transform.scale));
@@ -41,12 +49,12 @@ void TransformSystem::Update(Registry& registry) {
             
             // recurse to children
             if (hierarchy) {
-                for (auto child : hierarchy->children) {
+                for (auto child : hierarchy->children)
+                {
                     UpdateTransformRecursive(registry, child, transform.world_transform);
                 }
             }
         }
     });
 }
-
 } // namespace ecs

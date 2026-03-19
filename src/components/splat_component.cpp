@@ -44,8 +44,7 @@ void SplatComponent::Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipe
         return;
     }
 
-    vkCmdBindDescriptorSets(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                                    pipeline_layout, 0, 1, &descriptor_set_, 0, nullptr);
+    vkCmdBindDescriptorSets(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, 1, &descriptor_set_, 0, nullptr);
 
     // Draw 4 vertices (quad) for each splat
     vkCmdDraw(*command_buffer, 4, static_cast<uint32_t>(splat_indices_.size()), 0, 0);
@@ -82,7 +81,7 @@ void SplatComponent::CreateBuffers()
 
     VkDeviceSize splat_size = gpu_splats_.size() * sizeof(gs::GPUSplat);
     splat_buffer_ = StorageBuffer::Create(splat_size, StorageBuffer::AccessMode::CPUAccessible);
-    
+
     void* data = splat_buffer_->Map();
     memcpy(data, gpu_splats_.data(), splat_size);
     splat_buffer_->Unmap();

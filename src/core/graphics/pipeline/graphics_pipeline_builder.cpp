@@ -5,68 +5,68 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder()
 {
     vertex_input_state_ =
     {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
     };
 
     input_assembly_state_ =
     {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
-            .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
-            .primitiveRestartEnable = VK_FALSE,
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
+        .topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
+        .primitiveRestartEnable = VK_FALSE,
     };
 
     rasterizer_state_ =
     {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
-            .depthClampEnable = VK_FALSE,
-            .rasterizerDiscardEnable = VK_FALSE,
-            .polygonMode = VK_POLYGON_MODE_FILL,
-            .cullMode = VK_CULL_MODE_NONE,
-            .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
-            .depthBiasEnable = VK_FALSE,
-            .lineWidth = 1.0f,
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO,
+        .depthClampEnable = VK_FALSE,
+        .rasterizerDiscardEnable = VK_FALSE,
+        .polygonMode = VK_POLYGON_MODE_FILL,
+        .cullMode = VK_CULL_MODE_NONE,
+        .frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE,
+        .depthBiasEnable = VK_FALSE,
+        .lineWidth = 1.0f,
     };
 
     multisample_state_ =
     {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
-            .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
-            .sampleShadingEnable = VK_FALSE,
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO,
+        .rasterizationSamples = VK_SAMPLE_COUNT_1_BIT,
+        .sampleShadingEnable = VK_FALSE,
     };
 
     color_blend_attachment_ =
     {
-            .blendEnable = VK_FALSE,
-            .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
-                                                VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT};
+        .blendEnable = VK_FALSE,
+        .colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT |
+                                            VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT};
 
     color_blend_state_ =
     {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
-            .attachmentCount = 1,
-            .pAttachments = &color_blend_attachment_,
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
+        .attachmentCount = 1,
+        .pAttachments = &color_blend_attachment_,
     };
 
     depth_stencil_state_ = VkPipelineDepthStencilStateCreateInfo
     {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
-            .depthTestEnable = VK_FALSE,
-            .depthWriteEnable = VK_FALSE,
-            .depthCompareOp = VK_COMPARE_OP_LESS,
-            .depthBoundsTestEnable = VK_FALSE,
-            .stencilTestEnable = VK_FALSE
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO,
+        .depthTestEnable = VK_FALSE,
+        .depthWriteEnable = VK_FALSE,
+        .depthCompareOp = VK_COMPARE_OP_LESS,
+        .depthBoundsTestEnable = VK_FALSE,
+        .stencilTestEnable = VK_FALSE
     };
 }
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaderStage(VkShaderStageFlagBits stage, VkShaderModule module, const char* entry)
 {
 	shader_stages_.push_back(
-		{
-		    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-		    .stage = stage,
-		    .module = module,
-		    .pName = entry
-		});
+	{
+	    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+	    .stage = stage,
+	    .module = module,
+	    .pName = entry
+	});
 	return *this;
 }
 
@@ -80,11 +80,11 @@ GraphicsPipelineBuilder &GraphicsPipelineBuilder::SetVertexInput(
 
     vertex_input_state_ =
     {
-            .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-            .vertexBindingDescriptionCount = bindingCount,
-            .pVertexBindingDescriptions = binding_descriptions_.data(),
-            .vertexAttributeDescriptionCount = attributeCount,
-            .pVertexAttributeDescriptions = attribute_descriptions_.data()
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
+        .vertexBindingDescriptionCount = bindingCount,
+        .pVertexBindingDescriptions = binding_descriptions_.data(),
+        .vertexAttributeDescriptionCount = attributeCount,
+        .pVertexAttributeDescriptions = attribute_descriptions_.data()
     };
     return *this;
 }
@@ -195,13 +195,13 @@ GraphicsPipelineBuilder::UseDynamicRendering(VkFormat colorFormat, VkFormat dept
     return *this;
 }
 
-GraphicsPipelineBuilder &GraphicsPipelineBuilder::SetInputAssembly(
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetInputAssembly(
         const VkPipelineInputAssemblyStateCreateInfo &state)
 {
     input_assembly_state_ = state;
     return *this;
 }
-GraphicsPipelineBuilder &GraphicsPipelineBuilder::SetTessellation(
+GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetTessellation(
         bool enable, const VkPipelineTessellationStateCreateInfo &state)
 {
     tessellation_enabled_ = enable;
@@ -213,17 +213,17 @@ VkPipeline GraphicsPipelineBuilder::Build()
 {
     VkGraphicsPipelineCreateInfo pipelineInfo
     {
-            .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
-            .stageCount = static_cast<uint32_t>(shader_stages_.size()),
-            .pStages = shader_stages_.data(),
-            .pVertexInputState = &vertex_input_state_,
-            .pInputAssemblyState = &input_assembly_state_,
-            .pViewportState = &viewport_state_,
-            .pRasterizationState = &rasterizer_state_,
-            .pMultisampleState = &multisample_state_,
-            .pDepthStencilState = &depth_stencil_state_,
-            .pColorBlendState = &color_blend_state_,
-            .layout = pipeline_layout_,
+        .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
+        .stageCount = static_cast<uint32_t>(shader_stages_.size()),
+        .pStages = shader_stages_.data(),
+        .pVertexInputState = &vertex_input_state_,
+        .pInputAssemblyState = &input_assembly_state_,
+        .pViewportState = &viewport_state_,
+        .pRasterizationState = &rasterizer_state_,
+        .pMultisampleState = &multisample_state_,
+        .pDepthStencilState = &depth_stencil_state_,
+        .pColorBlendState = &color_blend_state_,
+        .layout = pipeline_layout_,
     };
 
     VkPipelineRenderingCreateInfo renderingInfo{};
@@ -236,10 +236,10 @@ VkPipeline GraphicsPipelineBuilder::Build()
     {
         renderingInfo =
         {
-                .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
-                .colorAttachmentCount = 1,
-                .pColorAttachmentFormats = &color_format_,
-                .depthAttachmentFormat = depth_format_,
+            .sType = VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO,
+            .colorAttachmentCount = 1,
+            .pColorAttachmentFormats = &color_format_,
+            .depthAttachmentFormat = depth_format_,
         };
         pipelineInfo.pNext = &renderingInfo;
         pipelineInfo.renderPass = VK_NULL_HANDLE;
@@ -253,8 +253,8 @@ VkPipeline GraphicsPipelineBuilder::Build()
 
     auto device = VulkanContext::Get().GetVkDevice();
     VkPipeline pipeline = VK_NULL_HANDLE;
-    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo,
-                                                                nullptr, &pipeline) != VK_SUCCESS) {
+    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+    {
         return VK_NULL_HANDLE;
     }
     return pipeline;

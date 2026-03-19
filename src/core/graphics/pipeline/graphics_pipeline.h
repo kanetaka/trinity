@@ -10,29 +10,29 @@ public:
 
 	void AddShaderStage(VkShaderStageFlagBits stage, VkShaderModule module)
 	{
-		VkPipelineShaderStageCreateInfo stageInfo
+		VkPipelineShaderStageCreateInfo stage_info
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
 			.stage = stage,
 			.module = module,
 			.pName = "main",
 		};
-		shader_stages_.push_back(stageInfo);
+		shader_stages_.push_back(stage_info);
 	}
 
 	void SetVertexInput(
-		const VkVertexInputBindingDescription* bindings, uint32_t bindingCount,
-		const VkVertexInputAttributeDescription* attributes, uint32_t attributeCount)
+		const VkVertexInputBindingDescription* bindings, uint32_t binding_count,
+		const VkVertexInputAttributeDescription* attributes, uint32_t attribute_count)
 	{
 		vertex_input_info_ = VkPipelineVertexInputStateCreateInfo{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO,
-			.vertexBindingDescriptionCount = bindingCount,
+			.vertexBindingDescriptionCount = binding_count,
 			.pVertexBindingDescriptions = bindings,
-			.vertexAttributeDescriptionCount = attributeCount,
+			.vertexAttributeDescriptionCount = attribute_count,
 			.pVertexAttributeDescriptions = attributes,
 		};
-		bindings_.assign(bindings, bindings + bindingCount);
-		attributes_.assign(attributes, attributes + attributeCount);
+		bindings_.assign(bindings, bindings + binding_count);
+		attributes_.assign(attributes, attributes + attribute_count);
 	}
 
 	void SetViewport(const VkViewport& viewport, const VkRect2D& scissor)
@@ -46,9 +46,9 @@ public:
 		pipeline_layout_ = layout;
 	}
 
-	void UseDynamicRendering(VkFormat colorFormat)
+	void UseDynamicRendering(VkFormat color_format)
 	{
-		color_format_ = colorFormat;
+		color_format_ = color_format;
 		use_dynamic_rendering_ = true;
 	}
 
@@ -60,14 +60,14 @@ public:
 		vertex_input_info_.pVertexBindingDescriptions = bindings_.data();
 		vertex_input_info_.pVertexAttributeDescriptions = attributes_.data();
 
-		VkPipelineInputAssemblyStateCreateInfo inputAssembly
+		VkPipelineInputAssemblyStateCreateInfo input_assembly
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO,
 			.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST,
 			.primitiveRestartEnable = VK_FALSE,
 		};
 
-		VkPipelineViewportStateCreateInfo viewportState
+		VkPipelineViewportStateCreateInfo viewport_state
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO,
 			.viewportCount = 1,
@@ -102,7 +102,7 @@ public:
 							  VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT,
 		};
 
-		VkPipelineColorBlendStateCreateInfo colorBlending
+		VkPipelineColorBlendStateCreateInfo color_blending
 		{
 			.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO,
 			.logicOpEnable = VK_FALSE,
@@ -116,11 +116,11 @@ public:
 			.stageCount = static_cast<uint32_t>(shader_stages_.size()),
 			.pStages = shader_stages_.data(),
 			.pVertexInputState = &vertex_input_info_,
-			.pInputAssemblyState = &inputAssembly,
-			.pViewportState = &viewportState,
+			.pInputAssemblyState = &input_assembly,
+			.pViewportState = &viewport_state,
 			.pRasterizationState = &rasterizer,
 			.pMultisampleState = &multisampling,
-			.pColorBlendState = &colorBlending,
+			.pColorBlendState = &color_blending,
 			.layout = pipeline_layout_,
 			.renderPass = VK_NULL_HANDLE,
 			.subpass = 0,

@@ -6,6 +6,6 @@ namespace ecs
 	class TransformSystem
 	{
 	public:
-		static void Update(Registry& registry);
+		static void Update(Registry &registry);
 	};
 } // namespace ecs
