@@ -20,7 +20,10 @@ if(NOT VK_SDK_PATH)
 endif()
 
 # Add Vulkan SDK to the prefix path so find_package can locate SDL3
-list(APPEND CMAKE_PREFIX_PATH ${VK_SDK_PATH})
+# Note: Newer Vulkan SDKs (e.g. 1.4.341.1) place SDL3Config.cmake in the 'cmake' subdirectory,
+# while older versions (e.g. 1.4.328.1) may place it in 'Lib/cmake/SDL3'.
+# We add both to ensure the correct one is found.
+list(APPEND CMAKE_PREFIX_PATH ${VK_SDK_PATH}/cmake ${VK_SDK_PATH})
 
 # Find SDL3
 find_package(SDL3 REQUIRED)
