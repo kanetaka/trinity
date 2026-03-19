@@ -79,6 +79,12 @@ namespace ecs
 		std::vector<T>& GetComponents() { return components_; }
 		const std::vector<T>& GetComponents() const { return components_; }
 
+		uint32_t GetIndex(EntityId entity) const
+		{
+			auto it = entity_to_index_.find(entity);
+			return it != entity_to_index_.end() ? it->second : 0xFFFFFFFF;
+		}
+
 	private:
 		std::vector<T> components_;
 		std::unordered_map<EntityId, uint32_t> entity_to_index_;
@@ -129,6 +135,12 @@ namespace ecs
 		std::vector<T>& View()
 		{
 			return GetPool<T>()->GetComponents();
+		}
+
+		template<typename T>
+		uint32_t GetPoolIndex(EntityId entity)
+		{
+			return GetPool<T>()->GetIndex(entity);
 		}
 
 		template<typename T, typename Func>

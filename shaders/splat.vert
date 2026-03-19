@@ -30,6 +30,16 @@ layout(location = 0) out vec2 outUV;
 layout(location = 1) out vec4 outColor;
 layout(location = 2) out vec3 outConicAlpha; // conic.x, conic.y, conic.z (opacity)
 
+// Transform Buffer (Batch transfer from ECS)
+layout(std430, binding = 3) readonly buffer TransformBuffer {
+    mat4 transforms[];
+};
+
+// Push Constants
+layout(push_constant) uniform PushConstants {
+    uint matrixIndex;
+} pc;
+
 // Quad vertices
 const vec2 quadVertices[4] = vec2[](
     vec2(-1.0, -1.0),
@@ -138,8 +148,11 @@ void main() {
     float cov3D[6];
     computeCov3D(scale, 1.0, rot, cov3D);
     
+    mat4 model = transforms[pc.matrixIndex];
+    vec3 worldMean = (model * vec4(mean, 1.0)).xyz;
+
     vec3 cov2D;
-    computeCov2D(mean, cov3D, camera.view, camera.proj, camera.viewport, cov2D);
+    computeCov2D(worldMean, cov3D, camera.view, camera.proj, camera.viewport, cov2D);
     
     // Compute Conic
     float det = (cov2D.x * cov2D.z - cov2D.y * cov2D.y);
@@ -152,9 +165,9 @@ void main() {
     float lambda1 = mid + sqrt(max(0.1, mid * mid - det));
     float lambda2 = mid - sqrt(max(0.1, mid * mid - det));
     float my_radius = ceil(3.0 * sqrt(max(lambda1, lambda2)));
-
+ 
     // Set outputs
-    vec4 p_hom = camera.proj * camera.view * vec4(mean, 1.0);
+    vec4 p_hom = camera.proj * camera.view * vec4(worldMean, 1.0);
     // Add offset based on quad vertex
     vec2 offset = quadVertices[gl_VertexIndex] * my_radius / camera.viewport * 2.0;
     

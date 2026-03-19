@@ -31,7 +31,8 @@ public:
 
 	void RegisterEntity(ecs::EntityId id, Entity* entity) { entity_map_[id] = entity; }
 	void UnregisterEntity(ecs::EntityId id) { entity_map_.erase(id); }
-	Entity* GetEntity(ecs::EntityId id) {
+	Entity* GetEntity(ecs::EntityId id)
+	{
 		auto it = entity_map_.find(id);
 		return it != entity_map_.end() ? it->second : nullptr;
 	}

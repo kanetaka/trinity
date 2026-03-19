@@ -3,6 +3,7 @@
 #endif
 #include "components/splat_component.h"
 #include "core/scene/entity.h"
+#include "core/ecs/components.h"
 #include "app/application.h"
 #include "core/renderer/renderer.h"
 #include "utils/ply_loader.h"
@@ -45,6 +46,10 @@ void SplatComponent::Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipe
     }
 
     vkCmdBindDescriptorSets(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, 1, &descriptor_set_, 0, nullptr);
+    
+    // Send transform index via Push Constant
+    uint32_t transform_index = owner_->GetRegistry().GetPoolIndex<::ecs::TransformComponent>(owner_->GetId());
+    vkCmdPushConstants(*command_buffer, pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
 
     // Draw 4 vertices (quad) for each splat
     vkCmdDraw(*command_buffer, 4, static_cast<uint32_t>(splat_indices_.size()), 0, 0);

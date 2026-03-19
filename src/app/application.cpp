@@ -67,6 +67,7 @@ void Application::OnDrawFrame()
 	renderer_->UpdateUniformBuffer();
 
 	ecs::TransformSystem::Update(*registry_);
+	renderer_->UpdateTransformBuffer(*registry_);
 
 	if (root_entity_)
 	{

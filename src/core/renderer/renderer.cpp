@@ -8,6 +8,8 @@
 #include "app/application.h"
 #include "core/scene/entity.h"
 #include "core/scene/component.h"
+#include "core/ecs/registry.h"
+#include "core/ecs/components.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -23,6 +25,10 @@ bool Renderer::Initialize(float screen_width, float screen_height)
 
     // Create uniform buffer for camera data
     uniform_buffer_ = UniformBuffer::Create(256); // Assuming sizeof(CameraUBO)
+
+    // Create storage buffer for entity transforms (batch transfer)
+    // Assuming max 1024 entities for now
+    transform_buffer_ = StorageBuffer::Create(sizeof(glm::mat4) * 1024, StorageBuffer::AccessMode::CPUAccessible);
 
     CreateDescriptorSetLayout();
     CreateDescriptorPool();
@@ -194,7 +200,21 @@ void Renderer::UpdateSplatDescriptorSet(VkDescriptorSet set, const std::shared_p
     idx_write.descriptorCount = 1;
     idx_write.pBufferInfo = &idx_info;
 
-    std::vector<VkWriteDescriptorSet> writes = {ubo_write, splat_write, idx_write};
+    VkDescriptorBufferInfo transform_info{};
+    transform_info.buffer = transform_buffer_->GetVkBuffer();
+    transform_info.offset = 0;
+    transform_info.range = VK_WHOLE_SIZE;
+
+    VkWriteDescriptorSet transform_write{};
+    transform_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    transform_write.dstSet = set;
+    transform_write.dstBinding = 3;
+    transform_write.dstArrayElement = 0;
+    transform_write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    transform_write.descriptorCount = 1;
+    transform_write.pBufferInfo = &transform_info;
+
+    std::vector<VkWriteDescriptorSet> writes = {ubo_write, splat_write, idx_write, transform_write};
     vkUpdateDescriptorSets(device, static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
 }
 
@@ -216,6 +236,23 @@ void Renderer::UpdateUniformBuffer()
     void* data = uniform_buffer_->Map();
     memcpy(data, &ubo, sizeof(ubo));
     uniform_buffer_->Unmap();
+}
+
+void Renderer::UpdateTransformBuffer(ecs::Registry& registry)
+{
+    auto& transforms = registry.View<ecs::TransformComponent>();
+    if (transforms.empty()) return;
+
+    std::vector<glm::mat4> matrices;
+    matrices.reserve(transforms.size());
+    for (const auto& t : transforms)
+    {
+        matrices.push_back(t.world_transform);
+    }
+
+    void* data = transform_buffer_->Map();
+    memcpy(data, matrices.data(), matrices.size() * sizeof(glm::mat4));
+    transform_buffer_->Unmap();
 }
 
 bool Renderer::CreateDescriptorSetLayout()
@@ -240,8 +277,14 @@ bool Renderer::CreateDescriptorSetLayout()
     idx_binding.descriptorCount = 1;
     idx_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
 
+    VkDescriptorSetLayoutBinding transform_binding{};
+    transform_binding.binding = 3;
+    transform_binding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    transform_binding.descriptorCount = 1;
+    transform_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
     std::vector<VkDescriptorSetLayoutBinding> bindings = {
-            ubo_binding, splat_binding, idx_binding};
+            ubo_binding, splat_binding, idx_binding, transform_binding};
     VkDescriptorSetLayoutCreateInfo layout_info{};
     layout_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
     layout_info.bindingCount = static_cast<uint32_t>(bindings.size());
@@ -289,10 +332,17 @@ bool Renderer::InitializeGraphicsPipeline()
     auto frag_module =
             loader::LoadShaderModule(GetAssetRootPath() / "splat.frag.spv");
 
+    VkPushConstantRange pushRange{};
+    pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    pushRange.offset = 0;
+    pushRange.size = sizeof(uint32_t); // matrixIndex
+
     VkPipelineLayoutCreateInfo pipeline_layout_info{};
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipeline_layout_info.setLayoutCount = 1;
     pipeline_layout_info.pSetLayouts = &descriptor_set_layout_;
+    pipeline_layout_info.pushConstantRangeCount = 1;
+    pipeline_layout_info.pPushConstantRanges = &pushRange;
 
     if (vkCreatePipelineLayout(device, &pipeline_layout_info, nullptr, &pipeline_layout_) != VK_SUCCESS)
     {

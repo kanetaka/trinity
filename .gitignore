@@ -1,5 +1,8 @@
 # This projeect's
 assets/models/gs/
+*.spv
+*.vert.spv
+*.frag.spv
 
 # Build directories
 build/

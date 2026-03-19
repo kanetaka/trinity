@@ -14,6 +14,8 @@ class CommandBuffer;
 class UniformBuffer;
 class StorageBuffer;
 
+namespace ecs { class Registry; }
+
 class Renderer
 {
 public:
@@ -29,6 +31,7 @@ public:
 	void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
 
 	void UpdateUniformBuffer();
+	void UpdateTransformBuffer(ecs::Registry& registry);
 
 	VkDescriptorSetLayout GetSplatDescriptorSetLayout() const { return descriptor_set_layout_; }
 	VkDescriptorSet AllocateDescriptorSet();
@@ -53,6 +56,7 @@ private:
 	VkPipelineLayout pipeline_layout_ = VK_NULL_HANDLE;
 
 	std::shared_ptr<UniformBuffer> uniform_buffer_;
+	std::shared_ptr<StorageBuffer> transform_buffer_;
 
 	glm::mat4 view_;
 	glm::mat4 projection_;
