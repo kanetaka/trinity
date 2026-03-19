@@ -20,7 +20,8 @@ Entity::Entity(ecs::Registry& registry, ecs::EntityId id)
 
 Entity::~Entity()
 {
-    for (auto comp : components_) {
+    for (auto comp : components_)
+    {
         delete comp;
     }
     registry_.Destroy(id_);
@@ -31,7 +32,8 @@ void Entity::AddChild(ecs::EntityId child_id)
     auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
     auto* child_hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(child_id);
     
-    if (hierarchy && child_hierarchy) {
+    if (hierarchy && child_hierarchy)
+    {
         child_hierarchy->parent = id_;
         hierarchy->children.push_back(child_id);
     }
