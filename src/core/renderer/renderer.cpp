@@ -28,7 +28,7 @@ bool Renderer::Initialize(float screen_width, float screen_height)
 
     // Create storage buffer for entity transforms (batch transfer)
     // Assuming max 1024 entities for now
-    transform_buffer_ = StorageBuffer::Create(sizeof(glm::mat4) * 1024, StorageBuffer::AccessMode::CPUAccessible);
+    transform_buffer_ = StorageBuffer::Create(sizeof(glm::mat4) * 1024, StorageBuffer::AccessMode::CpuAccessible);
 
     CreateDescriptorSetLayout();
     CreateDescriptorPool();

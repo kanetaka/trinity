@@ -120,7 +120,8 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
         return true;
 }
 
-void Swapchain::Cleanup() {
+void Swapchain::Cleanup()
+{
         auto& vulkan_ctx = VulkanContext::Get();
         auto vk_device = vulkan_ctx.GetVkDevice();
         DestroyFrameContext();

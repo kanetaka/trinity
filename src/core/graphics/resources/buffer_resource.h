@@ -175,8 +175,8 @@ public:
 
 	enum class AccessMode
 	{
-		GPUOnlyAccess,
-		CPUAccessible,
+		GpuOnlyAccess,
+		CpuAccessible,
 	};
 
 	bool Initialize(VkDeviceSize size, AccessMode mode);

@@ -69,7 +69,7 @@ void SplatComponent::LoadSplats()
     for (uint32_t i = 0; i < splats.size(); ++i)
     {
         const auto& s = splats[i];
-        gs::GPUSplat gpu_splat;
+        gs::GpuSplat gpu_splat;
         gpu_splat.position_opacity = glm::vec4(s.position, s.opacity);
         gpu_splat.rot_scale_0 = glm::vec4(s.rot.x, s.rot.y, s.rot.z, s.scale.x);
         gpu_splat.rot_w_scale_yz = glm::vec4(s.rot.w, s.scale.y, s.scale.z, 0.0f);
@@ -84,15 +84,15 @@ void SplatComponent::CreateBuffers()
 {
     if (gpu_splats_.empty()) return;
 
-    VkDeviceSize splat_size = gpu_splats_.size() * sizeof(gs::GPUSplat);
-    splat_buffer_ = StorageBuffer::Create(splat_size, StorageBuffer::AccessMode::CPUAccessible);
+    VkDeviceSize splat_size = gpu_splats_.size() * sizeof(gs::GpuSplat);
+    splat_buffer_ = StorageBuffer::Create(splat_size, StorageBuffer::AccessMode::CpuAccessible);
 
     void* data = splat_buffer_->Map();
     memcpy(data, gpu_splats_.data(), splat_size);
     splat_buffer_->Unmap();
 
     VkDeviceSize index_size = splat_indices_.size() * sizeof(uint32_t);
-    index_buffer_ = StorageBuffer::Create(index_size, StorageBuffer::AccessMode::CPUAccessible);
+    index_buffer_ = StorageBuffer::Create(index_size, StorageBuffer::AccessMode::CpuAccessible);
 }
 
 void SplatComponent::CreateDescriptorSets(Renderer* renderer)

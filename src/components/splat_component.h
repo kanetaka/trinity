@@ -32,7 +32,7 @@ private:
 	void SortSplats(const glm::mat4& view);
 
 	std::string ply_file_;
-	std::vector<gs::GPUSplat> gpu_splats_;
+	std::vector<gs::GpuSplat> gpu_splats_;
 	std::vector<gs::SplatSortEntry> splat_indices_;
 
 	std::shared_ptr<StorageBuffer> splat_buffer_;

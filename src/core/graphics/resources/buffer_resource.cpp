@@ -274,7 +274,7 @@ bool StorageBuffer::Initialize(VkDeviceSize size, AccessMode mode)
 		.sharingMode = VK_SHARING_MODE_EXCLUSIVE,
 	};
 	VkMemoryPropertyFlags mem_prop_flags = VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT;
-	if (mode == AccessMode::CPUAccessible)
+	if (mode == AccessMode::CpuAccessible)
 	{
 		mem_prop_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
 	}

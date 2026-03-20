@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
-Sdl3SurfaceProvider::Sdl3SurfaceProvider(SDL_Window *window)
+Sdl3SurfaceProvider::Sdl3SurfaceProvider(SDL_Window* window)
         : window_(window) {}
 
 VkSurfaceKHR Sdl3SurfaceProvider::CreateSurface(VkInstance instance)
