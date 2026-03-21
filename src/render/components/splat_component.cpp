@@ -1,8 +1,18 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <chrono>
+#include <execution>
+#include <memory>
+
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-
-
 #endif
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <SDL3/SDL.h>
+
 #include "render/components/splat_component.h"
 #include "core/entity.h"
 #include "core/ecs/components.h"
@@ -12,20 +22,13 @@
 #include "render/vulkan_context.h"
 #include "core/asset_path.h"
 #include "render/command_buffer.h"
-#include <SDL3/SDL.h>
-#include <iostream>
-#include <algorithm>
-#include <chrono>
-#include <execution>
-#include <glm/gtc/matrix_transform.hpp>
 
 namespace trinity::render {
 using namespace trinity::core;
 using namespace trinity::stream;
 
-
-SplatComponent::SplatComponent(trinity::core::Entity* owner, const std::string& ply_file, Renderer* renderer)
-        : Component(owner), ply_file_(ply_file)
+SplatComponent::SplatComponent(const std::string& ply_file, Renderer* renderer)
+        : ply_file_(ply_file)
 {
     LoadSplats();
     CreateBuffers();
@@ -36,35 +39,26 @@ SplatComponent::~SplatComponent()
 {
 }
 
-void SplatComponent::Update(float delta_time)
+void SplatComponent::Initialize(trinity::core::ecs::Registry& registry, trinity::core::ecs::EntityId entity, Renderer* renderer)
 {
+    auto& data = registry.AddComponent<trinity::core::ecs::SplatDataComponent>(entity);
+    data.ply_file = ply_file_;
+    data.splat_buffer = splat_buffer_;
+    data.index_buffer = index_buffer_;
+    data.descriptor_set = descriptor_set_;
 }
 
-void SplatComponent::UpdateWithCamera(float delta_time, const trinity::core::Camera& camera)
+void SplatComponent::UpdateWithCamera(trinity::core::ecs::Registry& registry, trinity::core::ecs::EntityId entity, const trinity::core::Camera& camera)
 {
-    SortSplats(camera.GetViewMatrix());
-}
+    auto* data = registry.GetComponent<trinity::core::ecs::SplatDataComponent>(entity);
+    if (!data) return;
 
-void SplatComponent::Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipelineLayout pipeline_layout)
-{
-    if (splat_indices_.empty() || descriptor_set_ == VK_NULL_HANDLE)
-    {
-        return;
-    }
-
-    vkCmdBindDescriptorSets(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, 1, &descriptor_set_, 0, nullptr);
-
-    // Send transform index via Push Constant
-    uint32_t transform_index = owner_->GetRegistry().GetPoolIndex<trinity::core::ecs::TransformComponent>(owner_->GetId());
-    vkCmdPushConstants(*command_buffer, pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
-
-    // Draw 4 vertices (quad) for each splat
-    vkCmdDraw(*command_buffer, 4, static_cast<uint32_t>(splat_indices_.size()), 0, 0);
+    SortSplats(*data, camera.GetViewMatrix());
 }
 
 void SplatComponent::LoadSplats()
 {
-    std::vector<gs::FullSplat> splats;
+    std::vector<trinity::core::gs::FullSplat> splats;
     if (!trinity::stream::gs::PlyLoader::LoadPly(ply_file_, splats))
     {
         return;
@@ -93,30 +87,26 @@ void SplatComponent::CreateBuffers()
 
     VkDeviceSize splat_size = gpu_splats_.size() * sizeof(trinity::core::gs::GpuSplat);
     splat_buffer_ = StorageBuffer::Create(splat_size, StorageBuffer::AccessMode::CpuAccessible);
-
     void* data = splat_buffer_->Map();
     memcpy(data, gpu_splats_.data(), splat_size);
     splat_buffer_->Unmap();
 
-    VkDeviceSize index_size = splat_indices_.size() * sizeof(uint32_t);
+    VkDeviceSize index_size = gpu_splats_.size() * sizeof(uint32_t);
     index_buffer_ = StorageBuffer::Create(index_size, StorageBuffer::AccessMode::CpuAccessible);
 }
 
 void SplatComponent::CreateDescriptorSets(Renderer* renderer)
 {
-    if (!renderer) return;
     descriptor_set_ = renderer->AllocateDescriptorSet();
-    if (descriptor_set_ != VK_NULL_HANDLE)
-    {
-        renderer->UpdateSplatDescriptorSet(descriptor_set_, splat_buffer_, index_buffer_);
-    }
+    renderer->UpdateSplatDescriptorSet(descriptor_set_, splat_buffer_, index_buffer_);
 }
 
-void SplatComponent::SortSplats(const glm::mat4& view)
+
+void SplatComponent::SortSplats(trinity::core::ecs::SplatDataComponent& data, const glm::mat4& view)
 {
     if (splat_indices_.empty()) return;
 
-    // Simple CPU sort (as in original Application)
+    // Pre-calculate depth for each splat
     for (size_t i = 0; i < splat_indices_.size(); ++i)
     {
         uint32_t initial_idx = splat_indices_[i].index;
@@ -133,17 +123,16 @@ void SplatComponent::SortSplats(const glm::mat4& view)
         });
 
     // Upload indices to SSBO
-    if (index_buffer_)
+    if (data.index_buffer)
     {
-        void* data = index_buffer_->Map();
-        uint32_t* mapped_uints = reinterpret_cast<uint32_t*>(data);
+        void* buf = data.index_buffer->Map();
+        uint32_t* mapped_uints = reinterpret_cast<uint32_t*>(buf);
         for (size_t i = 0; i < splat_indices_.size(); ++i)
         {
             mapped_uints[i] = splat_indices_[i].index;
         }
-        index_buffer_->Unmap();
+        data.index_buffer->Unmap();
     }
 }
-
 
 } // namespace trinity::render

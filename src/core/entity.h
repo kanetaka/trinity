@@ -15,8 +15,6 @@ class Application;
 
 namespace trinity::core {
 
-class Component;
-
 class Entity
 {
 public:
@@ -32,7 +30,6 @@ public:
     const std::vector<ecs::EntityId>& GetChildren() const;
 
     void Update(float delta_time);
-    void UpdateComponents(float delta_time);
     virtual void UpdateEntity(float delta_time);
 
     void ProcessInput(const uint8_t* key_state);
@@ -52,13 +49,8 @@ public:
 
     ecs::Registry& GetRegistry() { return registry_; }
 
-    void AddComponent(Component* component);
-    void RemoveComponent(Component* component);
-    const std::vector<Component*>& GetComponents() const { return components_; }
-
 private:
     ecs::EntityId id_;
-    std::vector<Component*> components_;
     ecs::Registry& registry_;
 };
 

@@ -4,6 +4,9 @@
 #include <glm/gtc/quaternion.hpp>
 #include <string>
 #include <vector>
+#include <memory>
+#include <vulkan/vulkan.h>
+#include "render/resources/buffer_resource.h"
 
 namespace trinity::core {
 
@@ -30,9 +33,9 @@ namespace ecs
     struct SplatDataComponent
     {
         std::string ply_file;
-        // We might need to store references to Vulkan resources here or pointers to
-        // classes For now, let's just keep the file path and we'll see how to
-        // integrate with SplatComponent
+        std::shared_ptr<::trinity::render::StorageBuffer> splat_buffer;
+        std::shared_ptr<::trinity::render::StorageBuffer> index_buffer;
+        VkDescriptorSet descriptor_set = VK_NULL_HANDLE;
     };
 
 } // namespace ecs

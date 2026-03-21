@@ -8,6 +8,9 @@
 #include "app/common/trinity_app.h"
 #include "core/camera.h"
 #include "core/entity.h"
+#include "render/components/splat_component.h"
+#include "core/ecs/registry.h"
+#include "core/ecs/components.h"
 
 #include <unordered_map>
 
@@ -50,6 +53,7 @@ private:
     void UpdateEntities(float delta_time);
 
     std::string ply_file_;
+    std::unique_ptr<trinity::render::SplatComponent> splat_component_;
     trinity::core::Camera camera_;
 
     std::unique_ptr<trinity::render::Renderer> renderer_;

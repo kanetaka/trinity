@@ -1,5 +1,4 @@
 #include "core/entity.h"
-#include "core/component.h"
 #include "core/ecs/components.h"
 #include <algorithm>
 #include <glm/glm.hpp>
@@ -27,10 +26,6 @@ Entity::Entity(ecs::Registry& registry, ecs::EntityId id)
 
 Entity::~Entity()
 {
-    for (auto comp : components_)
-    {
-        delete comp;
-    }
     registry_.Destroy(id_);
 }
 
@@ -140,46 +135,15 @@ glm::vec3 Entity::GetForward() const
     return GetRotation() * glm::vec3(1.0f, 0.0f, 0.0f);
 }
 
-void Entity::AddComponent(Component* component)
-{
-    components_.push_back(component);
-}
-
-void Entity::RemoveComponent(Component* component)
-{
-    auto it = std::find(components_.begin(), components_.end(), component);
-    if (it != components_.end())
-    {
-        components_.erase(it);
-    }
-}
-
 void Entity::Update(float delta_time)
 {
-    UpdateComponents(delta_time);
     UpdateEntity(delta_time);
-
-    // Child update should be handled by the application or a system, 
-    // but for now keeping it recursive via ID lookup if needed.
-    // However, simplest is to let Application::UpdateEntities handle it if it iterates all.
-}
-
-void Entity::UpdateComponents(float delta_time)
-{
-    for (auto comp : components_)
-    {
-        comp->Update(delta_time);
-    }
 }
 
 void Entity::UpdateEntity(float delta_time) {}
 
 void Entity::ProcessInput(const uint8_t* key_state)
 {
-    for (auto comp : components_)
-    {
-        comp->ProcessInput(key_state);
-    }
     EntityInput(key_state);
 }
 

@@ -43,17 +43,25 @@ void Application::OnInitialize()
     trinity::core::Entity* splat_entity = new Entity(*registry_, splat_id);
     RegisterEntity(splat_id, splat_entity);
     root_entity_->AddChild(splat_id);
-    new SplatComponent(splat_entity, ply_file_, renderer_.get());
+
+    // Use member splat_component_ to initialize ECS component
+    splat_component_ = std::make_unique<SplatComponent>(ply_file_, renderer_.get());
+    splat_component_->Initialize(*registry_, splat_id, renderer_.get());
 }
 
 void Application::OnCleanup()
 {
+    // Vulkanリソースはデバイス破棄前に解放する必要がある
+    splat_component_.reset();
+    entity_map_.clear();
+    root_entity_.reset();
+    registry_.reset();
+
     if (renderer_)
     {
         renderer_->Shutdown();
         renderer_.reset();
     }
-    root_entity_.reset();
 }
 
 void Application::OnDrawFrame()
@@ -75,15 +83,19 @@ void Application::OnDrawFrame()
     if (root_entity_)
     {
         root_entity_->Update(delta_time);
-        // Find SplatComponent and call UpdateWithCamera
-        for (auto child_id : root_entity_->GetChildren()) {
-            if (auto* child = GetEntity(child_id)) {
-                for (auto comp : child->GetComponents()) {
-                    if (auto* splat = dynamic_cast<SplatComponent*>(comp)) {
-                        splat->UpdateWithCamera(delta_time, camera_);
-                    }
-                }
-            }
+        
+        // Use member splat_component_ for specific logic (like sorting)
+        if (splat_component_)
+        {
+            // We need the entity ID for the splat data. 
+            // Looking up by name or just keeping the ID in application.
+            // For now, let's find it or use a known ID if we stored it.
+            // Assuming the last created splat_id in OnInitialize was what we want.
+            // To be safe, we can iterate entities or store the ID.
+            // Let's assume we want to update all SplatDataComponents.
+            registry_->ForEach<trinity::core::ecs::SplatDataComponent>([&](trinity::core::ecs::EntityId entity, trinity::core::ecs::SplatDataComponent& data) {
+                splat_component_->UpdateWithCamera(*registry_, entity, camera_);
+            });
         }
     }
 

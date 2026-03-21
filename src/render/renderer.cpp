@@ -7,7 +7,6 @@
 #include "render/resources/buffer_resource.h"
 #include "app/application.h"
 #include "core/entity.h"
-#include "core/component.h"
 #include "core/ecs/registry.h"
 #include "core/ecs/components.h"
 #include <stdexcept>
@@ -136,9 +135,28 @@ void Renderer::Draw(trinity::core::Entity* root)
 
 void Renderer::DrawEntity(trinity::core::Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer)
 {
-    for (auto comp : entity->GetComponents())
+    auto& registry = entity->GetRegistry();
+    auto id = entity->GetId();
+
+    if (auto* splat = registry.GetComponent<trinity::core::ecs::SplatDataComponent>(id))
     {
-        comp->Draw(command_buffer, pipeline_layout_);
+        if (splat->descriptor_set != VK_NULL_HANDLE)
+        {
+            vkCmdBindDescriptorSets(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout_, 0, 1, &splat->descriptor_set, 0, nullptr);
+
+            uint32_t transform_index = registry.GetPoolIndex<trinity::core::ecs::TransformComponent>(id);
+            vkCmdPushConstants(*command_buffer, pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
+
+            // Access original vertex count/index through the splat buffer size or keep it in component
+            // For now, assume common 4 vertices per splat as before. 
+            // We need to know the number of splats. Let's assume splat_buffer size / sizeof(GpuSplat).
+            // But actually we have index_buffer.
+            if (splat->index_buffer)
+            {
+                uint32_t num_splats = static_cast<uint32_t>(splat->index_buffer->GetBufferSize() / sizeof(uint32_t));
+                vkCmdDraw(*command_buffer, 4, num_splats, 0, 0);
+            }
+        }
     }
 
     for (auto child_id : entity->GetChildren())
@@ -253,7 +271,7 @@ void Renderer::UpdateUniformBuffer()
 
 void Renderer::UpdateTransformBuffer(trinity::core::ecs::Registry& registry)
 {
-    auto& transforms = registry.View<trinity::core::ecs::TransformComponent>();
+    auto transforms = registry.View<trinity::core::ecs::TransformComponent>();
     if (transforms.empty()) return;
 
     std::vector<glm::mat4> matrices;

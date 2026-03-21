@@ -1,41 +1,32 @@
 #pragma once
-#ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
-#define GLM_FORCE_DEPTH_ZERO_TO_ONE
-
-
-#endif
-#include "core/component.h"
-#include "core/splat_types.h"
-#include "render/resources/buffer_resource.h"
-#include <vector>
 #include <string>
+#include <vector>
 #include <memory>
 #include <vulkan/vulkan.h>
+#include <glm/glm.hpp>
+#include "core/splat_types.h"
 
 namespace trinity::core { class Camera; }
+namespace trinity::core::ecs { using EntityId = uint32_t; class Registry; struct SplatDataComponent; }
+
 namespace trinity::render {
-
-
-
-class CommandBuffer;
 class Renderer;
-class Camera;
+class StorageBuffer;
 
-class SplatComponent : public trinity::core::Component
+class SplatComponent
 {
 public:
-    SplatComponent(trinity::core::Entity* owner, const std::string& ply_file, Renderer* renderer);
-    ~SplatComponent() override;
+    SplatComponent(const std::string& ply_file, Renderer* renderer);
+    ~SplatComponent();
 
-    void Update(float delta_time) override;
-    void UpdateWithCamera(float delta_time, const trinity::core::Camera& camera);
-    void Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipelineLayout pipeline_layout);
+    void Initialize(trinity::core::ecs::Registry& registry, trinity::core::ecs::EntityId entity, Renderer* renderer);
+    void UpdateWithCamera(trinity::core::ecs::Registry& registry, trinity::core::ecs::EntityId entity, const trinity::core::Camera& camera);
 
 private:
     void LoadSplats();
     void CreateBuffers();
     void CreateDescriptorSets(Renderer* renderer);
-    void SortSplats(const glm::mat4& view);
+    void SortSplats(trinity::core::ecs::SplatDataComponent& data, const glm::mat4& view);
 
     std::string ply_file_;
     std::vector<trinity::core::gs::GpuSplat> gpu_splats_;
@@ -43,9 +34,7 @@ private:
 
     std::shared_ptr<StorageBuffer> splat_buffer_;
     std::shared_ptr<StorageBuffer> index_buffer_;
-
     VkDescriptorSet descriptor_set_ = VK_NULL_HANDLE;
 };
-
 
 } // namespace trinity::render
