@@ -42,24 +42,29 @@ void Renderer::Shutdown()
     auto device = VulkanContext::Get().GetVkDevice();
     vkDeviceWaitIdle(device);
 
-    if (uniform_buffer_) {
+    if (uniform_buffer_)
+    {
         uniform_buffer_->Cleanup();
         uniform_buffer_.reset();
     }
 
-    if (pipeline_) {
+    if (pipeline_)
+    {
         vkDestroyPipeline(device, pipeline_, nullptr);
         pipeline_ = VK_NULL_HANDLE;
     }
-    if (pipeline_layout_) {
+    if (pipeline_layout_)
+    {
         vkDestroyPipelineLayout(device, pipeline_layout_, nullptr);
         pipeline_layout_ = VK_NULL_HANDLE;
     }
-    if (descriptor_set_layout_) {
+    if (descriptor_set_layout_)
+    {
         vkDestroyDescriptorSetLayout(device, descriptor_set_layout_, nullptr);
         descriptor_set_layout_ = VK_NULL_HANDLE;
     }
-    if (descriptor_pool_) {
+    if (descriptor_pool_)
+    {
         vkDestroyDescriptorPool(device, descriptor_pool_, nullptr);
         descriptor_pool_ = VK_NULL_HANDLE;
     }
@@ -70,7 +75,8 @@ void Renderer::Draw(Entity* root)
     if (!root) return;
     auto& vulkan_ctx = VulkanContext::Get();
 
-    if (vulkan_ctx.AcquireNextImage() != VK_SUCCESS) {
+    if (vulkan_ctx.AcquireNextImage() != VK_SUCCESS)
+    {
         return;
     }
 
@@ -218,7 +224,7 @@ void Renderer::UpdateSplatDescriptorSet(VkDescriptorSet set, const std::shared_p
     vkUpdateDescriptorSets(device, static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
 }
 
-struct CameraUBO
+struct CameraUbo
 {
     glm::mat4 view;
     glm::mat4 proj;
@@ -228,7 +234,7 @@ struct CameraUBO
 
 void Renderer::UpdateUniformBuffer()
 {
-    CameraUBO ubo{};
+    CameraUbo ubo{};
     ubo.view = view_;
     ubo.proj = projection_;
     ubo.viewport = glm::vec2(screen_width_, screen_height_);
