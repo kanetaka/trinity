@@ -50,7 +50,8 @@ public:
     void FreeDescriptorSet(VkDescriptorSet descriptorSet);
 
     // Context information handled per rendering frame
-    struct FrameContext {
+    struct FrameContext
+    {
         std::shared_ptr<CommandBuffer> commandBuffer;
         VkFence inflightFence = VK_NULL_HANDLE;
     };

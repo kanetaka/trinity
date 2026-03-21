@@ -3,7 +3,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "core/component.h"
-#include "render/splat_types.h"
+#include "core/splat_types.h"
 #include "render/resources/buffer_resource.h"
 #include <vector>
 #include <string>
