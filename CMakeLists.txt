@@ -41,7 +41,6 @@ include_directories(${CMAKE_SOURCE_DIR}/src/render/surface)
 include_directories(${CMAKE_SOURCE_DIR}/src/core/ecs)
 include_directories(${CMAKE_SOURCE_DIR}/src/core)
 include_directories(${CMAKE_SOURCE_DIR}/src/render)
-include_directories(${CMAKE_SOURCE_DIR}/src/components)
 include_directories(${CMAKE_SOURCE_DIR}/src/utils)
 
 # Library directories
@@ -50,13 +49,11 @@ link_directories(${VK_SDK_PATH}/Lib)
 # Header files (for IDE organization)
 file(GLOB_RECURSE CORE_HEADERS "src/core/*.h")
 file(GLOB_RECURSE IO_HEADERS "src/io/*.h")
-file(GLOB_RECURSE APP_HEADERS "src/app/*.h" "src/components/*.h" "src/render/*.h")
-
+file(GLOB_RECURSE APP_HEADERS "src/app/*.h" "src/render/*.h")
 # Source files
 file(GLOB_RECURSE CORE_SOURCES "src/core/*.cpp")
 file(GLOB_RECURSE IO_SOURCES "src/io/*.cpp")
-file(GLOB_RECURSE APP_SOURCES "src/app/*.cpp" "src/components/*.cpp" "src/render/*.cpp" "src/main.cpp")
-
+file(GLOB_RECURSE APP_SOURCES "src/app/*.cpp" "src/render/*.cpp" "src/main.cpp")
 # Core library
 add_library(core STATIC ${CORE_HEADERS} ${CORE_SOURCES})
 target_include_directories(core PUBLIC ${CMAKE_SOURCE_DIR}/src)

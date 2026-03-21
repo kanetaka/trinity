@@ -1,7 +1,7 @@
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
-#include "components/splat_component.h"
+#include "render/components/splat_component.h"
 #include "core/entity.h"
 #include "core/ecs/components.h"
 #include "app/application.h"

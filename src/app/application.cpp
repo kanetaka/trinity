@@ -4,7 +4,7 @@
 #include "app/application.h"
 #include "core/entity.h"
 #include "render/renderer.h"
-#include "components/splat_component.h"
+#include "render/components/splat_component.h"
 #include "render/vulkan_context.h"
 #include "render/swapchain.h"
 #include <SDL3/SDL.h>
