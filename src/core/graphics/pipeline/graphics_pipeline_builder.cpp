@@ -60,14 +60,14 @@ GraphicsPipelineBuilder::GraphicsPipelineBuilder()
 
 GraphicsPipelineBuilder& GraphicsPipelineBuilder::AddShaderStage(VkShaderStageFlagBits stage, VkShaderModule module, const char* entry)
 {
-	shader_stages_.push_back(
-	{
-	    .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
-	    .stage = stage,
-	    .module = module,
-	    .pName = entry
-	});
-	return *this;
+    shader_stages_.push_back(
+    {
+        .sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO,
+        .stage = stage,
+        .module = module,
+        .pName = entry
+    });
+    return *this;
 }
 
 GraphicsPipelineBuilder &GraphicsPipelineBuilder::SetVertexInput(

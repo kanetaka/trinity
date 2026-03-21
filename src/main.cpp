@@ -18,7 +18,6 @@
 #include "core/graphics/resources/buffer_resource.h"
 
 #include "glm/glm.hpp"
-
 #include "app/application.h"
 
 namespace fs = std::filesystem;
@@ -36,8 +35,8 @@ int RunApplication()
     try
     {
         window = SDL_CreateWindow("Trinity",
-                    1280, 720,
-                    SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+                1280, 720,
+                SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
         if (!window)
         {
@@ -48,21 +47,21 @@ int RunApplication()
 
         auto& vulkan_ctx = VulkanContext::Get();
 
-		vulkan_ctx.GetWindowSystemExtensions = [=](auto& extension_list)
-			{
-				uint32_t ext_count = 0;
-				char const* const* extensions =
-					SDL_Vulkan_GetInstanceExtensions(&ext_count);
-				if (ext_count > 0 && extensions != nullptr)
-				{
-					size_t current_size = extension_list.size();
-					extension_list.resize(current_size + ext_count);
-					for (uint32_t i = 0; i < ext_count; ++i)
-					{
-						extension_list[current_size + i] = extensions[i];
-					}
-				}
-			};
+        vulkan_ctx.GetWindowSystemExtensions = [=](auto& extension_list)
+        {
+            uint32_t ext_count = 0;
+            char const* const* extensions =
+                SDL_Vulkan_GetInstanceExtensions(&ext_count);
+            if (ext_count > 0 && extensions != nullptr)
+            {
+                size_t current_size = extension_list.size();
+                extension_list.resize(current_size + ext_count);
+                for (uint32_t i = 0; i < ext_count; ++i)
+                {
+                    extension_list[current_size + i] = extensions[i];
+                }
+            }
+        };
 
         vulkan_ctx.Initialize("Trinity", &surface_provider);
         vulkan_ctx.RecreateSwapchain();
@@ -99,7 +98,8 @@ int RunApplication()
         app.OnCleanup();
         vulkan_ctx.Cleanup();
 
-    } catch (const std::exception &e)
+    }
+    catch (const std::exception &e)
     {
         std::cerr << "Fatal Error: " << e.what() << std::endl;
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error", e.what(), window);

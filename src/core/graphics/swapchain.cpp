@@ -25,18 +25,19 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
 
         // Select surface format
         VkSurfaceFormatKHR format = formats[0];
-        for (auto& surface_format : formats) {
-                if (surface_format.colorSpace != VK_COLORSPACE_SRGB_NONLINEAR_KHR)
-                {
-                        continue;
-                }
+        for (auto& surface_format : formats)
+        {
+            if (surface_format.colorSpace != VK_COLORSPACE_SRGB_NONLINEAR_KHR)
+            {
+                continue;
+            }
 
-                if (surface_format.format == VK_FORMAT_B8G8R8A8_UNORM ||
-                        surface_format.format == VK_FORMAT_R8G8B8A8_UNORM)
-                {
-                        format = surface_format;
-                        break;
-                }
+            if (surface_format.format == VK_FORMAT_B8G8R8A8_UNORM ||
+                    surface_format.format == VK_FORMAT_R8G8B8A8_UNORM)
+            {
+                format = surface_format;
+                break;
+            }
         }
         auto image_count = std::max(3u, caps.minImageCount);
 
@@ -64,20 +65,20 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
         {
             throw std::runtime_error("failed to create swapchain");
         }
-		if (swapchain_ != VK_NULL_HANDLE)
-		{
-			// Destroy the old swapchain
-			vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
-			swapchain_ = VK_NULL_HANDLE;
+        if (swapchain_ != VK_NULL_HANDLE)
+        {
+            // Destroy the old swapchain
+            vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
+            swapchain_ = VK_NULL_HANDLE;
 
-			for (auto& view : image_views_)
-			{
-				vkDestroyImageView(vk_device, view, nullptr);
-			}
-			image_views_.clear();
+            for (auto& view : image_views_)
+            {
+                vkDestroyImageView(vk_device, view, nullptr);
+            }
+            image_views_.clear();
 
-			DestroyFrameContext();
-		}
+            DestroyFrameContext();
+        }
 
         swapchain_ = swapchain;
         image_format_ = format;
@@ -89,28 +90,28 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
 
         for (uint32_t i = 0; i < images_.size(); ++i)
         {
-			VkImageViewCreateInfo image_view_ci
-			{
-					.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
-					.image = images_[i],
-					.viewType = VK_IMAGE_VIEW_TYPE_2D,
-					.format = format.format,
-					.components =
-				    {
-					    VK_COMPONENT_SWIZZLE_IDENTITY,
-					    VK_COMPONENT_SWIZZLE_IDENTITY,
-						VK_COMPONENT_SWIZZLE_IDENTITY,
-						VK_COMPONENT_SWIZZLE_IDENTITY,
-					},
-					.subresourceRange =
+            VkImageViewCreateInfo image_view_ci
+            {
+                    .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
+                    .image = images_[i],
+                    .viewType = VK_IMAGE_VIEW_TYPE_2D,
+                    .format = format.format,
+                    .components =
                     {
-						.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
-						.baseMipLevel = 0,
-						.levelCount = 1,
-						.baseArrayLayer = 0,
-						.layerCount = 1,
-					}
-			};
+                        VK_COMPONENT_SWIZZLE_IDENTITY,
+                        VK_COMPONENT_SWIZZLE_IDENTITY,
+                        VK_COMPONENT_SWIZZLE_IDENTITY,
+                        VK_COMPONENT_SWIZZLE_IDENTITY,
+                    },
+                    .subresourceRange =
+                    {
+                        .aspectMask = VK_IMAGE_ASPECT_COLOR_BIT,
+                        .baseMipLevel = 0,
+                        .levelCount = 1,
+                        .baseArrayLayer = 0,
+                        .layerCount = 1,
+                    }
+            };
                 VkImageView view;
                 vkCreateImageView(vk_device, &image_view_ci, nullptr, &view);
                 image_views_.push_back(view);
@@ -126,15 +127,15 @@ void Swapchain::Cleanup()
         auto vk_device = vulkan_ctx.GetVkDevice();
         DestroyFrameContext();
 
-		for (auto& view : image_views_)
-		{
-			vkDestroyImageView(vk_device, view, nullptr);
-		}
-		if (swapchain_)
-		{
-			vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
-			swapchain_ = VK_NULL_HANDLE;
-		}
+        for (auto& view : image_views_)
+        {
+            vkDestroyImageView(vk_device, view, nullptr);
+        }
+        if (swapchain_)
+        {
+            vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
+            swapchain_ = VK_NULL_HANDLE;
+        }
         images_.clear();
         image_views_.clear();
 }

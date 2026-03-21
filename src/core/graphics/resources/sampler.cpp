@@ -25,7 +25,8 @@ void Sampler::Initialize(
     };
 
     auto result = vkCreateSampler(vulkan_ctx.GetVkDevice(), &createInfo, nullptr, &sampler_);
-    if (result != VK_SUCCESS) {
+    if (result != VK_SUCCESS)
+    {
         throw std::runtime_error("failed to sampler !");
     }
 }
@@ -33,7 +34,8 @@ void Sampler::Initialize(
 void Sampler::Cleanup()
 {
     auto& vulkan_ctx = VulkanContext::Get();
-    if (sampler_ != VK_NULL_HANDLE) {
+    if (sampler_ != VK_NULL_HANDLE)
+    {
         vkDestroySampler(vulkan_ctx.GetVkDevice(), sampler_, nullptr);
     }
     sampler_ = VK_NULL_HANDLE;

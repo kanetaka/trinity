@@ -46,7 +46,7 @@ void SplatComponent::Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipe
     }
 
     vkCmdBindDescriptorSets(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, 1, &descriptor_set_, 0, nullptr);
-    
+
     // Send transform index via Push Constant
     uint32_t transform_index = owner_->GetRegistry().GetPoolIndex<::ecs::TransformComponent>(owner_->GetId());
     vkCmdPushConstants(*command_buffer, pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
@@ -108,7 +108,7 @@ void SplatComponent::CreateDescriptorSets(Renderer* renderer)
 void SplatComponent::SortSplats(const glm::mat4& view)
 {
     if (splat_indices_.empty()) return;
-    
+
     // Simple CPU sort (as in original Application)
     for (size_t i = 0; i < splat_indices_.size(); ++i)
     {
@@ -118,12 +118,12 @@ void SplatComponent::SortSplats(const glm::mat4& view)
         splat_indices_[i].depth = view_pos.z;
     }
 
-	std::sort(std::execution::par_unseq, splat_indices_.begin(),
-		splat_indices_.end(),
-		[](const gs::SplatSortEntry& a, const gs::SplatSortEntry& b)
-		{
-			return a.depth < b.depth;
-		});
+    std::sort(std::execution::par_unseq, splat_indices_.begin(),
+        splat_indices_.end(),
+        [](const gs::SplatSortEntry& a, const gs::SplatSortEntry& b)
+        {
+            return a.depth < b.depth;
+        });
 
     // Upload indices to SSBO
     if (index_buffer_)

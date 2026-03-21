@@ -107,15 +107,14 @@ void Renderer::Draw(Entity* root)
 
     vkCmdBeginRendering(*command_buffer, &rendering_info);
 
-    vkCmdBindPipeline(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS,
-                                        pipeline_);
+    vkCmdBindPipeline(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
 
     DrawEntity(root, command_buffer);
 
     vkCmdEndRendering(*command_buffer);
 
-    command_buffer->TransitionLayout(swapchain->GetCurrentImage(), range,
-                                                                     ImageLayoutTransition::FromColorToPresent());
+    command_buffer->TransitionLayout(swapchain->GetCurrentImage(),
+            range, ImageLayoutTransition::FromColorToPresent());
 
     command_buffer->End();
 
@@ -148,7 +147,8 @@ VkDescriptorSet Renderer::AllocateDescriptorSet()
     alloc_info.pSetLayouts = &descriptor_set_layout_;
 
     VkDescriptorSet set;
-    if (vkAllocateDescriptorSets(device, &alloc_info, &set) != VK_SUCCESS) {
+    if (vkAllocateDescriptorSets(device, &alloc_info, &set) != VK_SUCCESS)
+    {
         return VK_NULL_HANDLE;
     }
     return set;
@@ -290,8 +290,9 @@ bool Renderer::CreateDescriptorSetLayout()
     layout_info.bindingCount = static_cast<uint32_t>(bindings.size());
     layout_info.pBindings = bindings.data();
 
-    if (vkCreateDescriptorSetLayout(device, &layout_info, nullptr,
-                                                                    &descriptor_set_layout_) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(
+                device, &layout_info, nullptr, &descriptor_set_layout_) != VK_SUCCESS)
+    {
         return false;
     }
     return true;
@@ -303,8 +304,8 @@ bool Renderer::CreateDescriptorPool()
 
     std::vector<VkDescriptorPoolSize> pool_sizes =
     {
-            {VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10},
-            {VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 20}};
+        { VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10 },
+        { VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 20 } };
 
     VkDescriptorPoolCreateInfo pool_info{};
     pool_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
@@ -312,8 +313,7 @@ bool Renderer::CreateDescriptorPool()
     pool_info.pPoolSizes = pool_sizes.data();
     pool_info.maxSets = 10;
 
-    if (vkCreateDescriptorPool(device, &pool_info, nullptr, &descriptor_pool_) !=
-            VK_SUCCESS)
+    if (vkCreateDescriptorPool(device, &pool_info, nullptr, &descriptor_pool_) != VK_SUCCESS)
     {
         return false;
     }
@@ -350,15 +350,14 @@ bool Renderer::InitializeGraphicsPipeline()
     }
 
     GraphicsPipelineBuilder builder;
-    pipeline_ =
-            builder.AddShaderStage(VK_SHADER_STAGE_VERTEX_BIT, vert_module, "main")
-                    .AddShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, frag_module, "main")
-                    .SetVertexInput(nullptr, 0, nullptr, 0)
-                    .SetViewport(extent)
-                    .SetPipelineLayout(pipeline_layout_)
-                    .UseDynamicRendering(vulkan_ctx.GetSwapchain()->GetFormat().format, VK_FORMAT_UNDEFINED)
-                    .EnableAlphaBlend()
-                    .Build();
+    pipeline_ = builder.AddShaderStage(VK_SHADER_STAGE_VERTEX_BIT, vert_module, "main")
+        .AddShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, frag_module, "main")
+        .SetVertexInput(nullptr, 0, nullptr, 0)
+        .SetViewport(extent)
+        .SetPipelineLayout(pipeline_layout_)
+        .UseDynamicRendering(vulkan_ctx.GetSwapchain()->GetFormat().format, VK_FORMAT_UNDEFINED)
+        .EnableAlphaBlend()
+        .Build();
 
     vkDestroyShaderModule(device, vert_module, nullptr);
     vkDestroyShaderModule(device, frag_module, nullptr);

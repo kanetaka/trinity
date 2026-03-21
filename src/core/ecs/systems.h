@@ -3,9 +3,9 @@
 
 namespace ecs
 {
-	class TransformSystem
-	{
-	public:
-		static void Update(Registry &registry);
-	};
+    class TransformSystem
+    {
+    public:
+        static void Update(Registry &registry);
+    };
 } // namespace ecs

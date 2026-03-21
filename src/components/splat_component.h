@@ -18,25 +18,25 @@ class Camera;
 class SplatComponent : public Component
 {
 public:
-	SplatComponent(Entity* owner, const std::string& ply_file, Renderer* renderer);
-	~SplatComponent() override;
+    SplatComponent(Entity* owner, const std::string& ply_file, Renderer* renderer);
+    ~SplatComponent() override;
 
-	void Update(float delta_time) override;
-	void UpdateWithCamera(float delta_time, const Camera& camera);
-	void Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipelineLayout pipeline_layout);
+    void Update(float delta_time) override;
+    void UpdateWithCamera(float delta_time, const Camera& camera);
+    void Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipelineLayout pipeline_layout);
 
 private:
-	void LoadSplats();
-	void CreateBuffers();
-	void CreateDescriptorSets(Renderer* renderer);
-	void SortSplats(const glm::mat4& view);
+    void LoadSplats();
+    void CreateBuffers();
+    void CreateDescriptorSets(Renderer* renderer);
+    void SortSplats(const glm::mat4& view);
 
-	std::string ply_file_;
-	std::vector<gs::GpuSplat> gpu_splats_;
-	std::vector<gs::SplatSortEntry> splat_indices_;
+    std::string ply_file_;
+    std::vector<gs::GpuSplat> gpu_splats_;
+    std::vector<gs::SplatSortEntry> splat_indices_;
 
-	std::shared_ptr<StorageBuffer> splat_buffer_;
-	std::shared_ptr<StorageBuffer> index_buffer_;
+    std::shared_ptr<StorageBuffer> splat_buffer_;
+    std::shared_ptr<StorageBuffer> index_buffer_;
 
-	VkDescriptorSet descriptor_set_ = VK_NULL_HANDLE;
+    VkDescriptorSet descriptor_set_ = VK_NULL_HANDLE;
 };

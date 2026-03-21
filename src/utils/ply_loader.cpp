@@ -19,20 +19,23 @@ struct Property
 bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out_splats)
 {
     std::ifstream file(filepath, std::ios::binary);
-    if (!file.is_open()) {
+    if (!file.is_open())
+    {
         std::cerr << "Failed to open PLY file: " << filepath << std::endl;
         return false;
     }
 
     std::string line;
     std::getline(file, line);
-    if (line != "ply" && line != "ply\r") {
+    if (line != "ply" && line != "ply\r")
+    {
         std::cerr << "Invalid PLY format: Missing 'ply' magic word." << std::endl;
         return false;
     }
 
     std::getline(file, line);
-    if (line.find("format binary_little_endian") == std::string::npos) {
+    if (line.find("format binary_little_endian") == std::string::npos)
+    {
         std::cerr << "Only binary little endian PLY files are supported."
                             << std::endl;
         return false;
@@ -44,13 +47,16 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
     bool inVertexElement = false;
 
     // Parse Header
-    while (std::getline(file, line)) {
+    while (std::getline(file, line))
+    {
         // Strip carriage return if present
-        if (!line.empty() && line.back() == '\r') {
+        if (!line.empty() && line.back() == '\r')
+        {
             line.pop_back();
         }
 
-        if (line == "end_header") {
+        if (line == "end_header")
+        {
             break;
         }
 
@@ -58,16 +64,22 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
         std::string token;
         iss >> token;
 
-        if (token == "element") {
+        if (token == "element")
+        {
             std::string elementType;
             iss >> elementType;
-            if (elementType == "vertex") {
+            if (elementType == "vertex")
+            {
                 iss >> vertexCount;
                 inVertexElement = true;
-            } else {
+            }
+            else
+            {
                 inVertexElement = false;
             }
-        } else if (token == "property" && inVertexElement) {
+        }
+        else if (token == "property" && inVertexElement)
+        {
             std::string propType, propName;
             iss >> propType >> propName;
 
@@ -81,14 +93,16 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
             else if (propType == "int" || propType == "int32")
                 size = 4;
 
-            if (size > 0) {
+            if (size > 0)
+            {
                 properties.push_back({propName, propType, size, currentOffset});
                 currentOffset += size;
             }
         }
     }
 
-    if (vertexCount == 0 || properties.empty()) {
+    if (vertexCount == 0 || properties.empty())
+    {
         std::cerr << "Invalid PLY file or no vertices found." << std::endl;
         return false;
     }
@@ -98,12 +112,14 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
 
     // Create a mapping from property name to offset for quick access
     std::map<std::string, size_t> propMap;
-    for (const auto &prop : properties) {
+    for (const auto &prop : properties)
+    {
         propMap[prop.name] = prop.offset;
     }
 
     // Helper lambda to get offset, or max size_t if not found
-    auto getOffset = [&](const std::string &name) -> size_t {
+    auto getOffset = [&](const std::string &name) -> size_t
+    {
         auto it = propMap.find(name);
         return it != propMap.end() ? it->second : static_cast<size_t>(-1);
     };
@@ -123,7 +139,8 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
 
     // sh_rest offsets
     std::vector<size_t> off_f_rest(45, static_cast<size_t>(-1));
-    for (int i = 0; i < 45; ++i) {
+    for (int i = 0; i < 45; ++i)
+    {
         off_f_rest[i] = getOffset("f_rest_" + std::to_string(i));
     }
 
@@ -139,9 +156,11 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
 
     // Read payload
     std::vector<char> buffer(vertexStride);
-    for (size_t i = 0; i < vertexCount; ++i) {
+    for (size_t i = 0; i < vertexCount; ++i)
+    {
         file.read(buffer.data(), vertexStride);
-        if (!file) {
+        if (!file)
+        {
             std::cerr << "Error reading PLY payload at vertex " << i << std::endl;
             return false;
         }
@@ -149,8 +168,10 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
         FullSplat &splat = out_splats[i];
 
         // Helper to read a float safely
-        auto readFloat = [&](size_t offset, float fallback = 0.0f) -> float {
-            if (offset != static_cast<size_t>(-1)) {
+        auto readFloat = [&](size_t offset, float fallback = 0.0f) -> float
+        {
+            if (offset != static_cast<size_t>(-1))
+            {
                 return *reinterpret_cast<float *>(buffer.data() + offset);
             }
             return fallback;
@@ -168,7 +189,8 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
         splat.sh_dc[1] = readFloat(off_f_dc_1);
         splat.sh_dc[2] = readFloat(off_f_dc_2);
 
-        for (int j = 0; j < 45; ++j) {
+        for (int j = 0; j < 45; ++j)
+        {
             splat.sh_rest[j] = readFloat(off_f_rest[j]);
         }
 
@@ -178,8 +200,7 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
         splat.scale.y = readFloat(off_scale_1, 1.0f);
         splat.scale.z = readFloat(off_scale_2, 1.0f);
 
-        splat.rot.x = readFloat(
-                off_rot_0, 1.0f); // Sometimes rot_0 is w, but we'll read it straight
+        splat.rot.x = readFloat(off_rot_0, 1.0f); // Sometimes rot_0 is w, but we'll read it straight
         splat.rot.y = readFloat(off_rot_1, 0.0f);
         splat.rot.z = readFloat(off_rot_2, 0.0f);
         splat.rot.w = readFloat(off_rot_3, 0.0f);

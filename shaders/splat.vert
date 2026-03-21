@@ -54,11 +54,11 @@ mat3 quatToMat3(vec4 q) {
     float x = q.y;
     float y = q.z;
     float z = q.w;
-    
+
     // Actually, based on PLY structure, usually it's w, x, y, z in rot_0, rot_1, rot_2, rot_3
     // We packed it as: rot_scale_0.xyz = x,y,z; rot_w_scale_yz.x = w
     // Let's assume standard normalized quaternion
-    
+
     return mat3(
         1.0 - 2.0 * (y * y + z * z), 2.0 * (x * y - r * z),       2.0 * (x * z + r * y),
         2.0 * (x * y + r * z),       1.0 - 2.0 * (x * x + z * z), 2.0 * (y * z - r * x),
@@ -72,11 +72,11 @@ void computeCov3D(vec3 scale, float mod, vec4 rot, out float cov3D[6]) {
         0.0, mod * exp(scale.y), 0.0,
         0.0, 0.0, mod * exp(scale.z)
     );
-    
+
     mat3 R = quatToMat3(rot);
     mat3 M = R * S;
     mat3 Sigma = M * transpose(M);
-    
+
     cov3D[0] = Sigma[0][0];
     cov3D[1] = Sigma[0][1];
     cov3D[2] = Sigma[0][2];
@@ -87,7 +87,7 @@ void computeCov3D(vec3 scale, float mod, vec4 rot, out float cov3D[6]) {
 
 void computeCov2D(vec3 mean, float cov3D[6], mat4 view, mat4 proj, vec2 viewport, out vec3 cov2D) {
     vec4 t = view * vec4(mean, 1.0);
-    
+
     // Focal lengths
     float focal_x = proj[0][0] * viewport.x * 0.5;
     float focal_y = proj[1][1] * viewport.y * 0.5;
