@@ -2,14 +2,14 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "components/splat_component.h"
-#include "core/scene/entity.h"
+#include "core/entity.h"
 #include "core/ecs/components.h"
 #include "app/application.h"
-#include "core/renderer/renderer.h"
-#include "utils/ply_loader.h"
-#include "core/graphics/vulkan_context.h"
-#include "utils/asset_path.h"
-#include "core/graphics/command_buffer.h"
+#include "render/renderer.h"
+#include "io/ply_loader.h"
+#include "render/vulkan_context.h"
+#include "core/asset_path.h"
+#include "render/command_buffer.h"
 #include <SDL3/SDL.h>
 #include <iostream>
 #include <algorithm>

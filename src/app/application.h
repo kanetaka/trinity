@@ -6,7 +6,7 @@
 #include <string>
 #include <chrono>
 #include "app/common/trinity_app.h"
-#include "core/scene/camera.h"
+#include "core/camera.h"
 
 #include <unordered_map>
 class Entity;

@@ -2,11 +2,11 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "app/application.h"
-#include "core/scene/entity.h"
-#include "core/renderer/renderer.h"
+#include "core/entity.h"
+#include "render/renderer.h"
 #include "components/splat_component.h"
-#include "core/graphics/vulkan_context.h"
-#include "core/graphics/swapchain.h"
+#include "render/vulkan_context.h"
+#include "render/swapchain.h"
 #include <SDL3/SDL.h>
 #include <iostream>
 #include <algorithm>

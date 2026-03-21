@@ -10,12 +10,12 @@
 #include <iostream>
 #include <vector>
 
-#include "core/graphics/surface/sdl3_surface_provider.h"
-#include "core/graphics/swapchain.h"
-#include "core/graphics/vulkan_context.h"
+#include "render/surface/sdl3_surface_provider.h"
+#include "render/swapchain.h"
+#include "render/vulkan_context.h"
 
-#include "utils/asset_path.h"
-#include "core/graphics/resources/buffer_resource.h"
+#include "core/asset_path.h"
+#include "render/resources/buffer_resource.h"
 
 #include "glm/glm.hpp"
 #include "app/application.h"
