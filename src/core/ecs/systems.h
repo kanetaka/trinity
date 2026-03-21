@@ -2,10 +2,6 @@
 #include "core/ecs/registry.h"
 
 namespace trinity::core {
-
-
-
-
 namespace ecs
 {
     class TransformSystem
@@ -14,6 +10,4 @@ namespace ecs
         static void Update(Registry &registry);
     };
 } // namespace ecs
-
-
 } // namespace trinity::core

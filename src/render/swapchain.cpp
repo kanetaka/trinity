@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <cassert>
 
-namespace trinity::render {
+using namespace trinity::render;
 
 
 
@@ -244,6 +244,3 @@ void Swapchain::DestroyFrameContext()
     }
     present_semaphore_list_.clear();
 }
-
-
-} // namespace trinity::render

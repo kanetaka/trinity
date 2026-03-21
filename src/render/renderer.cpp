@@ -9,16 +9,13 @@
 #include "core/entity.h"
 #include "core/ecs/registry.h"
 #include "core/ecs/components.h"
+#include "render/components/splat_data_component.h"
 #include <stdexcept>
 #include <algorithm>
 
-namespace trinity::render {
+using namespace trinity::render;
 using namespace trinity::core;
 using namespace trinity::stream;
-
-
-
-
 Renderer::Renderer(Application* app)
         : app_(app), screen_width_(0), screen_height_(0) {}
 
@@ -138,7 +135,7 @@ void Renderer::DrawEntity(trinity::core::Entity* entity, std::shared_ptr<Command
     auto& registry = entity->GetRegistry();
     auto id = entity->GetId();
 
-    if (auto* splat = registry.GetComponent<trinity::core::ecs::SplatDataComponent>(id))
+    if (auto* splat = registry.GetComponent<trinity::render::SplatDataComponent>(id))
     {
         if (splat->descriptor_set != VK_NULL_HANDLE)
         {
@@ -395,6 +392,3 @@ bool Renderer::InitializeGraphicsPipeline()
 
     return true;
 }
-
-
-} // namespace trinity::render

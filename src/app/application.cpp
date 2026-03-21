@@ -51,7 +51,7 @@ void Application::OnInitialize()
 
 void Application::OnCleanup()
 {
-    // Vulkanリソースはデバイス破棄前に解放する必要がある
+    // Vulkan resources must be released before the device is destroyed.
     splat_component_.reset();
     entity_map_.clear();
     root_entity_.reset();
@@ -93,7 +93,7 @@ void Application::OnDrawFrame()
             // Assuming the last created splat_id in OnInitialize was what we want.
             // To be safe, we can iterate entities or store the ID.
             // Let's assume we want to update all SplatDataComponents.
-            registry_->ForEach<trinity::core::ecs::SplatDataComponent>([&](trinity::core::ecs::EntityId entity, trinity::core::ecs::SplatDataComponent& data) {
+            registry_->ForEach<trinity::render::SplatDataComponent>([&](trinity::core::ecs::EntityId entity, trinity::render::SplatDataComponent& data) {
                 splat_component_->UpdateWithCamera(*registry_, entity, camera_);
             });
         }

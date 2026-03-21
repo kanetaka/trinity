@@ -1,7 +1,7 @@
 #include "render/resources/image_resource.h"
 #include <stdexcept>
 
-namespace trinity::render {
+using namespace trinity::render;
 
 
 
@@ -326,6 +326,3 @@ VkDescriptorImageInfo StorageImage2D::GetStorageReadWriteDescriptorInfo(VkSample
 template class ImageResource<DepthBuffer>;
 template class ImageResource<Texture2D>;
 template class ImageResource<StorageImage2D>;
-
-
-} // namespace trinity::render

@@ -1,7 +1,7 @@
 #include "render/pipeline/graphics_pipeline_builder.h"
 #include "render/vulkan_context.h"
 
-namespace trinity::render {
+using namespace trinity::render;
 
 
 
@@ -264,6 +264,3 @@ VkPipeline GraphicsPipelineBuilder::Build()
     }
     return pipeline;
 }
-
-
-} // namespace trinity::render

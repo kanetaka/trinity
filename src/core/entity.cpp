@@ -5,9 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-namespace trinity::core {
-
-
+using namespace trinity::core;
 
 
 Entity::Entity(ecs::Registry& registry, ecs::EntityId id)
@@ -148,6 +146,3 @@ void Entity::ProcessInput(const uint8_t* key_state)
 }
 
 void Entity::EntityInput(const uint8_t* key_state) {}
-
-
-} // namespace trinity::core

@@ -1,7 +1,7 @@
 #include "render/resources/sampler.h"
 #include <stdexcept>
 
-namespace trinity::render {
+using namespace trinity::render;
 
 
 
@@ -45,6 +45,3 @@ void Sampler::Cleanup()
     }
     sampler_ = VK_NULL_HANDLE;
 }
-
-
-} // namespace trinity::render

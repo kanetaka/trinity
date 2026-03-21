@@ -5,13 +5,11 @@
 #include <map>
 #include <sstream>
 
-namespace trinity::stream {
+using namespace trinity::stream;
+using namespace trinity::stream::gs;
 
-
-
-
-
-namespace gs {
+namespace
+{
 
 struct Property
 {
@@ -21,7 +19,9 @@ struct Property
     size_t offset;
 };
 
-bool PlyLoader::LoadPly(const std::string &filepath, std::vector<trinity::core::gs::FullSplat> &out_splats)
+} // namespace
+
+bool gs::PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out_splats)
 {
     std::ifstream file(filepath, std::ios::binary);
     if (!file.is_open())
@@ -170,7 +170,7 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<trinity::core::
             return false;
         }
 
-        trinity::core::gs::FullSplat &splat = out_splats[i];
+        FullSplat &splat = out_splats[i];
 
         // Helper to read a float safely
         auto readFloat = [&](size_t offset, float fallback = 0.0f) -> float
@@ -215,8 +215,3 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<trinity::core::
                         << filepath << std::endl;
     return true;
 }
-
-} // namespace gs
-
-
-} // namespace trinity::stream

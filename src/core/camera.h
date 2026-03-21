@@ -4,11 +4,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 namespace trinity::core {
-
-
-
-
-
 class Camera
 {
 public:
@@ -40,6 +35,4 @@ public:
 private:
     void UpdateCameraVectors();
 };
-
-
 } // namespace trinity::core

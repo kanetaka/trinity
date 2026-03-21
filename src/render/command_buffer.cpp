@@ -1,6 +1,6 @@
 #include "render/command_buffer.h"
 
-namespace trinity::render {
+using namespace trinity::render;
 
 
 
@@ -59,6 +59,3 @@ void CommandBuffer::TransitionLayout(VkImage image,
 
     vkCmdPipelineBarrier2(command_buffer_, &dependency_info);
 }
-
-
-} // namespace trinity::render

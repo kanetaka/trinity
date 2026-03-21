@@ -19,10 +19,9 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-
-namespace trinity::render {
-
 #endif
+
+using namespace trinity::render;
 
 #define VK_GET_INSTANCE_PROC_ADDR(instance, name, ...)                         \
   reinterpret_cast<PFN_##name>(vkGetInstanceProcAddr(instance, #name))
@@ -567,6 +566,3 @@ void VulkanContext::FreeDescriptorSet(VkDescriptorSet descriptor_set)
 {
     vkFreeDescriptorSets(vk_device_, descriptor_pool_, 1, &descriptor_set);
 }
-
-
-} // namespace trinity::render

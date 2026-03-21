@@ -11,10 +11,7 @@
 
 #include "core/ecs/registry.h"
 
-class Application;
-
 namespace trinity::core {
-
 class Entity
 {
 public:
@@ -53,6 +50,4 @@ private:
     ecs::EntityId id_;
     ecs::Registry& registry_;
 };
-
-
 } // namespace trinity::core

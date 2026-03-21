@@ -11,6 +11,7 @@
 #include "render/components/splat_component.h"
 #include "core/ecs/registry.h"
 #include "core/ecs/components.h"
+#include "render/components/splat_data_component.h"
 
 #include <unordered_map>
 

@@ -7,10 +7,6 @@
 #include <cassert>
 
 namespace trinity::core {
-
-
-
-
 namespace ecs
 {
     using EntityId = uint32_t;
@@ -184,6 +180,4 @@ namespace ecs
         std::unordered_map<uint32_t, std::unique_ptr<IComponentPool>> pools_;
     };
 } // namespace ecs
-
-
 } // namespace trinity::core

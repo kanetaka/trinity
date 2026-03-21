@@ -2,17 +2,9 @@
 #include "core/ecs/registry.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include <string>
 #include <vector>
-#include <memory>
-#include <vulkan/vulkan.h>
-#include "render/resources/buffer_resource.h"
 
 namespace trinity::core {
-
-
-
-
 namespace ecs
 {
     struct TransformComponent
@@ -30,15 +22,6 @@ namespace ecs
         std::vector<EntityId> children;
     };
 
-    struct SplatDataComponent
-    {
-        std::string ply_file;
-        std::shared_ptr<::trinity::render::StorageBuffer> splat_buffer;
-        std::shared_ptr<::trinity::render::StorageBuffer> index_buffer;
-        VkDescriptorSet descriptor_set = VK_NULL_HANDLE;
-    };
-
 } // namespace ecs
-
-
 } // namespace trinity::core
+
