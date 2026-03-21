@@ -1,6 +1,11 @@
-#include "io/shader_loader.h"
+#include "stream/shader_loader.h"
 #include <vector>
 #include <fstream>
+
+namespace trinity::stream {
+
+
+
 
 namespace loader
 {
@@ -34,3 +39,6 @@ namespace loader
         return shader_module;
     }
 }
+
+
+} // namespace trinity::stream

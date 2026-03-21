@@ -2,6 +2,11 @@
 #include "render/surface/surface_provider.h"
 #include <SDL3/SDL.h>
 
+namespace trinity::render {
+
+
+
+
 class Sdl3SurfaceProvider : public ISurfaceProvider
 {
 public:
@@ -13,3 +18,6 @@ public:
 private:
     SDL_Window* window_;
 };
+
+
+} // namespace trinity::render

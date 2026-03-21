@@ -1,5 +1,10 @@
 #include "render/resources/buffer_resource.h"
 
+namespace trinity::render {
+
+
+
+
 template<typename T>
 void BufferResource<T>::Cleanup()
 {
@@ -291,3 +296,6 @@ template class BufferResource<StagingBuffer>;
 template class BufferResource<DynamicUniformBuffer>;
 template class BufferResource<StorageBuffer>;
 
+
+
+} // namespace trinity::render

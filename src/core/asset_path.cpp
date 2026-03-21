@@ -2,6 +2,11 @@
 #include <array>
 #include <string_view>
 
+namespace trinity::core {
+
+
+
+
 namespace
 {
     std::filesystem::path asset_root__ = "assets/";
@@ -30,3 +35,6 @@ std::filesystem::path GetAssetPath(AssetType type, const std::filesystem::path& 
 {
     return GetAssetRootPath() / ToSubDirectoryName(type) / fileName;
 }
+
+
+} // namespace trinity::core

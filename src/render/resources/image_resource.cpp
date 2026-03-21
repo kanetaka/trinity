@@ -1,6 +1,11 @@
 #include "render/resources/image_resource.h"
 #include <stdexcept>
 
+namespace trinity::render {
+
+
+
+
 bool DepthBuffer::Initialize(VkExtent2D extent, VkFormat depthFormat)
 {
     auto& vulkanCtx = VulkanContext::Get();
@@ -321,3 +326,6 @@ VkDescriptorImageInfo StorageImage2D::GetStorageReadWriteDescriptorInfo(VkSample
 template class ImageResource<DepthBuffer>;
 template class ImageResource<Texture2D>;
 template class ImageResource<StorageImage2D>;
+
+
+} // namespace trinity::render

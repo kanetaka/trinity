@@ -1,6 +1,11 @@
 #pragma once
 #include <memory>
 
+namespace trinity::render {
+
+
+
+
 template<typename T>
 class GpuResourceBase
 {
@@ -15,3 +20,6 @@ public:
 protected:
     GpuResourceBase() = default;    // Protected to restrict creation via factory method
 };
+
+
+} // namespace trinity::render

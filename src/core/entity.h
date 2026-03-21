@@ -1,6 +1,8 @@
 #pragma once
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
+
 #endif
 #include <vector>
 #include <glm/glm.hpp>
@@ -10,6 +12,9 @@
 #include "core/ecs/registry.h"
 
 class Application;
+
+namespace trinity::core {
+
 class Component;
 
 class Entity
@@ -56,3 +61,6 @@ private:
     std::vector<Component*> components_;
     ecs::Registry& registry_;
 };
+
+
+} // namespace trinity::core

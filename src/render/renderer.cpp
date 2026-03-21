@@ -1,7 +1,7 @@
 #include "render/renderer.h"
 #include "render/vulkan_context.h"
 #include "render/swapchain.h"
-#include "io/shader_loader.h"
+#include "stream/shader_loader.h"
 #include "core/asset_path.h"
 #include "render/pipeline/graphics_pipeline_builder.h"
 #include "render/resources/buffer_resource.h"
@@ -12,6 +12,13 @@
 #include "core/ecs/components.h"
 #include <stdexcept>
 #include <algorithm>
+
+namespace trinity::render {
+using namespace trinity::core;
+using namespace trinity::stream;
+
+
+
 
 Renderer::Renderer(Application* app)
         : app_(app), screen_width_(0), screen_height_(0) {}
@@ -70,7 +77,7 @@ void Renderer::Shutdown()
     }
 }
 
-void Renderer::Draw(Entity* root)
+void Renderer::Draw(trinity::core::Entity* root)
 {
     if (!root) return;
     auto& vulkan_ctx = VulkanContext::Get();
@@ -127,7 +134,7 @@ void Renderer::Draw(Entity* root)
     vulkan_ctx.SubmitPresent();
 }
 
-void Renderer::DrawEntity(Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer)
+void Renderer::DrawEntity(trinity::core::Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer)
 {
     for (auto comp : entity->GetComponents())
     {
@@ -244,9 +251,9 @@ void Renderer::UpdateUniformBuffer()
     uniform_buffer_->Unmap();
 }
 
-void Renderer::UpdateTransformBuffer(ecs::Registry& registry)
+void Renderer::UpdateTransformBuffer(trinity::core::ecs::Registry& registry)
 {
-    auto& transforms = registry.View<ecs::TransformComponent>();
+    auto& transforms = registry.View<trinity::core::ecs::TransformComponent>();
     if (transforms.empty()) return;
 
     std::vector<glm::mat4> matrices;
@@ -334,9 +341,9 @@ bool Renderer::InitializeGraphicsPipeline()
 
     // Load Shaders
     auto vert_module =
-            loader::LoadShaderModule(VulkanContext::Get().GetVkDevice(), GetAssetRootPath() / "shaders" / "splat" / "splat.vert.spv");
+            trinity::stream::loader::LoadShaderModule(VulkanContext::Get().GetVkDevice(), trinity::core::GetAssetRootPath() / "shaders" / "splat" / "splat.vert.spv");
     auto frag_module =
-            loader::LoadShaderModule(VulkanContext::Get().GetVkDevice(), GetAssetRootPath() / "shaders" / "splat" / "splat.frag.spv");
+            trinity::stream::loader::LoadShaderModule(VulkanContext::Get().GetVkDevice(), trinity::core::GetAssetRootPath() / "shaders" / "splat" / "splat.frag.spv");
 
     VkPushConstantRange pushRange{};
     pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
@@ -370,3 +377,6 @@ bool Renderer::InitializeGraphicsPipeline()
 
     return true;
 }
+
+
+} // namespace trinity::render

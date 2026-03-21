@@ -1,8 +1,13 @@
 #pragma once
+
+
 #ifdef VK_USE_PLATFORM_WIN32_KHR
 # define NOMINMAX
 #endif
 #include <vulkan/vulkan.h>
+
+namespace trinity::render {
+
 
 class ISurfaceProvider
 {
@@ -12,3 +17,6 @@ public:
     virtual uint32_t GetFramebufferWidth() const = 0;
     virtual uint32_t GetFramebufferHeight() const = 0;
 };
+
+
+} // namespace trinity::render

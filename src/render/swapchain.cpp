@@ -2,6 +2,11 @@
 #include <stdexcept>
 #include <cassert>
 
+namespace trinity::render {
+
+
+
+
 bool Swapchain::Recreate(uint32_t width, uint32_t height)
 {
         auto& vulkan_ctx = VulkanContext::Get();
@@ -239,3 +244,6 @@ void Swapchain::DestroyFrameContext()
     }
     present_semaphore_list_.clear();
 }
+
+
+} // namespace trinity::render

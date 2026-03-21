@@ -1,6 +1,8 @@
 #include "render/vulkan_context.h"
 #include "render/swapchain.h"
 
+
+
 #if defined(__ANDROID__)
 #include <vulkan/vulkan.h>
 #include <vulkan/vulkan_android.h>
@@ -17,6 +19,9 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+
+namespace trinity::render {
+
 #endif
 
 #define VK_GET_INSTANCE_PROC_ADDR(instance, name, ...)                         \
@@ -562,3 +567,6 @@ void VulkanContext::FreeDescriptorSet(VkDescriptorSet descriptor_set)
 {
     vkFreeDescriptorSets(vk_device_, descriptor_pool_, 1, &descriptor_set);
 }
+
+
+} // namespace trinity::render

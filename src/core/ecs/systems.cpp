@@ -3,6 +3,11 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
+namespace trinity::core {
+
+
+
+
 namespace ecs
 {
     static void UpdateTransformRecursive(Registry& registry, EntityId entity, const glm::mat4& parent_world)
@@ -59,3 +64,6 @@ namespace ecs
             });
     }
 } // namespace ecs
+
+
+} // namespace trinity::core

@@ -2,6 +2,11 @@
 #include "render/resources/image_resource.h"
 #include "render/image_barrier.h"
 
+namespace trinity::render {
+
+
+
+
 ImageLayoutTransition ImageLayoutTransition::FromUndefinedToColorAttachment()
 {
     return
@@ -92,3 +97,6 @@ ImageLayoutTransition ImageLayoutTransition::ToStorageImageGeneralLayout(const I
         .dstStage = VK_PIPELINE_STAGE_COMPUTE_SHADER_BIT | VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT
     };
 }
+
+
+} // namespace trinity::render

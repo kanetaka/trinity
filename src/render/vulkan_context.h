@@ -9,6 +9,11 @@
 
 #include "render/command_buffer.h"
 
+namespace trinity::render {
+
+
+
+
 class Swapchain;
 class CommandBuffer;
 class ISurfaceProvider;
@@ -147,3 +152,6 @@ private:
         .sType =
             VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SHADER_ATOMIC_FLOAT_FEATURES_EXT };
 };
+
+
+} // namespace trinity::render

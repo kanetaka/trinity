@@ -3,6 +3,11 @@
 #include <vector>
 #include "render/vulkan_context.h"
 
+namespace trinity::render {
+
+
+
+
 class GraphicsPipelineBuilder
 {
 public:
@@ -158,3 +163,6 @@ private:
     VkFormat color_format_ = VK_FORMAT_UNDEFINED;
     bool use_dynamic_rendering_ = false;
 };
+
+
+} // namespace trinity::render

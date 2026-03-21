@@ -2,6 +2,11 @@
 #include "core/component.h"
 #include "core/entity.h"
 
+namespace trinity::core {
+
+
+
+
 Component::Component(Entity* owner, int update_order)
         : owner_(owner), update_order_(update_order)
 {
@@ -16,3 +21,6 @@ Component::~Component()
 void Component::Update(float delta_time)
 {
 }
+
+
+} // namespace trinity::core

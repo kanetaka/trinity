@@ -2,6 +2,11 @@
 #include "render/vulkan_context.h"
 #include "render/image_barrier.h"
 
+namespace trinity::render {
+
+
+
+
 class CommandBuffer
 {
 public:
@@ -30,3 +35,6 @@ public:
 private:
     VkCommandBuffer command_buffer_{};
 };
+
+
+} // namespace trinity::render

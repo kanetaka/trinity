@@ -4,17 +4,23 @@
 #include <memory>
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
+
+
 #endif
 #include <glm/glm.hpp>
+#include "core/entity.h"
 
+namespace trinity::core::ecs { class Registry; }
 class Application;
-class Entity;
-class Component;
+
+namespace trinity::render {
+
+
 class CommandBuffer;
 class UniformBuffer;
 class StorageBuffer;
 
-namespace ecs { class Registry; }
+
 
 class Renderer
 {
@@ -25,13 +31,13 @@ public:
     bool Initialize(float screen_width, float screen_height);
     void Shutdown();
 
-    void Draw(Entity* root);
+    void Draw(trinity::core::Entity* root);
 
     void SetViewMatrix(const glm::mat4& view) { view_ = view; }
     void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
 
     void UpdateUniformBuffer();
-    void UpdateTransformBuffer(ecs::Registry& registry);
+    void UpdateTransformBuffer(trinity::core::ecs::Registry& registry);
 
     VkDescriptorSetLayout GetSplatDescriptorSetLayout() const { return descriptor_set_layout_; }
     VkDescriptorSet AllocateDescriptorSet();
@@ -45,7 +51,7 @@ private:
     bool CreateDescriptorPool();
     bool CreateDescriptorSets();
     bool InitializeGraphicsPipeline();
-    void DrawEntity(Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer);
+    void DrawEntity(trinity::core::Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer);
 
     Application* app_;
 
@@ -63,3 +69,6 @@ private:
     float screen_width_;
     float screen_height_;
 };
+
+
+} // namespace trinity::render

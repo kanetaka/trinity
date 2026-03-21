@@ -1,9 +1,14 @@
-#include "io/ply_loader.h"
+#include "stream/ply_loader.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <map>
 #include <sstream>
+
+namespace trinity::stream {
+
+
+
 
 
 namespace gs {
@@ -16,7 +21,7 @@ struct Property
     size_t offset;
 };
 
-bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out_splats)
+bool PlyLoader::LoadPly(const std::string &filepath, std::vector<trinity::core::gs::FullSplat> &out_splats)
 {
     std::ifstream file(filepath, std::ios::binary);
     if (!file.is_open())
@@ -165,7 +170,7 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
             return false;
         }
 
-        FullSplat &splat = out_splats[i];
+        trinity::core::gs::FullSplat &splat = out_splats[i];
 
         // Helper to read a float safely
         auto readFloat = [&](size_t offset, float fallback = 0.0f) -> float
@@ -212,3 +217,6 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
 }
 
 } // namespace gs
+
+
+} // namespace trinity::stream

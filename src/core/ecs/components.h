@@ -5,6 +5,11 @@
 #include <string>
 #include <vector>
 
+namespace trinity::core {
+
+
+
+
 namespace ecs
 {
     struct TransformComponent
@@ -31,3 +36,6 @@ namespace ecs
     };
 
 } // namespace ecs
+
+
+} // namespace trinity::core

@@ -2,6 +2,11 @@
 #include "render/vulkan_context.h"
 #include "render/resources/gpu_resource_base.h"
 
+namespace trinity::render {
+
+
+
+
 class Sampler : public GpuResourceBase<Sampler>
 {
     friend class GpuResourceBase<Sampler>;
@@ -28,3 +33,6 @@ public:
 protected:
     VkSampler sampler_ = VK_NULL_HANDLE;
 };
+
+
+} // namespace trinity::render

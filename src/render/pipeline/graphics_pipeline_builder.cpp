@@ -1,6 +1,11 @@
 #include "render/pipeline/graphics_pipeline_builder.h"
 #include "render/vulkan_context.h"
 
+namespace trinity::render {
+
+
+
+
 GraphicsPipelineBuilder::GraphicsPipelineBuilder()
 {
     vertex_input_state_ =
@@ -259,3 +264,6 @@ VkPipeline GraphicsPipelineBuilder::Build()
     }
     return pipeline;
 }
+
+
+} // namespace trinity::render

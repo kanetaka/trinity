@@ -3,6 +3,11 @@
 #include <iostream>
 #include <stdexcept>
 
+namespace trinity::render {
+
+
+
+
 Sdl3SurfaceProvider::Sdl3SurfaceProvider(SDL_Window* window)
         : window_(window) {}
 
@@ -29,3 +34,6 @@ uint32_t Sdl3SurfaceProvider::GetFramebufferHeight() const
     SDL_GetWindowSizeInPixels(window_, &width, &height);
     return static_cast<uint32_t>(height);
 }
+
+
+} // namespace trinity::render

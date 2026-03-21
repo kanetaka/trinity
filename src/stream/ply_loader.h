@@ -3,6 +3,11 @@
 #include <string>
 #include <vector>
 
+namespace trinity::stream {
+
+
+
+
 
 namespace gs
 {
@@ -12,6 +17,9 @@ namespace gs
         // Loads a standard 3DGS .ply file
         // Returns true on success, false on failure
         static bool LoadPly(const std::string& filepath,
-            std::vector<FullSplat>& out_splats);
+            std::vector<trinity::core::gs::FullSplat>& out_splats);
     };
 } // namespace gs
+
+
+} // namespace trinity::stream

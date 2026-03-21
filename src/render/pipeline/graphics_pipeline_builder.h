@@ -3,6 +3,11 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
+namespace trinity::render {
+
+
+
+
 class GraphicsPipelineBuilder
 {
 public:
@@ -85,3 +90,6 @@ private:
     VkRenderPass render_pass_ = VK_NULL_HANDLE;
     uint32_t subpass_ = 0;
 };
+
+
+} // namespace trinity::render

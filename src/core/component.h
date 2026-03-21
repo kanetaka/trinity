@@ -3,8 +3,11 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 
+namespace trinity::render { class CommandBuffer; }
+
+namespace trinity::core {
+
 class Entity;
-class CommandBuffer;
 
 class Component
 {
@@ -14,8 +17,7 @@ public:
 
     virtual void Update(float delta_time);
     virtual void ProcessInput(const uint8_t* key_state) {}
-    virtual void OnUpdateWorldTransform() {}
-    virtual void Draw(std::shared_ptr<CommandBuffer>& command_buffer, VkPipelineLayout pipeline_layout) {}
+    virtual void Draw(std::shared_ptr<trinity::render::CommandBuffer>& command_buffer, VkPipelineLayout pipeline_layout) {}
 
     int GetUpdateOrder() const { return update_order_; }
 
@@ -23,3 +25,6 @@ protected:
     Entity* owner_;
     int update_order_;
 };
+
+
+} // namespace trinity::core

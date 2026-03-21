@@ -1,5 +1,10 @@
 #pragma once
 
+namespace trinity::render {
+
+
+
+
 class IImageResource;
 
 struct ImageLayoutTransition
@@ -34,3 +39,6 @@ struct ImageLayoutTransition
     // ensuring dependencies for these stages.
     static ImageLayoutTransition ToStorageImageGeneralLayout(const IImageResource* image);
 };
+
+
+} // namespace trinity::render

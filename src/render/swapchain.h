@@ -4,6 +4,11 @@
 #include <map>
 #include <string>
 
+namespace trinity::render {
+
+
+
+
 class VulkanContext;
 class Swapchain
 {
@@ -50,3 +55,6 @@ private:
     std::vector<VkSemaphore> present_semaphore_list_;
     friend class VulkanContext;
 };
+
+
+} // namespace trinity::render

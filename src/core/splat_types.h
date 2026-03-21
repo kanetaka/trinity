@@ -3,6 +3,11 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
+namespace trinity::core {
+
+
+
+
 namespace gs
 {
     // Structured data for a single 3D Gaussian Splat
@@ -62,3 +67,6 @@ namespace gs
         float depth;
     };
 } // namespace gs
+
+
+} // namespace trinity::core

@@ -2,6 +2,11 @@
 #include "render/vulkan_context.h"
 #include "render/resources/gpu_resource_base.h"
 
+namespace trinity::render {
+
+
+
+
 class IImageResource
 {
 public:
@@ -128,3 +133,6 @@ private:
 
     VkImageSubresourceRange subresource_range_{};
 };
+
+
+} // namespace trinity::render

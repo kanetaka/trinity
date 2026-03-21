@@ -1,6 +1,11 @@
 #pragma once
 #include "render/vulkan_context.h"
 
+namespace trinity::render {
+
+
+
+
 
 // Helper templates for Vulkan pNext chain construction
 template<typename T>
@@ -37,3 +42,6 @@ public:
 protected:
     VkPhysicalDeviceFeatures2 phys_dev_features_{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };
 };
+
+
+} // namespace trinity::render

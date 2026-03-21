@@ -15,6 +15,9 @@
 #include "core/ecs/systems.h"
 #include "core/ecs/components.h"
 
+using namespace trinity::core;
+using namespace trinity::render;
+
 Application::Application(const std::string& plyFile)
     : ply_file_(plyFile), camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
     updating_entities_(false)
@@ -37,7 +40,7 @@ void Application::OnInitialize()
 
     // Create Splat Entity as a child of root
     ecs::EntityId splat_id = registry_->Create();
-    Entity* splat_entity = new Entity(*registry_, splat_id);
+    trinity::core::Entity* splat_entity = new Entity(*registry_, splat_id);
     RegisterEntity(splat_id, splat_entity);
     root_entity_->AddChild(splat_id);
     new SplatComponent(splat_entity, ply_file_, renderer_.get());

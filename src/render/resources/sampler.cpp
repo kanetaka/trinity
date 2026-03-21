@@ -1,6 +1,11 @@
 #include "render/resources/sampler.h"
 #include <stdexcept>
 
+namespace trinity::render {
+
+
+
+
 void Sampler::Initialize(
     VkFilter minFilter,
     VkFilter magFilter,
@@ -40,3 +45,6 @@ void Sampler::Cleanup()
     }
     sampler_ = VK_NULL_HANDLE;
 }
+
+
+} // namespace trinity::render

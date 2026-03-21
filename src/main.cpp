@@ -19,6 +19,8 @@
 
 #include "glm/glm.hpp"
 #include "app/application.h"
+using namespace trinity::core;
+using namespace trinity::render;
 
 namespace fs = std::filesystem;
 
