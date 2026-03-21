@@ -14,11 +14,9 @@ namespace trinity::core { class Registry; }
 class Application;
 
 namespace trinity::render {
-
-
-class CommandBuffer;
-class UniformBuffer;
-class StorageBuffer;
+    class CommandBuffer;
+    class UniformBuffer;
+    class StorageBuffer;
 
 
 

@@ -356,9 +356,9 @@ bool Renderer::InitializeGraphicsPipeline()
 
     // Load Shaders
     auto vert_module =
-            trinity::stream::loader::LoadShaderModule(VulkanContext::Get().GetVkDevice(), trinity::core::GetAssetRootPath() / "shaders" / "splat" / "splat.vert.spv");
+            trinity::stream::LoadShaderModule(VulkanContext::Get().GetVkDevice(), trinity::core::GetAssetRootPath() / "shaders" / "splat" / "splat.vert.spv");
     auto frag_module =
-            trinity::stream::loader::LoadShaderModule(VulkanContext::Get().GetVkDevice(), trinity::core::GetAssetRootPath() / "shaders" / "splat" / "splat.frag.spv");
+            trinity::stream::LoadShaderModule(VulkanContext::Get().GetVkDevice(), trinity::core::GetAssetRootPath() / "shaders" / "splat" / "splat.frag.spv");
 
     VkPushConstantRange pushRange{};
     pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;

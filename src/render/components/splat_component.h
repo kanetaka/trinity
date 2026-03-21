@@ -8,8 +8,11 @@
 #include "render/components/splat_data_component.h"
 #include "render/resources/buffer_resource.h"
 
-namespace trinity::core { class Camera; }
-namespace trinity::core { using EntityId = uint32_t; class Registry; }
+namespace trinity::core { 
+    class Camera; 
+    class Registry;
+    using EntityId = uint32_t;
+}
 
 namespace trinity::render {
 class Renderer;
@@ -32,8 +35,8 @@ private:
     void SortSplats(trinity::render::SplatDataComponent& data, const glm::mat4& view);
 
     std::string ply_file_;
-    std::vector<trinity::stream::gs::GpuSplat> gpu_splats_;
-    std::vector<trinity::stream::gs::SplatSortEntry> splat_indices_;
+    std::vector<trinity::stream::GpuSplat> gpu_splats_;
+    std::vector<trinity::stream::SplatSortEntry> splat_indices_;
 
     std::shared_ptr<StorageBuffer> splat_buffer_;
     std::shared_ptr<StorageBuffer> index_buffer_;

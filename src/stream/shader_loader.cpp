@@ -2,9 +2,9 @@
 #include <vector>
 #include <fstream>
 
-using namespace trinity::stream;
+namespace trinity::stream {
 
-VkShaderModule loader::LoadShaderModule(VkDevice device, const std::filesystem::path& shaderSpvPath)
+VkShaderModule LoadShaderModule(VkDevice device, const std::filesystem::path& shaderSpvPath)
 {
     // Read file in binary mode
     std::ifstream file(shaderSpvPath, std::ios::ate | std::ios::binary);
@@ -32,3 +32,5 @@ VkShaderModule loader::LoadShaderModule(VkDevice device, const std::filesystem::
     }
     return shader_module;
 }
+
+} // namespace trinity::stream

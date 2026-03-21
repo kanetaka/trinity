@@ -58,8 +58,8 @@ void SplatComponent::UpdateWithCamera(trinity::core::Registry& registry, trinity
 
 void SplatComponent::LoadSplats()
 {
-    std::vector<trinity::stream::gs::FullSplat> splats;
-    if (!trinity::stream::gs::PlyLoader::LoadPly(ply_file_, splats))
+    std::vector<trinity::stream::FullSplat> splats;
+    if (!trinity::stream::PlyLoader::LoadPly(ply_file_, splats))
     {
         return;
     }
@@ -70,7 +70,7 @@ void SplatComponent::LoadSplats()
     for (uint32_t i = 0; i < splats.size(); ++i)
     {
         const auto& s = splats[i];
-        trinity::stream::gs::GpuSplat gpu_splat;
+        trinity::stream::GpuSplat gpu_splat;
         gpu_splat.position_opacity = glm::vec4(s.position, s.opacity);
         gpu_splat.rot_scale_0 = glm::vec4(s.rot.x, s.rot.y, s.rot.z, s.scale.x);
         gpu_splat.rot_w_scale_yz = glm::vec4(s.rot.w, s.scale.y, s.scale.z, 0.0f);
@@ -85,7 +85,7 @@ void SplatComponent::CreateBuffers()
 {
     if (gpu_splats_.empty()) return;
 
-    VkDeviceSize splat_size = gpu_splats_.size() * sizeof(trinity::stream::gs::GpuSplat);
+    VkDeviceSize splat_size = gpu_splats_.size() * sizeof(trinity::stream::GpuSplat);
     splat_buffer_ = StorageBuffer::Create(splat_size, StorageBuffer::AccessMode::CpuAccessible);
     void* data = splat_buffer_->Map();
     memcpy(data, gpu_splats_.data(), splat_size);
@@ -117,7 +117,7 @@ void SplatComponent::SortSplats(trinity::render::SplatDataComponent& data, const
 
     std::sort(std::execution::par_unseq, splat_indices_.begin(),
         splat_indices_.end(),
-        [](const trinity::stream::gs::SplatSortEntry& a, const trinity::stream::gs::SplatSortEntry& b)
+        [](const trinity::stream::SplatSortEntry& a, const trinity::stream::SplatSortEntry& b)
         {
             return a.depth < b.depth;
         });

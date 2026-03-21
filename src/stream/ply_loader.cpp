@@ -5,8 +5,7 @@
 #include <map>
 #include <sstream>
 
-using namespace trinity::stream;
-using namespace trinity::stream::gs;
+namespace trinity::stream {
 
 namespace
 {
@@ -21,7 +20,7 @@ struct Property
 
 } // namespace
 
-bool gs::PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out_splats)
+bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out_splats)
 {
     std::ifstream file(filepath, std::ios::binary);
     if (!file.is_open())
@@ -215,3 +214,5 @@ bool gs::PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> 
                         << filepath << std::endl;
     return true;
 }
+
+} // namespace trinity::stream

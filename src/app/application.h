@@ -7,16 +7,18 @@
 #include <chrono>
 #include "app/common/trinity_app.h"
 #include "core/camera.h"
-#include "core/entity.h"
-#include "render/components/splat_component.h"
 #include "core/registry.h"
-#include "core/components.h"
-#include "render/components/splat_data_component.h"
-
 #include <unordered_map>
 
-namespace trinity::render { class Renderer; }
-namespace trinity::core { class Registry; using EntityId = uint32_t; }
+namespace trinity::core { 
+    class Entity;
+    class Registry;
+    using EntityId = uint32_t;
+}
+namespace trinity::render { 
+    class Renderer; 
+    class SplatComponent;
+}
 
 class Application : public ITrinityApp
 {

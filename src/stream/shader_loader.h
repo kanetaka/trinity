@@ -4,13 +4,6 @@
 
 namespace trinity::stream {
 
-
-
-
-namespace loader
-{
-    VkShaderModule LoadShaderModule(VkDevice device, const std::filesystem::path& shaderSpvPath);
-};
-
+VkShaderModule LoadShaderModule(VkDevice device, const std::filesystem::path& shaderSpvPath);
 
 } // namespace trinity::stream
