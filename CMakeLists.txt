@@ -48,18 +48,25 @@ include_directories(${CMAKE_SOURCE_DIR}/src/utils)
 link_directories(${VK_SDK_PATH}/Lib)
 
 # Header files (for IDE organization)
-file(GLOB_RECURSE HEADERS "src/*.h")
+file(GLOB_RECURSE CORE_HEADERS "src/core/*.h")
+file(GLOB_RECURSE APP_HEADERS "src/app/*.h" "src/components/*.h" "src/io/*.h" "src/render/*.h")
 
 # Source files
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE CORE_SOURCES "src/core/*.cpp")
+file(GLOB_RECURSE APP_SOURCES "src/app/*.cpp" "src/components/*.cpp" "src/io/*.cpp" "src/render/*.cpp" "src/main.cpp")
+
+# Core library
+add_library(core STATIC ${CORE_HEADERS} ${CORE_SOURCES})
+target_include_directories(core PUBLIC ${CMAKE_SOURCE_DIR}/src)
 
 # Create executable
-add_executable(trinity ${HEADERS} ${SOURCES})
+add_executable(trinity ${APP_HEADERS} ${APP_SOURCES})
 target_compile_definitions(trinity PRIVATE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 
 # Link libraries
 target_link_libraries(trinity
     PRIVATE
+    core
     vulkan-1
     SDL3::SDL3
 )
