@@ -10,7 +10,7 @@
 #include <glm/glm.hpp>
 #include "core/entity.h"
 
-namespace trinity::core::ecs { class Registry; }
+namespace trinity::core { class Registry; }
 class Application;
 
 namespace trinity::render {
@@ -37,7 +37,7 @@ public:
     void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
 
     void UpdateUniformBuffer();
-    void UpdateTransformBuffer(trinity::core::ecs::Registry& registry);
+    void UpdateTransformBuffer(trinity::core::Registry& registry);
 
     VkDescriptorSetLayout GetSplatDescriptorSetLayout() const { return descriptor_set_layout_; }
     VkDescriptorSet AllocateDescriptorSet();

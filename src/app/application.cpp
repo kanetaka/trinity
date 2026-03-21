@@ -11,9 +11,9 @@
 #include <iostream>
 #include <algorithm>
 #include <chrono>
-#include "core/ecs/registry.h"
-#include "core/ecs/systems.h"
-#include "core/ecs/components.h"
+#include "core/registry.h"
+#include "core/systems.h"
+#include "core/components.h"
 
 using namespace trinity::core;
 using namespace trinity::render;
@@ -22,7 +22,7 @@ Application::Application(const std::string& plyFile)
     : ply_file_(plyFile), camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
     updating_entities_(false)
 {
-    registry_ = std::make_unique<ecs::Registry>();
+    registry_ = std::make_unique<Registry>();
 }
 
 Application::~Application()
@@ -39,7 +39,7 @@ void Application::OnInitialize()
     RegisterEntity(root_entity_->GetId(), root_entity_.get());
 
     // Create Splat Entity as a child of root
-    ecs::EntityId splat_id = registry_->Create();
+    EntityId splat_id = registry_->Create();
     trinity::core::Entity* splat_entity = new Entity(*registry_, splat_id);
     RegisterEntity(splat_id, splat_entity);
     root_entity_->AddChild(splat_id);
@@ -77,7 +77,7 @@ void Application::OnDrawFrame()
     renderer_->SetProjectionMatrix(camera_.GetProjectionMatrix(width_ / height_));
     renderer_->UpdateUniformBuffer();
 
-    ecs::TransformSystem::Update(*registry_);
+    TransformSystem::Update(*registry_);
     renderer_->UpdateTransformBuffer(*registry_);
 
     if (root_entity_)
@@ -93,7 +93,7 @@ void Application::OnDrawFrame()
             // Assuming the last created splat_id in OnInitialize was what we want.
             // To be safe, we can iterate entities or store the ID.
             // Let's assume we want to update all SplatDataComponents.
-            registry_->ForEach<trinity::render::SplatDataComponent>([&](trinity::core::ecs::EntityId entity, trinity::render::SplatDataComponent& data) {
+            registry_->ForEach<trinity::render::SplatDataComponent>([&](trinity::core::EntityId entity, trinity::render::SplatDataComponent& data) {
                 splat_component_->UpdateWithCamera(*registry_, entity, camera_);
             });
         }

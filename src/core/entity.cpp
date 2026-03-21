@@ -1,5 +1,5 @@
 #include "core/entity.h"
-#include "core/ecs/components.h"
+#include "core/components.h"
 #include <algorithm>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -8,17 +8,17 @@
 using namespace trinity::core;
 
 
-Entity::Entity(ecs::Registry& registry, ecs::EntityId id)
+Entity::Entity(Registry& registry, EntityId id)
     : registry_(registry), id_(id)
 {
     // Initialize components if they don't exist
-    if (!registry_.HasComponent<ecs::TransformComponent>(id_))
+    if (!registry_.HasComponent<TransformComponent>(id_))
     {
-        registry_.AddComponent<ecs::TransformComponent>(id_);
+        registry_.AddComponent<TransformComponent>(id_);
     }
-    if (!registry_.HasComponent<ecs::HierarchyComponent>(id_))
+    if (!registry_.HasComponent<HierarchyComponent>(id_))
     {
-        registry_.AddComponent<ecs::HierarchyComponent>(id_);
+        registry_.AddComponent<HierarchyComponent>(id_);
     }
 }
 
@@ -27,10 +27,10 @@ Entity::~Entity()
     registry_.Destroy(id_);
 }
 
-void Entity::AddChild(ecs::EntityId child_id)
+void Entity::AddChild(EntityId child_id)
 {
-    auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
-    auto* child_hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(child_id);
+    auto* hierarchy = registry_.GetComponent<HierarchyComponent>(id_);
+    auto* child_hierarchy = registry_.GetComponent<HierarchyComponent>(child_id);
     
     if (hierarchy && child_hierarchy)
     {
@@ -39,9 +39,9 @@ void Entity::AddChild(ecs::EntityId child_id)
     }
 }
 
-void Entity::RemoveChild(ecs::EntityId child_id)
+void Entity::RemoveChild(EntityId child_id)
 {
-    auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
+    auto* hierarchy = registry_.GetComponent<HierarchyComponent>(id_);
     if (hierarchy)
     {
         auto it = std::find(hierarchy->children.begin(), hierarchy->children.end(), child_id);
@@ -52,29 +52,29 @@ void Entity::RemoveChild(ecs::EntityId child_id)
     }
 }
 
-void Entity::SetParent(ecs::EntityId parent_id)
+void Entity::SetParent(EntityId parent_id)
 {
-    auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
+    auto* hierarchy = registry_.GetComponent<HierarchyComponent>(id_);
     if (hierarchy)
     {
         hierarchy->parent = parent_id;
     }
 }
 
-ecs::EntityId Entity::GetParent()
+EntityId Entity::GetParent()
 {
-    auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
+    auto* hierarchy = registry_.GetComponent<HierarchyComponent>(id_);
     if (hierarchy)
     {
         return hierarchy->parent;
     }
-    return ecs::NullEntity;
+    return NullEntity;
 }
 
-const std::vector<ecs::EntityId>& Entity::GetChildren() const
+const std::vector<EntityId>& Entity::GetChildren() const
 {
-    static const std::vector<ecs::EntityId> empty;
-    auto* hierarchy = registry_.GetComponent<ecs::HierarchyComponent>(id_);
+    static const std::vector<EntityId> empty;
+    auto* hierarchy = registry_.GetComponent<HierarchyComponent>(id_);
     if (hierarchy)
     {
         return hierarchy->children;
@@ -84,36 +84,36 @@ const std::vector<ecs::EntityId>& Entity::GetChildren() const
 
 const glm::vec3& Entity::GetPosition() const
 {
-    return registry_.GetComponent<ecs::TransformComponent>(id_)->position;
+    return registry_.GetComponent<TransformComponent>(id_)->position;
 }
 
 void Entity::SetPosition(const glm::vec3& pos)
 {
-    auto* transform = registry_.GetComponent<ecs::TransformComponent>(id_);
+    auto* transform = registry_.GetComponent<TransformComponent>(id_);
     transform->position = pos;
     transform->recompute = true;
 }
 
 float Entity::GetScale() const
 {
-    return registry_.GetComponent<ecs::TransformComponent>(id_)->scale;
+    return registry_.GetComponent<TransformComponent>(id_)->scale;
 }
 
 void Entity::SetScale(float scale)
 {
-    auto* transform = registry_.GetComponent<ecs::TransformComponent>(id_);
+    auto* transform = registry_.GetComponent<TransformComponent>(id_);
     transform->scale = scale;
     transform->recompute = true;
 }
 
 const glm::quat& Entity::GetRotation() const
 {
-    return registry_.GetComponent<ecs::TransformComponent>(id_)->rotation;
+    return registry_.GetComponent<TransformComponent>(id_)->rotation;
 }
 
 void Entity::SetRotation(const glm::quat& rotation)
 {
-    auto* transform = registry_.GetComponent<ecs::TransformComponent>(id_);
+    auto* transform = registry_.GetComponent<TransformComponent>(id_);
     transform->rotation = rotation;
     transform->recompute = true;
 }
@@ -125,7 +125,7 @@ void Entity::ComputeWorldTransform()
 
 const glm::mat4& Entity::GetWorldTransform() const
 {
-    return registry_.GetComponent<ecs::TransformComponent>(id_)->world_transform;
+    return registry_.GetComponent<TransformComponent>(id_)->world_transform;
 }
 
 glm::vec3 Entity::GetForward() const

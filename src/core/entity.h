@@ -9,22 +9,22 @@
 #include <glm/gtc/quaternion.hpp>
 #include <cstdint>
 
-#include "core/ecs/registry.h"
+#include "core/registry.h"
 
 namespace trinity::core {
 class Entity
 {
 public:
-    Entity(ecs::Registry& registry, ecs::EntityId id);
+    Entity(Registry& registry, EntityId id);
     virtual ~Entity();
 
-    ecs::EntityId GetId() const { return id_; }
+    EntityId GetId() const { return id_; }
 
-    void AddChild(ecs::EntityId child_id);
-    void RemoveChild(ecs::EntityId child_id);
-    void SetParent(ecs::EntityId parent_id);
-    ecs::EntityId GetParent();
-    const std::vector<ecs::EntityId>& GetChildren() const;
+    void AddChild(EntityId child_id);
+    void RemoveChild(EntityId child_id);
+    void SetParent(EntityId parent_id);
+    EntityId GetParent();
+    const std::vector<EntityId>& GetChildren() const;
 
     void Update(float delta_time);
     virtual void UpdateEntity(float delta_time);
@@ -44,10 +44,10 @@ public:
 
     glm::vec3 GetForward() const;
 
-    ecs::Registry& GetRegistry() { return registry_; }
+    Registry& GetRegistry() { return registry_; }
 
 private:
-    ecs::EntityId id_;
-    ecs::Registry& registry_;
+    EntityId id_;
+    Registry& registry_;
 };
 } // namespace trinity::core

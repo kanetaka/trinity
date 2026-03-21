@@ -9,14 +9,14 @@
 #include "core/camera.h"
 #include "core/entity.h"
 #include "render/components/splat_component.h"
-#include "core/ecs/registry.h"
-#include "core/ecs/components.h"
+#include "core/registry.h"
+#include "core/components.h"
 #include "render/components/splat_data_component.h"
 
 #include <unordered_map>
 
 namespace trinity::render { class Renderer; }
-namespace trinity::core::ecs { class Registry; using EntityId = uint32_t; }
+namespace trinity::core { class Registry; using EntityId = uint32_t; }
 
 class Application : public ITrinityApp
 {
@@ -32,11 +32,11 @@ public:
 
     trinity::render::Renderer* GetRenderer() { return renderer_.get(); }
     trinity::core::Camera& GetCamera() { return camera_; }
-    trinity::core::ecs::Registry& GetRegistry() { return *registry_; }
+    trinity::core::Registry& GetRegistry() { return *registry_; }
 
-    void RegisterEntity(trinity::core::ecs::EntityId id, trinity::core::Entity* entity) { entity_map_[id] = entity; }
-    void UnregisterEntity(trinity::core::ecs::EntityId id) { entity_map_.erase(id); }
-    trinity::core::Entity* GetEntity(trinity::core::ecs::EntityId id)
+    void RegisterEntity(trinity::core::EntityId id, trinity::core::Entity* entity) { entity_map_[id] = entity; }
+    void UnregisterEntity(trinity::core::EntityId id) { entity_map_.erase(id); }
+    trinity::core::Entity* GetEntity(trinity::core::EntityId id)
     {
         auto it = entity_map_.find(id);
         return it != entity_map_.end() ? it->second : nullptr;
@@ -58,9 +58,9 @@ private:
     trinity::core::Camera camera_;
 
     std::unique_ptr<trinity::render::Renderer> renderer_;
-    std::unique_ptr<trinity::core::ecs::Registry> registry_;
+    std::unique_ptr<trinity::core::Registry> registry_;
     std::unique_ptr<trinity::core::Entity> root_entity_;
-    std::unordered_map<trinity::core::ecs::EntityId, trinity::core::Entity*> entity_map_;
+    std::unordered_map<trinity::core::EntityId, trinity::core::Entity*> entity_map_;
 
     bool updating_entities_ = false;
 

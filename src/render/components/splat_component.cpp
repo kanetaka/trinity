@@ -39,7 +39,7 @@ SplatComponent::~SplatComponent()
 {
 }
 
-void SplatComponent::Initialize(trinity::core::ecs::Registry& registry, trinity::core::ecs::EntityId entity, Renderer* renderer)
+void SplatComponent::Initialize(trinity::core::Registry& registry, trinity::core::EntityId entity, Renderer* renderer)
 {
     auto& data = registry.AddComponent<trinity::render::SplatDataComponent>(entity);
     data.ply_file = ply_file_;
@@ -48,7 +48,7 @@ void SplatComponent::Initialize(trinity::core::ecs::Registry& registry, trinity:
     data.descriptor_set = descriptor_set_;
 }
 
-void SplatComponent::UpdateWithCamera(trinity::core::ecs::Registry& registry, trinity::core::ecs::EntityId entity, const trinity::core::Camera& camera)
+void SplatComponent::UpdateWithCamera(trinity::core::Registry& registry, trinity::core::EntityId entity, const trinity::core::Camera& camera)
 {
     auto* data = registry.GetComponent<trinity::render::SplatDataComponent>(entity);
     if (!data) return;

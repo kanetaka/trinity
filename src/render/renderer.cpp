@@ -7,8 +7,8 @@
 #include "render/resources/buffer_resource.h"
 #include "app/application.h"
 #include "core/entity.h"
-#include "core/ecs/registry.h"
-#include "core/ecs/components.h"
+#include "core/registry.h"
+#include "core/components.h"
 #include "render/components/splat_data_component.h"
 #include <stdexcept>
 #include <algorithm>
@@ -141,7 +141,7 @@ void Renderer::DrawEntity(trinity::core::Entity* entity, std::shared_ptr<Command
         {
             vkCmdBindDescriptorSets(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout_, 0, 1, &splat->descriptor_set, 0, nullptr);
 
-            uint32_t transform_index = registry.GetPoolIndex<trinity::core::ecs::TransformComponent>(id);
+            uint32_t transform_index = registry.GetPoolIndex<trinity::core::TransformComponent>(id);
             vkCmdPushConstants(*command_buffer, pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
 
             // Access original vertex count/index through the splat buffer size or keep it in component
@@ -266,9 +266,9 @@ void Renderer::UpdateUniformBuffer()
     uniform_buffer_->Unmap();
 }
 
-void Renderer::UpdateTransformBuffer(trinity::core::ecs::Registry& registry)
+void Renderer::UpdateTransformBuffer(trinity::core::Registry& registry)
 {
-    auto transforms = registry.View<trinity::core::ecs::TransformComponent>();
+    auto transforms = registry.View<trinity::core::TransformComponent>();
     if (transforms.empty()) return;
 
     std::vector<glm::mat4> matrices;

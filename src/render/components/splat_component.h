@@ -9,7 +9,7 @@
 #include "render/resources/buffer_resource.h"
 
 namespace trinity::core { class Camera; }
-namespace trinity::core::ecs { using EntityId = uint32_t; class Registry; }
+namespace trinity::core { using EntityId = uint32_t; class Registry; }
 
 namespace trinity::render {
 class Renderer;
@@ -21,8 +21,8 @@ public:
     SplatComponent(const std::string& ply_file, Renderer* renderer);
     ~SplatComponent();
 
-    void Initialize(trinity::core::ecs::Registry& registry, trinity::core::ecs::EntityId entity, Renderer* renderer);
-    void UpdateWithCamera(trinity::core::ecs::Registry& registry, trinity::core::ecs::EntityId entity, const trinity::core::Camera& camera);
+    void Initialize(trinity::core::Registry& registry, trinity::core::EntityId entity, Renderer* renderer);
+    void UpdateWithCamera(trinity::core::Registry& registry, trinity::core::EntityId entity, const trinity::core::Camera& camera);
 
 
 private:
