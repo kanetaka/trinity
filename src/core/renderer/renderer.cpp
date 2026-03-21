@@ -334,9 +334,9 @@ bool Renderer::InitializeGraphicsPipeline()
 
     // Load Shaders
     auto vert_module =
-            loader::LoadShaderModule(GetAssetRootPath() / "splat.vert.spv");
+            loader::LoadShaderModule(GetAssetRootPath() / "shaders" / "splat" / "splat.vert.spv");
     auto frag_module =
-            loader::LoadShaderModule(GetAssetRootPath() / "splat.frag.spv");
+            loader::LoadShaderModule(GetAssetRootPath() / "shaders" / "splat" / "splat.frag.spv");
 
     VkPushConstantRange pushRange{};
     pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
