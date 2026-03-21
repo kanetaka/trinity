@@ -13,9 +13,7 @@
 #include <stdexcept>
 #include <algorithm>
 
-using namespace trinity::render;
-using namespace trinity::core;
-using namespace trinity::stream;
+using namespace tr;
 Renderer::Renderer(Application* app)
         : app_(app), screen_width_(0), screen_height_(0) {}
 
@@ -73,7 +71,7 @@ void Renderer::Shutdown()
     }
 }
 
-void Renderer::Draw(trinity::core::Entity* root)
+void Renderer::Draw(tr::core::Entity* root)
 {
     if (!root) return;
     auto& vulkan_ctx = VulkanContext::Get();
@@ -130,18 +128,18 @@ void Renderer::Draw(trinity::core::Entity* root)
     vulkan_ctx.SubmitPresent();
 }
 
-void Renderer::DrawEntity(trinity::core::Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer)
+void Renderer::DrawEntity(tr::core::Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer)
 {
     auto& registry = entity->GetRegistry();
     auto id = entity->GetId();
 
-    if (auto* splat = registry.GetComponent<trinity::render::SplatDataComponent>(id))
-    {
-        if (splat->descriptor_set != VK_NULL_HANDLE)
-        {
-            vkCmdBindDescriptorSets(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout_, 0, 1, &splat->descriptor_set, 0, nullptr);
+            if (auto* splat = registry.GetComponent<tr::render::SplatDataComponent>(id))
+            {
+                if (splat->descriptor_set != VK_NULL_HANDLE)
+                {
+                    vkCmdBindDescriptorSets(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout_, 0, 1, &splat->descriptor_set, 0, nullptr);
 
-            uint32_t transform_index = registry.GetPoolIndex<trinity::core::TransformComponent>(id);
+                    uint32_t transform_index = registry.GetPoolIndex<tr::core::TransformComponent>(id);
             vkCmdPushConstants(*command_buffer, pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
 
             // Access original vertex count/index through the splat buffer size or keep it in component
@@ -266,9 +264,9 @@ void Renderer::UpdateUniformBuffer()
     uniform_buffer_->Unmap();
 }
 
-void Renderer::UpdateTransformBuffer(trinity::core::Registry& registry)
+void Renderer::UpdateTransformBuffer(tr::core::Registry& registry)
 {
-    auto transforms = registry.View<trinity::core::TransformComponent>();
+    auto transforms = registry.View<tr::core::TransformComponent>();
     if (transforms.empty()) return;
 
     std::vector<glm::mat4> matrices;
@@ -356,9 +354,9 @@ bool Renderer::InitializeGraphicsPipeline()
 
     // Load Shaders
     auto vert_module =
-            trinity::stream::LoadShaderModule(VulkanContext::Get().GetVkDevice(), trinity::core::GetAssetRootPath() / "shaders" / "splat" / "splat.vert.spv");
+            tr::stream::LoadShaderModule(VulkanContext::Get().GetVkDevice(), tr::core::GetAssetRootPath() / "shaders" / "splat" / "splat.vert.spv");
     auto frag_module =
-            trinity::stream::LoadShaderModule(VulkanContext::Get().GetVkDevice(), trinity::core::GetAssetRootPath() / "shaders" / "splat" / "splat.frag.spv");
+            tr::stream::LoadShaderModule(VulkanContext::Get().GetVkDevice(), tr::core::GetAssetRootPath() / "shaders" / "splat" / "splat.frag.spv");
 
     VkPushConstantRange pushRange{};
     pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;

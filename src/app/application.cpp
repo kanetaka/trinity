@@ -15,8 +15,7 @@
 #include "core/systems.h"
 #include "core/components.h"
 
-using namespace trinity::core;
-using namespace trinity::render;
+using namespace tr;
 
 Application::Application(const std::string& plyFile)
     : ply_file_(plyFile), camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
@@ -40,7 +39,7 @@ void Application::OnInitialize()
 
     // Create Splat Entity as a child of root
     EntityId splat_id = registry_->Create();
-    trinity::core::Entity* splat_entity = new Entity(*registry_, splat_id);
+    Entity* splat_entity = new Entity(*registry_, splat_id);
     RegisterEntity(splat_id, splat_entity);
     root_entity_->AddChild(splat_id);
 
@@ -93,7 +92,7 @@ void Application::OnDrawFrame()
             // Assuming the last created splat_id in OnInitialize was what we want.
             // To be safe, we can iterate entities or store the ID.
             // Let's assume we want to update all SplatDataComponents.
-            registry_->ForEach<trinity::render::SplatDataComponent>([&](trinity::core::EntityId entity, trinity::render::SplatDataComponent& data) {
+            registry_->ForEach<SplatDataComponent>([&](EntityId entity, SplatDataComponent& data) {
                 splat_component_->UpdateWithCamera(*registry_, entity, camera_);
             });
         }

@@ -9,7 +9,7 @@
 
 #include "render/command_buffer.h"
 
-namespace trinity::render {
+namespace tr {
 
 
 
@@ -154,4 +154,4 @@ private:
 };
 
 
-} // namespace trinity::render
+} // namespace tr

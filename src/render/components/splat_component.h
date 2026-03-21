@@ -8,15 +8,14 @@
 #include "render/components/splat_data_component.h"
 #include "render/resources/buffer_resource.h"
 
-namespace trinity::core { 
+namespace tr {
     class Camera; 
     class Registry;
     using EntityId = uint32_t;
-}
 
-namespace trinity::render {
 class Renderer;
 class StorageBuffer;
+struct SplatDataComponent;
 
 class SplatComponent
 {
@@ -24,23 +23,22 @@ public:
     SplatComponent(const std::string& ply_file, Renderer* renderer);
     ~SplatComponent();
 
-    void Initialize(trinity::core::Registry& registry, trinity::core::EntityId entity, Renderer* renderer);
-    void UpdateWithCamera(trinity::core::Registry& registry, trinity::core::EntityId entity, const trinity::core::Camera& camera);
+    void Initialize(Registry& registry, EntityId entity, Renderer* renderer);
+    void UpdateWithCamera(Registry& registry, EntityId entity, const Camera& camera);
 
 
 private:
     void LoadSplats();
     void CreateBuffers();
     void CreateDescriptorSets(Renderer* renderer);
-    void SortSplats(trinity::render::SplatDataComponent& data, const glm::mat4& view);
+    void SortSplats(SplatDataComponent& data, const glm::mat4& view);
 
     std::string ply_file_;
-    std::vector<trinity::stream::GpuSplat> gpu_splats_;
-    std::vector<trinity::stream::SplatSortEntry> splat_indices_;
+    std::vector<GpuSplat> gpu_splats_;
+    std::vector<SplatSortEntry> splat_indices_;
 
     std::shared_ptr<StorageBuffer> splat_buffer_;
     std::shared_ptr<StorageBuffer> index_buffer_;
     VkDescriptorSet descriptor_set_ = VK_NULL_HANDLE;
 };
-
-} // namespace trinity::render
+} // namespace tr

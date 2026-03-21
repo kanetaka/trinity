@@ -1,7 +1,7 @@
 #include "render/resources/sampler.h"
 #include <stdexcept>
 
-using namespace trinity::render;
+using namespace tr;
 
 
 

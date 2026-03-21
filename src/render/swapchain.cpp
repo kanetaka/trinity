@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <cassert>
 
-using namespace trinity::render;
+using namespace tr;
 
 
 

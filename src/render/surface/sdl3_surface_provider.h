@@ -2,7 +2,7 @@
 #include "render/surface/surface_provider.h"
 #include <SDL3/SDL.h>
 
-namespace trinity::render {
+namespace tr {
 
 
 
@@ -20,4 +20,4 @@ private:
 };
 
 
-} // namespace trinity::render
+} // namespace tr

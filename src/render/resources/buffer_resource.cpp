@@ -1,6 +1,6 @@
 #include "render/resources/buffer_resource.h"
 
-using namespace trinity::render;
+using namespace tr;
 
 
 

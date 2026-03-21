@@ -6,7 +6,7 @@
 #endif
 #include <vulkan/vulkan.h>
 
-namespace trinity::render {
+namespace tr {
 
 
 class ISurfaceProvider
@@ -19,4 +19,4 @@ public:
 };
 
 
-} // namespace trinity::render
+} // namespace tr

@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 
-namespace trinity::render {
+namespace tr {
 
 
 
@@ -57,4 +57,4 @@ private:
 };
 
 
-} // namespace trinity::render
+} // namespace tr

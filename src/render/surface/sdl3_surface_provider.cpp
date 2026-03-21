@@ -3,7 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
-using namespace trinity::render;
+using namespace tr;
 
 
 

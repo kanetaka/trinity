@@ -1,7 +1,7 @@
 #pragma once
 #include <memory>
 
-namespace trinity::render {
+namespace tr {
 
 
 
@@ -22,4 +22,4 @@ protected:
 };
 
 
-} // namespace trinity::render
+} // namespace tr

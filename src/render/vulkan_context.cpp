@@ -21,7 +21,7 @@
 #include <windows.h>
 #endif
 
-using namespace trinity::render;
+using namespace tr;
 
 #define VK_GET_INSTANCE_PROC_ADDR(instance, name, ...)                         \
   reinterpret_cast<PFN_##name>(vkGetInstanceProcAddr(instance, #name))

@@ -1,7 +1,7 @@
 #pragma once
 #include "render/vulkan_context.h"
 
-namespace trinity::render {
+namespace tr {
 
 
 
@@ -44,4 +44,4 @@ protected:
 };
 
 
-} // namespace trinity::render
+} // namespace tr

@@ -1,6 +1,6 @@
 #include "render/command_buffer.h"
 
-using namespace trinity::render;
+using namespace tr;
 
 
 

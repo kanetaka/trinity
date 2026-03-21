@@ -1,5 +1,7 @@
 #pragma once
 
+namespace tr {
+
 // Default interface for sample programs
 class ITrinityApp
 {
@@ -13,6 +15,8 @@ public:
     virtual void OnSurfaceChanged() = 0;
 #endif
 };
+
+} // namespace tr
 
 // Checker Macro
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE

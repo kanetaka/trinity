@@ -4,7 +4,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include <vector>
 
-namespace trinity::core {
+namespace tr {
 struct TransformComponent
 {
     glm::vec3 position = glm::vec3(0.0f);
@@ -19,4 +19,4 @@ struct HierarchyComponent
     EntityId parent = NullEntity;
     std::vector<EntityId> children;
 };
-} // namespace trinity::core
+} // namespace tr

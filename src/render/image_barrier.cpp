@@ -2,7 +2,7 @@
 #include "render/resources/image_resource.h"
 #include "render/image_barrier.h"
 
-using namespace trinity::render;
+using namespace tr;
 
 
 

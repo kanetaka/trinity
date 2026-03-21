@@ -2,7 +2,7 @@
 #include "render/vulkan_context.h"
 #include "render/image_barrier.h"
 
-namespace trinity::render {
+namespace tr {
 
 
 
@@ -37,4 +37,4 @@ private:
 };
 
 
-} // namespace trinity::render
+} // namespace tr

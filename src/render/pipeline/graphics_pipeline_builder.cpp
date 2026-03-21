@@ -1,7 +1,7 @@
 #include "render/pipeline/graphics_pipeline_builder.h"
 #include "render/vulkan_context.h"
 
-using namespace trinity::render;
+using namespace tr;
 
 
 

@@ -1,6 +1,6 @@
 #pragma once
 
-namespace trinity::render {
+namespace tr {
 
 
 
@@ -41,4 +41,4 @@ struct ImageLayoutTransition
 };
 
 
-} // namespace trinity::render
+} // namespace tr

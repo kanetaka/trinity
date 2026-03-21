@@ -5,7 +5,7 @@
 #include <map>
 #include <sstream>
 
-namespace trinity::stream {
+namespace tr {
 
 namespace
 {
@@ -215,4 +215,4 @@ bool PlyLoader::LoadPly(const std::string &filepath, std::vector<FullSplat> &out
     return true;
 }
 
-} // namespace trinity::stream
+} // namespace tr

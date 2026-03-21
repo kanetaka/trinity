@@ -2,7 +2,7 @@
 #include <array>
 #include <string_view>
 
-using namespace trinity::core;
+using namespace tr;
 
 namespace
 {
@@ -17,18 +17,18 @@ namespace
     }
 }
 
-void trinity::core::SetAssetRootPath(const std::filesystem::path& path)
+void tr::SetAssetRootPath(const std::filesystem::path& path)
 {
     auto fullPath = std::filesystem::absolute(path);
     asset_root__ = std::filesystem::canonical(fullPath);
 }
 
-std::filesystem::path trinity::core::GetAssetRootPath()
+std::filesystem::path tr::GetAssetRootPath()
 {
     return asset_root__;
 }
 
-std::filesystem::path trinity::core::GetAssetPath(AssetType type, const std::filesystem::path& fileName)
+std::filesystem::path tr::GetAssetPath(AssetType type, const std::filesystem::path& fileName)
 {
     return GetAssetRootPath() / ToSubDirectoryName(type) / fileName;
 }

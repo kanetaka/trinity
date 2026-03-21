@@ -3,7 +3,7 @@
 #include <vector>
 #include "render/vulkan_context.h"
 
-namespace trinity::render {
+namespace tr {
 
 
 
@@ -165,4 +165,4 @@ private:
 };
 
 
-} // namespace trinity::render
+} // namespace tr

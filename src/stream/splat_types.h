@@ -3,7 +3,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 
-namespace trinity::stream {
+namespace tr {
 
 struct Splat {
     glm::vec3 position;
@@ -39,4 +39,4 @@ struct SplatSortEntry {
     float depth;
 };
 
-} // namespace trinity::stream
+} // namespace tr

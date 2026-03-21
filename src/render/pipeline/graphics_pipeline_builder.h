@@ -3,7 +3,7 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-namespace trinity::render {
+namespace tr {
 
 
 
@@ -92,4 +92,4 @@ private:
 };
 
 
-} // namespace trinity::render
+} // namespace tr

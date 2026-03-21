@@ -10,10 +10,10 @@
 #include <glm/glm.hpp>
 #include "core/entity.h"
 
-namespace trinity::core { class Registry; }
+namespace tr { class Registry; }
 class Application;
 
-namespace trinity::render {
+namespace tr {
     class CommandBuffer;
     class UniformBuffer;
     class StorageBuffer;
@@ -29,13 +29,13 @@ public:
     bool Initialize(float screen_width, float screen_height);
     void Shutdown();
 
-    void Draw(trinity::core::Entity* root);
+    void Draw(tr::core::Entity* root);
 
     void SetViewMatrix(const glm::mat4& view) { view_ = view; }
     void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
 
     void UpdateUniformBuffer();
-    void UpdateTransformBuffer(trinity::core::Registry& registry);
+    void UpdateTransformBuffer(tr::core::Registry& registry);
 
     VkDescriptorSetLayout GetSplatDescriptorSetLayout() const { return descriptor_set_layout_; }
     VkDescriptorSet AllocateDescriptorSet();
@@ -49,7 +49,7 @@ private:
     bool CreateDescriptorPool();
     bool CreateDescriptorSets();
     bool InitializeGraphicsPipeline();
-    void DrawEntity(trinity::core::Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer);
+    void DrawEntity(tr::core::Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer);
 
     Application* app_;
 
@@ -69,4 +69,4 @@ private:
 };
 
 
-} // namespace trinity::render
+} // namespace tr

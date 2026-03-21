@@ -1,7 +1,7 @@
 #include "render/resources/image_resource.h"
 #include <stdexcept>
 
-using namespace trinity::render;
+using namespace tr;
 
 
 

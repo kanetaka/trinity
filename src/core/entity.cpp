@@ -5,7 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-using namespace trinity::core;
+using namespace tr;
 
 
 Entity::Entity(Registry& registry, EntityId id)

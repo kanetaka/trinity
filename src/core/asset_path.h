@@ -1,7 +1,7 @@
 #pragma once
 #include <filesystem>
 
-namespace trinity::core {
+namespace tr {
 // Sets the asset root path
 void SetAssetRootPath(const std::filesystem::path& path);
 
@@ -18,4 +18,4 @@ enum class AssetType
 };
 // Gets the file path for a specific asset type
 std::filesystem::path GetAssetPath(AssetType type, const std::filesystem::path& fileName);
-} // namespace trinity::core
+} // namespace tr

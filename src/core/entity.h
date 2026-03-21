@@ -5,7 +5,7 @@
 #include <glm/gtc/quaternion.hpp>
 #include "core/registry.h"
 
-namespace trinity::core {
+namespace tr {
 class Entity
 {
 public:
@@ -44,4 +44,4 @@ private:
     EntityId id_;
     Registry& registry_;
 };
-} // namespace trinity::core
+} // namespace tr

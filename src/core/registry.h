@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <cassert>
 
-namespace trinity::core {
+namespace tr {
     using EntityId = uint32_t;
     const EntityId NullEntity = 0;
 
@@ -177,4 +177,4 @@ namespace trinity::core {
         inline static uint32_t next_type_id_ = 0;
         std::unordered_map<uint32_t, std::unique_ptr<IComponentPool>> pools_;
     };
-} // namespace trinity::core
+} // namespace tr

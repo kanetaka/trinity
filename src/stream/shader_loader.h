@@ -2,8 +2,8 @@
 #include <vulkan/vulkan.h>
 #include <filesystem>
 
-namespace trinity::stream {
+namespace tr {
 
 VkShaderModule LoadShaderModule(VkDevice device, const std::filesystem::path& shaderSpvPath);
 
-} // namespace trinity::stream
+} // namespace tr

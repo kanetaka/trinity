@@ -3,7 +3,7 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 
-namespace trinity::render {
+namespace tr {
 class StorageBuffer;
 
 struct SplatDataComponent
@@ -14,4 +14,4 @@ struct SplatDataComponent
     VkDescriptorSet descriptor_set = VK_NULL_HANDLE;
 };
 
-} // namespace trinity::render
+} // namespace tr

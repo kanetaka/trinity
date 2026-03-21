@@ -2,7 +2,7 @@
 #include <vector>
 #include <fstream>
 
-namespace trinity::stream {
+namespace tr {
 
 VkShaderModule LoadShaderModule(VkDevice device, const std::filesystem::path& shaderSpvPath)
 {
@@ -33,4 +33,4 @@ VkShaderModule LoadShaderModule(VkDevice device, const std::filesystem::path& sh
     return shader_module;
 }
 
-} // namespace trinity::stream
+} // namespace tr

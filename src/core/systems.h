@@ -1,10 +1,10 @@
 #pragma once
 #include "core/registry.h"
 
-namespace trinity::core {
+namespace tr {
 class TransformSystem
 {
 public:
     static void Update(Registry &registry);
 };
-} // namespace trinity::core
+} // namespace tr

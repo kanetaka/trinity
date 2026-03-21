@@ -2,7 +2,7 @@
 #include "render/vulkan_context.h"
 #include "render/resources/gpu_resource_base.h"
 
-namespace trinity::render {
+namespace tr {
 
 
 
@@ -35,4 +35,4 @@ protected:
 };
 
 
-} // namespace trinity::render
+} // namespace tr
