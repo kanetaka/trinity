@@ -49,11 +49,13 @@ link_directories(${VK_SDK_PATH}/Lib)
 # Header files (for IDE organization)
 file(GLOB_RECURSE CORE_HEADERS "src/core/*.h")
 file(GLOB_RECURSE IO_HEADERS "src/io/*.h")
-file(GLOB_RECURSE APP_HEADERS "src/app/*.h" "src/render/*.h")
+file(GLOB_RECURSE RENDER_HEADERS "src/render/*.h")
+file(GLOB_RECURSE APP_HEADERS "src/app/*.h")
 # Source files
 file(GLOB_RECURSE CORE_SOURCES "src/core/*.cpp")
 file(GLOB_RECURSE IO_SOURCES "src/io/*.cpp")
-file(GLOB_RECURSE APP_SOURCES "src/app/*.cpp" "src/render/*.cpp" "src/main.cpp")
+file(GLOB_RECURSE RENDER_SOURCES "src/render/*.cpp")
+file(GLOB_RECURSE APP_SOURCES "src/app/*.cpp" "src/main.cpp")
 # Core library
 add_library(core STATIC ${CORE_HEADERS} ${CORE_SOURCES})
 target_include_directories(core PUBLIC ${CMAKE_SOURCE_DIR}/src)
@@ -62,6 +64,10 @@ target_include_directories(core PUBLIC ${CMAKE_SOURCE_DIR}/src)
 # IO static library
 add_library(io STATIC ${IO_HEADERS} ${IO_SOURCES})
 target_link_libraries(io PRIVATE core vulkan-1)
+
+# Render static library
+add_library(render STATIC ${RENDER_HEADERS} ${RENDER_SOURCES})
+target_link_libraries(render PRIVATE core io vulkan-1)
 
 # Create executable
 add_executable(trinity ${APP_HEADERS} ${APP_SOURCES})
@@ -72,6 +78,7 @@ target_link_libraries(trinity
     PRIVATE
     core
     io
+    render
     vulkan-1
     SDL3::SDL3
 )
