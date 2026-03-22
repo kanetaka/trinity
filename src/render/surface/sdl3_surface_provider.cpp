@@ -3,9 +3,7 @@
 #include <iostream>
 #include <stdexcept>
 
-using namespace tr;
-
-
+using namespace tri;
 
 
 Sdl3SurfaceProvider::Sdl3SurfaceProvider(SDL_Window* window)

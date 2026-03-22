@@ -2,9 +2,7 @@
 #include <stdexcept>
 #include <cassert>
 
-using namespace tr;
-
-
+using namespace tri;
 
 
 bool Swapchain::Recreate(uint32_t width, uint32_t height)

@@ -2,9 +2,7 @@
 #include "render/resources/image_resource.h"
 #include "render/image_barrier.h"
 
-using namespace tr;
-
-
+using namespace tri;
 
 
 ImageLayoutTransition ImageLayoutTransition::FromUndefinedToColorAttachment()

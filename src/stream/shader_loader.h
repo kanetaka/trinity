@@ -2,8 +2,7 @@
 #include <vulkan/vulkan.h>
 #include <filesystem>
 
-namespace tr {
-
-VkShaderModule LoadShaderModule(VkDevice device, const std::filesystem::path& shaderSpvPath);
-
-} // namespace tr
+namespace tri
+{
+    VkShaderModule LoadShaderModule(VkDevice device, const std::filesystem::path& shaderSpvPath);
+} // namespace tri

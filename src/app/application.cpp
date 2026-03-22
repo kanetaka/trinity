@@ -17,20 +17,18 @@
 #include "core/systems.h"
 #include "core/components.h"
 
-namespace tr {
-
-Application::Application(const std::string& plyFile)
+tri::Application::Application(const std::string& plyFile)
     : ply_file_(plyFile), camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
     updating_entities_(false)
 {
     registry_ = std::make_unique<Registry>();
 }
 
-Application::~Application()
+tri::Application::~Application()
 {
 }
 
-void Application::OnInitialize()
+void tri::Application::OnInitialize()
 {
     renderer_ = std::make_unique<Renderer>(this);
     auto extent = VulkanContext::Get().GetSwapchain()->GetExtent();
@@ -50,7 +48,7 @@ void Application::OnInitialize()
     splat_component_->Initialize(*registry_, splat_id, renderer_.get());
 }
 
-void Application::OnCleanup()
+void tri::Application::OnCleanup()
 {
     // Vulkan resources must be released before the device is destroyed.
     splat_component_.reset();
@@ -65,7 +63,7 @@ void Application::OnCleanup()
     }
 }
 
-void Application::OnDrawFrame()
+void tri::Application::OnDrawFrame()
 {
     static auto last_time = std::chrono::high_resolution_clock::now();
     auto current_time = std::chrono::high_resolution_clock::now();
@@ -103,7 +101,7 @@ void Application::OnDrawFrame()
     renderer_->Draw(root_entity_.get());
 }
 
-void Application::ProcessInput(const Uint8* state, float delta_time)
+void tri::Application::ProcessInput(const Uint8* state, float delta_time)
 {
     camera_.ProcessKeyboard(state, delta_time);
     if (root_entity_)
@@ -112,17 +110,17 @@ void Application::ProcessInput(const Uint8* state, float delta_time)
     }
 }
 
-void Application::ProcessMouseMotion(float xrel, float yrel)
+void tri::Application::ProcessMouseMotion(float xrel, float yrel)
 {
     camera_.ProcessMouseMovement(xrel, -yrel); // Invert y
 }
 
-void Application::ProcessMouseScroll(float yoffset)
+void tri::Application::ProcessMouseScroll(float yoffset)
 {
     camera_.ProcessMouseScroll(yoffset);
 }
 
-void Application::ProcessMousePanning(float xrel, float yrel)
+void tri::Application::ProcessMousePanning(float xrel, float yrel)
 {
     camera_.ProcessMousePanning(xrel, -yrel);
 }
@@ -142,7 +140,7 @@ void Application::OnSurfaceChanged()
 }
 #endif
 
-int Application::Run(const std::string& plyFile)
+int tri::Application::Run(const std::string& plyFile)
 {
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
@@ -246,5 +244,3 @@ int Application::Run(const std::string& plyFile)
 
     return 0;
 }
-
-} // namespace tr

@@ -1,8 +1,6 @@
 #include "render/command_buffer.h"
 
-using namespace tr;
-
-
+using namespace tri;
 
 
 CommandBuffer::CommandBuffer(VkCommandBuffer command_buffer)

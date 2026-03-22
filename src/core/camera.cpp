@@ -1,8 +1,7 @@
 #include "core/camera.h"
 
-using namespace tr;
 
-Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
+tri::Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     : Front(glm::vec3(0.0f, 0.0f, -1.0f)), MovementSpeed(2.5f),
     MouseSensitivity(0.1f), Zoom(45.0f)
 {
@@ -13,12 +12,12 @@ Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)
     UpdateCameraVectors();
 }
 
-glm::mat4 Camera::GetViewMatrix() const
+glm::mat4 tri::Camera::GetViewMatrix() const
 {
     return glm::lookAt(Position, Position + Front, Up);
 }
 
-glm::mat4 Camera::GetProjectionMatrix(float aspect) const
+glm::mat4 tri::Camera::GetProjectionMatrix(float aspect) const
 {
     // Note: GLM projection uses OpenGL clip space (-1 to 1 Z).
     // Vulkan clip space is 0 to 1 Z. We will fix this in the projection matrix
@@ -28,7 +27,7 @@ glm::mat4 Camera::GetProjectionMatrix(float aspect) const
     return proj;
 }
 
-void Camera::ProcessKeyboard(const Uint8* state, float deltaTime)
+void tri::Camera::ProcessKeyboard(const Uint8* state, float deltaTime)
 {
     float velocity = MovementSpeed * deltaTime;
     if (state[SDL_SCANCODE_W])
@@ -45,7 +44,7 @@ void Camera::ProcessKeyboard(const Uint8* state, float deltaTime)
         Position += Up * velocity;
 }
 
-void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
+void tri::Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch)
 {
     xoffset *= MouseSensitivity;
     yoffset *= MouseSensitivity;
@@ -64,7 +63,7 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
     UpdateCameraVectors();
 }
 
-void Camera::ProcessMouseScroll(float yoffset)
+void tri::Camera::ProcessMouseScroll(float yoffset)
 {
     Zoom -= (float)yoffset;
     if (Zoom < 1.0f)
@@ -73,14 +72,14 @@ void Camera::ProcessMouseScroll(float yoffset)
         Zoom = 45.0f;
 }
 
-void Camera::ProcessMousePanning(float xoffset, float yoffset)
+void tri::Camera::ProcessMousePanning(float xoffset, float yoffset)
 {
     float velocity = MouseSensitivity * 0.1f;
     Position -= Right * xoffset * velocity;
     Position += Up * yoffset * velocity;
 }
 
-void Camera::UpdateCameraVectors()
+void tri::Camera::UpdateCameraVectors()
 {
     glm::vec3 front;
     front.x = cos(glm::radians(Yaw)) * cos(glm::radians(Pitch));

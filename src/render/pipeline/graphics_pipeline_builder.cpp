@@ -1,9 +1,7 @@
 #include "render/pipeline/graphics_pipeline_builder.h"
 #include "render/vulkan_context.h"
 
-using namespace tr;
-
-
+using namespace tri;
 
 
 GraphicsPipelineBuilder::GraphicsPipelineBuilder()

@@ -23,7 +23,7 @@
 #include "core/asset_path.h"
 #include "render/command_buffer.h"
 
-using namespace tr;
+using namespace tri;
 
 SplatComponent::SplatComponent(const std::string& ply_file, Renderer* renderer)
         : ply_file_(ply_file)

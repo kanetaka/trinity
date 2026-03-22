@@ -4,19 +4,20 @@
 #include <glm/gtc/quaternion.hpp>
 #include <vector>
 
-namespace tr {
-struct TransformComponent
+namespace tri
 {
-    glm::vec3 position = glm::vec3(0.0f);
-    glm::quat rotation = glm::identity<glm::quat>();
-    float scale = 1.0f;
-    glm::mat4 world_transform = glm::mat4(1.0f);
-    bool recompute = true;
-};
+    struct TransformComponent
+    {
+        glm::vec3 position = glm::vec3(0.0f);
+        glm::quat rotation = glm::identity<glm::quat>();
+        float scale = 1.0f;
+        glm::mat4 world_transform = glm::mat4(1.0f);
+        bool recompute = true;
+    };
 
-struct HierarchyComponent
-{
-    EntityId parent = NullEntity;
-    std::vector<EntityId> children;
-};
-} // namespace tr
+    struct HierarchyComponent
+    {
+        EntityId parent = NullEntity;
+        std::vector<EntityId> children;
+    };
+} // namespace tri

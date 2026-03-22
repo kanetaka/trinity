@@ -3,7 +3,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
-using namespace tr;
+using namespace tri;
 
 static void UpdateTransformRecursive(Registry& registry, EntityId entity, const glm::mat4& parent_world)
 {

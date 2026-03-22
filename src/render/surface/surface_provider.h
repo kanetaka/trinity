@@ -6,17 +6,14 @@
 #endif
 #include <vulkan/vulkan.h>
 
-namespace tr {
-
-
-class ISurfaceProvider
+namespace tri
 {
-public:
-    virtual ~ISurfaceProvider() = default;
-    virtual VkSurfaceKHR CreateSurface(VkInstance instance) = 0;
-    virtual uint32_t GetFramebufferWidth() const = 0;
-    virtual uint32_t GetFramebufferHeight() const = 0;
-};
-
-
-} // namespace tr
+    class ISurfaceProvider
+    {
+    public:
+        virtual ~ISurfaceProvider() = default;
+        virtual VkSurfaceKHR CreateSurface(VkInstance instance) = 0;
+        virtual uint32_t GetFramebufferWidth() const = 0;
+        virtual uint32_t GetFramebufferHeight() const = 0;
+    };
+} // namespace tri

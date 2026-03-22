@@ -1,9 +1,7 @@
 #include "render/resources/image_resource.h"
 #include <stdexcept>
 
-using namespace tr;
-
-
+using namespace tri;
 
 
 bool DepthBuffer::Initialize(VkExtent2D extent, VkFormat depthFormat)

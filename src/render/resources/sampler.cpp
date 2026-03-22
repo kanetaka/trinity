@@ -1,10 +1,7 @@
 #include "render/resources/sampler.h"
 #include <stdexcept>
 
-using namespace tr;
-
-
-
+using namespace tri;
 
 void Sampler::Initialize(
     VkFilter minFilter,

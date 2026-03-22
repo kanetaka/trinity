@@ -3,15 +3,16 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 
-namespace tr {
-class StorageBuffer;
-
-struct SplatDataComponent
+namespace tri
 {
-    std::string ply_file;
-    std::shared_ptr<StorageBuffer> splat_buffer;
-    std::shared_ptr<StorageBuffer> index_buffer;
-    VkDescriptorSet descriptor_set = VK_NULL_HANDLE;
-};
+    class StorageBuffer;
 
-} // namespace tr
+    struct SplatDataComponent
+    {
+        std::string ply_file;
+        std::shared_ptr<StorageBuffer> splat_buffer;
+        std::shared_ptr<StorageBuffer> index_buffer;
+        VkDescriptorSet descriptor_set = VK_NULL_HANDLE;
+    };
+
+} // namespace tri

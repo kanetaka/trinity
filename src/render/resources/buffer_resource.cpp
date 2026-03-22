@@ -1,9 +1,6 @@
 #include "render/resources/buffer_resource.h"
 
-using namespace tr;
-
-
-
+using namespace tri;
 
 template<typename T>
 void BufferResource<T>::Cleanup()

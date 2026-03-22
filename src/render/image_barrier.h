@@ -1,44 +1,41 @@
 #pragma once
 
-namespace tr {
-
-
-
-
-class IImageResource;
-
-struct ImageLayoutTransition
+namespace tri
 {
-    VkImageLayout oldLayout;
-    VkImageLayout newLayout;
-    VkAccessFlags srcAccessMask;
-    VkAccessFlags dstAccessMask;
-    VkPipelineStageFlags srcStage;
-    VkPipelineStageFlags dstStage;
+    class IImageResource;
 
-    // From undefined to color attachment layout
-    static ImageLayoutTransition FromUndefinedToColorAttachment();
+    struct ImageLayoutTransition
+    {
+        VkImageLayout oldLayout;
+        VkImageLayout newLayout;
+        VkAccessFlags srcAccessMask;
+        VkAccessFlags dstAccessMask;
+        VkPipelineStageFlags srcStage;
+        VkPipelineStageFlags dstStage;
 
-    // From present source to color attachment layout
-    static ImageLayoutTransition FromPresentSrcToColorAttachment();
+        // From undefined to color attachment layout
+        static ImageLayoutTransition FromUndefinedToColorAttachment();
 
-    // From color attachment to present source layout
-    static ImageLayoutTransition FromColorToPresent();
+        // From present source to color attachment layout
+        static ImageLayoutTransition FromPresentSrcToColorAttachment();
 
-    // From initial layout to transfer destination
-    static ImageLayoutTransition FromUndefToTransferDst();
+        // From color attachment to present source layout
+        static ImageLayoutTransition FromColorToPresent();
 
-    // From transfer destination to transfer source
-    static ImageLayoutTransition FromTransferDstToTransferSrc();
+        // From initial layout to transfer destination
+        static ImageLayoutTransition FromUndefToTransferDst();
 
-    static ImageLayoutTransition ToShaderReadonlyOptimal(const IImageResource* image);
+        // From transfer destination to transfer source
+        static ImageLayoutTransition FromTransferDstToTransferSrc();
 
-    // Transition layout and access mask to VK_IMAGE_LAYOUT_GENERAL 
-    // to allow read/write access from shaders as storage image.
-    // Assumes access from compute and fragment shaders,
-    // ensuring dependencies for these stages.
-    static ImageLayoutTransition ToStorageImageGeneralLayout(const IImageResource* image);
-};
+        static ImageLayoutTransition ToShaderReadonlyOptimal(const IImageResource* image);
+
+        // Transition layout and access mask to VK_IMAGE_LAYOUT_GENERAL 
+        // to allow read/write access from shaders as storage image.
+        // Assumes access from compute and fragment shaders,
+        // ensuring dependencies for these stages.
+        static ImageLayoutTransition ToStorageImageGeneralLayout(const IImageResource* image);
+    };
 
 
-} // namespace tr
+} // namespace tri

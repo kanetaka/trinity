@@ -5,10 +5,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/quaternion.hpp>
 
-using namespace tr;
-
-
-Entity::Entity(Registry& registry, EntityId id)
+tri::Entity::Entity(Registry& registry, EntityId id)
     : registry_(registry), id_(id)
 {
     // Initialize components if they don't exist
@@ -22,12 +19,12 @@ Entity::Entity(Registry& registry, EntityId id)
     }
 }
 
-Entity::~Entity()
+tri::Entity::~Entity()
 {
     registry_.Destroy(id_);
 }
 
-void Entity::AddChild(EntityId child_id)
+void tri::Entity::AddChild(EntityId child_id)
 {
     auto* hierarchy = registry_.GetComponent<HierarchyComponent>(id_);
     auto* child_hierarchy = registry_.GetComponent<HierarchyComponent>(child_id);
@@ -39,7 +36,7 @@ void Entity::AddChild(EntityId child_id)
     }
 }
 
-void Entity::RemoveChild(EntityId child_id)
+void tri::Entity::RemoveChild(EntityId child_id)
 {
     auto* hierarchy = registry_.GetComponent<HierarchyComponent>(id_);
     if (hierarchy)
@@ -52,7 +49,7 @@ void Entity::RemoveChild(EntityId child_id)
     }
 }
 
-void Entity::SetParent(EntityId parent_id)
+void tri::Entity::SetParent(EntityId parent_id)
 {
     auto* hierarchy = registry_.GetComponent<HierarchyComponent>(id_);
     if (hierarchy)
@@ -61,7 +58,7 @@ void Entity::SetParent(EntityId parent_id)
     }
 }
 
-EntityId Entity::GetParent()
+tri::EntityId tri::Entity::GetParent()
 {
     auto* hierarchy = registry_.GetComponent<HierarchyComponent>(id_);
     if (hierarchy)
@@ -71,7 +68,7 @@ EntityId Entity::GetParent()
     return NullEntity;
 }
 
-const std::vector<EntityId>& Entity::GetChildren() const
+const std::vector<tri::EntityId>& tri::Entity::GetChildren() const
 {
     static const std::vector<EntityId> empty;
     auto* hierarchy = registry_.GetComponent<HierarchyComponent>(id_);
@@ -82,67 +79,67 @@ const std::vector<EntityId>& Entity::GetChildren() const
     return empty;
 }
 
-const glm::vec3& Entity::GetPosition() const
+const glm::vec3& tri::Entity::GetPosition() const
 {
     return registry_.GetComponent<TransformComponent>(id_)->position;
 }
 
-void Entity::SetPosition(const glm::vec3& pos)
+void tri::Entity::SetPosition(const glm::vec3& pos)
 {
     auto* transform = registry_.GetComponent<TransformComponent>(id_);
     transform->position = pos;
     transform->recompute = true;
 }
 
-float Entity::GetScale() const
+float tri::Entity::GetScale() const
 {
     return registry_.GetComponent<TransformComponent>(id_)->scale;
 }
 
-void Entity::SetScale(float scale)
+void tri::Entity::SetScale(float scale)
 {
     auto* transform = registry_.GetComponent<TransformComponent>(id_);
     transform->scale = scale;
     transform->recompute = true;
 }
 
-const glm::quat& Entity::GetRotation() const
+const glm::quat& tri::Entity::GetRotation() const
 {
     return registry_.GetComponent<TransformComponent>(id_)->rotation;
 }
 
-void Entity::SetRotation(const glm::quat& rotation)
+void tri::Entity::SetRotation(const glm::quat& rotation)
 {
     auto* transform = registry_.GetComponent<TransformComponent>(id_);
     transform->rotation = rotation;
     transform->recompute = true;
 }
 
-void Entity::ComputeWorldTransform()
+void tri::Entity::ComputeWorldTransform()
 {
     // This is now handled by TransformSystem
 }
 
-const glm::mat4& Entity::GetWorldTransform() const
+const glm::mat4& tri::Entity::GetWorldTransform() const
 {
     return registry_.GetComponent<TransformComponent>(id_)->world_transform;
 }
 
-glm::vec3 Entity::GetForward() const
+glm::vec3 tri::Entity::GetForward() const
 {
     return GetRotation() * glm::vec3(1.0f, 0.0f, 0.0f);
 }
 
-void Entity::Update(float delta_time)
+void tri::Entity::Update(float delta_time)
 {
     UpdateEntity(delta_time);
 }
 
-void Entity::UpdateEntity(float delta_time) {}
+void tri::Entity::UpdateEntity(float delta_time) {}
 
-void Entity::ProcessInput(const uint8_t* key_state)
+void tri::Entity::ProcessInput(const uint8_t* key_state)
 {
     EntityInput(key_state);
 }
 
-void Entity::EntityInput(const uint8_t* key_state) {}
+void tri::Entity::EntityInput(const uint8_t* key_state) {}
