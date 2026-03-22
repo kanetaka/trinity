@@ -13,7 +13,8 @@
 #include <stdexcept>
 #include <algorithm>
 
-using namespace tr;
+namespace tr {
+
 Renderer::Renderer(Application* app)
         : app_(app), screen_width_(0), screen_height_(0) {}
 
@@ -71,7 +72,7 @@ void Renderer::Shutdown()
     }
 }
 
-void Renderer::Draw(tr::core::Entity* root)
+void Renderer::Draw(Entity* root)
 {
     if (!root) return;
     auto& vulkan_ctx = VulkanContext::Get();
@@ -112,13 +113,13 @@ void Renderer::Draw(tr::core::Entity* root)
     rendering_info.colorAttachmentCount = 1;
     rendering_info.pColorAttachments = &color_attachment;
 
-    vkCmdBeginRendering(*command_buffer, &rendering_info);
+    vkCmdBeginRendering(command_buffer->Get(), &rendering_info);
 
-    vkCmdBindPipeline(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
+    vkCmdBindPipeline(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
 
     DrawEntity(root, command_buffer);
 
-    vkCmdEndRendering(*command_buffer);
+    vkCmdEndRendering(command_buffer->Get());
 
     command_buffer->TransitionLayout(swapchain->GetCurrentImage(),
             range, ImageLayoutTransition::FromColorToPresent());
@@ -128,19 +129,19 @@ void Renderer::Draw(tr::core::Entity* root)
     vulkan_ctx.SubmitPresent();
 }
 
-void Renderer::DrawEntity(tr::core::Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer)
+void Renderer::DrawEntity(Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer)
 {
     auto& registry = entity->GetRegistry();
     auto id = entity->GetId();
 
-            if (auto* splat = registry.GetComponent<tr::render::SplatDataComponent>(id))
+            if (auto* splat = registry.GetComponent<SplatDataComponent>(id))
             {
                 if (splat->descriptor_set != VK_NULL_HANDLE)
                 {
-                    vkCmdBindDescriptorSets(*command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout_, 0, 1, &splat->descriptor_set, 0, nullptr);
+                    vkCmdBindDescriptorSets(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout_, 0, 1, &splat->descriptor_set, 0, nullptr);
 
-                    uint32_t transform_index = registry.GetPoolIndex<tr::core::TransformComponent>(id);
-            vkCmdPushConstants(*command_buffer, pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
+                    uint32_t transform_index = registry.GetPoolIndex<TransformComponent>(id);
+            vkCmdPushConstants(command_buffer->Get(), pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
 
             // Access original vertex count/index through the splat buffer size or keep it in component
             // For now, assume common 4 vertices per splat as before. 
@@ -149,7 +150,7 @@ void Renderer::DrawEntity(tr::core::Entity* entity, std::shared_ptr<CommandBuffe
             if (splat->index_buffer)
             {
                 uint32_t num_splats = static_cast<uint32_t>(splat->index_buffer->GetBufferSize() / sizeof(uint32_t));
-                vkCmdDraw(*command_buffer, 4, num_splats, 0, 0);
+                vkCmdDraw(command_buffer->Get(), 4, num_splats, 0, 0);
             }
         }
     }
@@ -264,9 +265,9 @@ void Renderer::UpdateUniformBuffer()
     uniform_buffer_->Unmap();
 }
 
-void Renderer::UpdateTransformBuffer(tr::core::Registry& registry)
+void Renderer::UpdateTransformBuffer(Registry& registry)
 {
-    auto transforms = registry.View<tr::core::TransformComponent>();
+    auto transforms = registry.View<TransformComponent>();
     if (transforms.empty()) return;
 
     std::vector<glm::mat4> matrices;
@@ -354,9 +355,9 @@ bool Renderer::InitializeGraphicsPipeline()
 
     // Load Shaders
     auto vert_module =
-            tr::stream::LoadShaderModule(VulkanContext::Get().GetVkDevice(), tr::core::GetAssetRootPath() / "shaders" / "splat" / "splat.vert.spv");
+            LoadShaderModule(VulkanContext::Get().GetVkDevice(), GetAssetRootPath() / "shaders" / "splat" / "splat.vert.spv");
     auto frag_module =
-            tr::stream::LoadShaderModule(VulkanContext::Get().GetVkDevice(), tr::core::GetAssetRootPath() / "shaders" / "splat" / "splat.frag.spv");
+            LoadShaderModule(VulkanContext::Get().GetVkDevice(), GetAssetRootPath() / "shaders" / "splat" / "splat.frag.spv");
 
     VkPushConstantRange pushRange{};
     pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
@@ -390,3 +391,5 @@ bool Renderer::InitializeGraphicsPipeline()
 
     return true;
 }
+
+} // namespace tr

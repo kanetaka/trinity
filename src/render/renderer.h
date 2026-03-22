@@ -10,8 +10,10 @@
 #include <glm/glm.hpp>
 #include "core/entity.h"
 
-namespace tr { class Registry; }
-class Application;
+namespace tr { 
+    class Registry;
+    class Application; 
+}
 
 namespace tr {
     class CommandBuffer;
@@ -29,13 +31,13 @@ public:
     bool Initialize(float screen_width, float screen_height);
     void Shutdown();
 
-    void Draw(tr::core::Entity* root);
+    void Draw(Entity* root);
 
     void SetViewMatrix(const glm::mat4& view) { view_ = view; }
     void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
 
     void UpdateUniformBuffer();
-    void UpdateTransformBuffer(tr::core::Registry& registry);
+    void UpdateTransformBuffer(Registry& registry);
 
     VkDescriptorSetLayout GetSplatDescriptorSetLayout() const { return descriptor_set_layout_; }
     VkDescriptorSet AllocateDescriptorSet();
@@ -49,7 +51,7 @@ private:
     bool CreateDescriptorPool();
     bool CreateDescriptorSets();
     bool InitializeGraphicsPipeline();
-    void DrawEntity(tr::core::Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer);
+    void DrawEntity(Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer);
 
     Application* app_;
 

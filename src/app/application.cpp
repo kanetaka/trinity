@@ -7,7 +7,9 @@
 #include "render/components/splat_component.h"
 #include "render/vulkan_context.h"
 #include "render/swapchain.h"
+#include "render/surface/sdl3_surface_provider.h"
 #include <SDL3/SDL.h>
+#include <SDL3/SDL_vulkan.h>
 #include <iostream>
 #include <algorithm>
 #include <chrono>
@@ -15,7 +17,7 @@
 #include "core/systems.h"
 #include "core/components.h"
 
-using namespace tr;
+namespace tr {
 
 Application::Application(const std::string& plyFile)
     : ply_file_(plyFile), camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
@@ -129,3 +131,102 @@ void Application::OnSurfaceChanged()
     }
 }
 #endif
+
+int Application::Run(const std::string& plyFile)
+{
+    if (!SDL_Init(SDL_INIT_VIDEO))
+    {
+        std::cerr << "SDL_Init failed" << std::endl;
+        return -1;
+    }
+
+    SDL_Window *window = nullptr;
+
+    try
+    {
+        window = SDL_CreateWindow("Trinity",
+                1280, 720,
+                SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
+
+        if (!window)
+        {
+            throw std::runtime_error("SDL_CreateWindow failed");
+        }
+
+        Sdl3SurfaceProvider surface_provider(window);
+
+        auto& vulkan_ctx = VulkanContext::Get();
+
+        vulkan_ctx.GetWindowSystemExtensions = [=](auto& extension_list)
+        {
+            uint32_t ext_count = 0;
+            char const* const* extensions =
+                SDL_Vulkan_GetInstanceExtensions(&ext_count);
+            if (ext_count > 0 && extensions != nullptr)
+            {
+                size_t current_size = extension_list.size();
+                extension_list.resize(current_size + ext_count);
+                for (uint32_t i = 0; i < ext_count; ++i)
+                {
+                    extension_list[current_size + i] = extensions[i];
+                }
+            }
+        };
+
+        vulkan_ctx.Initialize("Trinity", &surface_provider);
+        vulkan_ctx.RecreateSwapchain();
+
+        Application app{plyFile};
+        app.OnInitialize();
+
+        // Set dimensions for projection matrix
+        auto extent = vulkan_ctx.GetSwapchain()->GetExtent();
+        app.width_ = (float)extent.width;
+        app.height_ = (float)extent.height;
+
+        bool is_running = true;
+        while (is_running)
+        {
+            SDL_Event event;
+            const Uint8* state = (const Uint8*)SDL_GetKeyboardState(nullptr);
+            // Rough delta time for now
+            app.ProcessInput(state, 0.016f);
+
+            while (SDL_PollEvent(&event))
+            {
+                if (event.type == SDL_EVENT_QUIT)
+                {
+                    is_running = false;
+                }
+                else if (event.type == SDL_EVENT_MOUSE_MOTION)
+                {
+                    if (event.motion.state & SDL_BUTTON_LMASK)
+                    {
+                        app.ProcessMouseMotion(event.motion.xrel, event.motion.yrel);
+                    }
+                }
+            }
+
+            app.OnDrawFrame();
+        }
+        // cleanup
+        app.OnCleanup();
+        vulkan_ctx.Cleanup();
+
+    }
+    catch (const std::exception &e)
+    {
+        std::cerr << "Fatal Error: " << e.what() << std::endl;
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Fatal Error", e.what(), window);
+    }
+
+    if (window)
+    {
+        SDL_DestroyWindow(window);
+    }
+    SDL_Quit();
+
+    return 0;
+}
+
+} // namespace tr

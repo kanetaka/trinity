@@ -5,20 +5,23 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
+#endif
 #include "app/common/trinity_app.h"
 #include "core/camera.h"
 #include "core/registry.h"
 #include <unordered_map>
 
-namespace tr { 
-    class Entity;
-    class Registry;
-    using EntityId = uint32_t;
-    class Renderer; 
-    class SplatComponent;
-}
+namespace tr {
 
-class Application : public tr::ITrinityApp
+class Entity;
+class Registry;
+using EntityId = uint32_t;
+class Renderer; 
+class SplatComponent;
+
+class Application : public ITrinityApp
 {
 public:
     Application(const std::string& plyFile);
@@ -27,6 +30,8 @@ public:
     void OnInitialize() override;
     void OnDrawFrame() override;
     void OnCleanup() override;
+
+    static int Run(const std::string& plyFile);
 
     tr::Entity* GetRootEntity() { return root_entity_.get(); }
 
@@ -67,3 +72,5 @@ private:
     float width_ = 1280.0f;
     float height_ = 720.0f;
 };
+
+} // namespace tr
