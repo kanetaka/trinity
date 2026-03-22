@@ -54,6 +54,8 @@ public:
 
     void ProcessInput(const Uint8* state, float deltaTime);
     void ProcessMouseMotion(float xrel, float yrel);
+    void ProcessMouseScroll(float yoffset);
+    void ProcessMousePanning(float xrel, float yrel);
 
 private:
     void UpdateEntities(float delta_time);

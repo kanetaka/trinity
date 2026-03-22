@@ -117,6 +117,16 @@ void Application::ProcessMouseMotion(float xrel, float yrel)
     camera_.ProcessMouseMovement(xrel, -yrel); // Invert y
 }
 
+void Application::ProcessMouseScroll(float yoffset)
+{
+    camera_.ProcessMouseScroll(yoffset);
+}
+
+void Application::ProcessMousePanning(float xrel, float yrel)
+{
+    camera_.ProcessMousePanning(xrel, -yrel);
+}
+
 #if defined(__ANDROID__)
 void Application::OnSurfaceChanged()
 {
@@ -204,6 +214,14 @@ int Application::Run(const std::string& plyFile)
                     {
                         app.ProcessMouseMotion(event.motion.xrel, event.motion.yrel);
                     }
+                    else if (event.motion.state & SDL_BUTTON_MMASK)
+                    {
+                        app.ProcessMousePanning(event.motion.xrel, event.motion.yrel);
+                    }
+                }
+                else if (event.type == SDL_EVENT_MOUSE_WHEEL)
+                {
+                    app.ProcessMouseScroll(event.wheel.y);
                 }
             }
 

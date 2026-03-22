@@ -15,6 +15,8 @@ public:
     void ProcessKeyboard(const Uint8* state, float deltaTime);
     void ProcessMouseMovement(float xoffset, float yoffset,
         bool constrainPitch = true);
+    void ProcessMouseScroll(float yoffset);
+    void ProcessMousePanning(float xoffset, float yoffset);
 
     // Camera Attributes
     glm::vec3 Position;

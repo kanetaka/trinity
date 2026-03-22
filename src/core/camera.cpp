@@ -64,6 +64,22 @@ void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrainPi
     UpdateCameraVectors();
 }
 
+void Camera::ProcessMouseScroll(float yoffset)
+{
+    Zoom -= (float)yoffset;
+    if (Zoom < 1.0f)
+        Zoom = 1.0f;
+    if (Zoom > 45.0f)
+        Zoom = 45.0f;
+}
+
+void Camera::ProcessMousePanning(float xoffset, float yoffset)
+{
+    float velocity = MouseSensitivity * 0.1f;
+    Position -= Right * xoffset * velocity;
+    Position += Up * yoffset * velocity;
+}
+
 void Camera::UpdateCameraVectors()
 {
     glm::vec3 front;
