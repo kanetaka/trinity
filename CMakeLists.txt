@@ -54,17 +54,17 @@ file(GLOB_RECURSE IO_SOURCES "src/stream/*.cpp")
 file(GLOB_RECURSE RENDER_SOURCES "src/render/*.cpp")
 file(GLOB_RECURSE APP_SOURCES "src/app/*.cpp" "src/main.cpp")
 # Core library
-add_library(trinity_core STATIC ${CORE_HEADERS} ${CORE_SOURCES})
-target_include_directories(trinity_core PUBLIC ${CMAKE_SOURCE_DIR}/src)
+add_library(tri_core STATIC ${CORE_HEADERS} ${CORE_SOURCES})
+target_include_directories(tri_core PUBLIC ${CMAKE_SOURCE_DIR}/src)
 
 
 # IO static library
-add_library(trinity_stream STATIC ${IO_HEADERS} ${IO_SOURCES})
-target_link_libraries(trinity_stream PRIVATE trinity_core vulkan-1)
+add_library(tri_stream STATIC ${IO_HEADERS} ${IO_SOURCES})
+target_link_libraries(tri_stream PRIVATE tri_core vulkan-1)
 
 # Render static library
-add_library(trinity_render STATIC ${RENDER_HEADERS} ${RENDER_SOURCES})
-target_link_libraries(trinity_render PRIVATE trinity_core trinity_stream vulkan-1)
+add_library(tri_render STATIC ${RENDER_HEADERS} ${RENDER_SOURCES})
+target_link_libraries(tri_render PRIVATE tri_core tri_stream vulkan-1)
 
 # Create executable
 add_executable(trinity ${APP_HEADERS} ${APP_SOURCES})
@@ -73,9 +73,9 @@ target_compile_definitions(trinity PRIVATE GLM_FORCE_DEPTH_ZERO_TO_ONE)
 # Link libraries
 target_link_libraries(trinity
     PRIVATE
-    trinity_core
-    trinity_stream
-    trinity_render
+    tri_core
+    tri_stream
+    tri_render
     vulkan-1
     SDL3::SDL3
 )
