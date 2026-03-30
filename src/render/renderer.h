@@ -8,11 +8,10 @@
 
 #endif
 #include <glm/glm.hpp>
-#include "core/entity.h"
+#include "core/ecs/registry.h"
 
 namespace tri
 {
-    class Registry;
     class Application;
 }
 
@@ -31,7 +30,7 @@ namespace tri
         bool Initialize(float screen_width, float screen_height);
         void Shutdown();
 
-        void Draw(Entity* root);
+        void Draw(Entity root);
 
         void SetViewMatrix(const glm::mat4& view) { view_ = view; }
         void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
@@ -51,7 +50,7 @@ namespace tri
         bool CreateDescriptorPool();
         bool CreateDescriptorSets();
         bool InitializeGraphicsPipeline();
-        void DrawEntity(Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer);
+        void DrawEntity(Entity entity, Registry& registry, std::shared_ptr<CommandBuffer>& command_buffer);
 
         Application* app_;
 

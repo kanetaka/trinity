@@ -6,9 +6,8 @@
 #include "render/pipeline/graphics_pipeline_builder.h"
 #include "render/resources/buffer_resource.h"
 #include "app/application.h"
-#include "core/entity.h"
-#include "core/registry.h"
-#include "core/components.h"
+#include "core/ecs/registry.h"
+#include "core/ecs/components.h"
 #include "render/components/splat_data_component.h"
 #include <stdexcept>
 #include <algorithm>
@@ -72,9 +71,9 @@ namespace tri
         }
     }
 
-    void Renderer::Draw(Entity* root)
+    void Renderer::Draw(Entity root)
     {
-        if (!root) return;
+        if (root == NullEntity) return;
         auto& vulkan_ctx = VulkanContext::Get();
 
         if (vulkan_ctx.AcquireNextImage() != VK_SUCCESS)
@@ -117,7 +116,7 @@ namespace tri
 
         vkCmdBindPipeline(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
 
-        DrawEntity(root, command_buffer);
+        DrawEntity(root, app_->GetRegistry(), command_buffer);
 
         vkCmdEndRendering(command_buffer->Get());
 
@@ -129,18 +128,15 @@ namespace tri
         vulkan_ctx.SubmitPresent();
     }
 
-    void Renderer::DrawEntity(Entity* entity, std::shared_ptr<CommandBuffer>& command_buffer)
+    void Renderer::DrawEntity(Entity entity, Registry& registry, std::shared_ptr<CommandBuffer>& command_buffer)
     {
-        auto& registry = entity->GetRegistry();
-        auto id = entity->GetId();
-
-        if (auto* splat = registry.GetComponent<SplatDataComponent>(id))
+        if (auto* splat = registry.GetComponent<SplatDataComponent>(entity))
         {
             if (splat->descriptor_set != VK_NULL_HANDLE)
             {
                 vkCmdBindDescriptorSets(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout_, 0, 1, &splat->descriptor_set, 0, nullptr);
 
-                uint32_t transform_index = registry.GetPoolIndex<TransformComponent>(id);
+                uint32_t transform_index = registry.GetPoolIndex<TransformComponent>(entity);
                 vkCmdPushConstants(command_buffer->Get(), pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
 
                 // Access original vertex count/index through the splat buffer size or keep it in component
@@ -155,11 +151,11 @@ namespace tri
             }
         }
 
-        for (auto child_id : entity->GetChildren())
+        if (auto* hierarchy = registry.GetComponent<HierarchyComponent>(entity))
         {
-            if (auto* child = app_->GetEntity(child_id))
+            for (auto child_id : hierarchy->children)
             {
-                DrawEntity(child, command_buffer);
+                DrawEntity(child_id, registry, command_buffer);
             }
         }
     }

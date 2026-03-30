@@ -1,5 +1,5 @@
 #pragma once
-#include "core/registry.h"
+#include "core/ecs/registry.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <vector>
@@ -17,7 +17,7 @@ namespace tri
 
     struct HierarchyComponent
     {
-        EntityId parent = NullEntity;
-        std::vector<EntityId> children;
+        Entity parent = NullEntity;
+        std::vector<Entity> children;
     };
 } // namespace tri

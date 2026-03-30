@@ -13,8 +13,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <SDL3/SDL.h>
 
-#include "render/components/splat_component.h"
-#include "core/entity.h"
+#include "render/systems/splat_system.h"
 #include "render/components/splat_data_component.h"
 #include "app/application.h"
 #include "render/renderer.h"
@@ -25,7 +24,7 @@
 
 using namespace tri;
 
-SplatComponent::SplatComponent(const std::string& ply_file, Renderer* renderer)
+SplatSystem::SplatSystem(const std::string& ply_file, Renderer* renderer)
         : ply_file_(ply_file)
 {
     LoadSplats();
@@ -33,11 +32,11 @@ SplatComponent::SplatComponent(const std::string& ply_file, Renderer* renderer)
     CreateDescriptorSets(renderer);
 }
 
-SplatComponent::~SplatComponent()
+SplatSystem::~SplatSystem()
 {
 }
 
-void SplatComponent::Initialize(Registry& registry, EntityId entity, Renderer* renderer)
+void SplatSystem::Initialize(Registry& registry, Entity entity, Renderer* renderer)
 {
     auto& data = registry.AddComponent<SplatDataComponent>(entity);
     data.ply_file = ply_file_;
@@ -46,7 +45,7 @@ void SplatComponent::Initialize(Registry& registry, EntityId entity, Renderer* r
     data.descriptor_set = descriptor_set_;
 }
 
-void SplatComponent::UpdateWithCamera(Registry& registry, EntityId entity, const Camera& camera)
+void SplatSystem::UpdateWithCamera(Registry& registry, Entity entity, const Camera& camera)
 {
     auto* data = registry.GetComponent<SplatDataComponent>(entity);
     if (!data) return;
@@ -54,7 +53,7 @@ void SplatComponent::UpdateWithCamera(Registry& registry, EntityId entity, const
     SortSplats(*data, camera.GetViewMatrix());
 }
 
-void SplatComponent::LoadSplats()
+void SplatSystem::LoadSplats()
 {
     std::vector<FullSplat> splats;
     if (!PlyLoader::LoadPly(ply_file_, splats))
@@ -79,7 +78,7 @@ void SplatComponent::LoadSplats()
     }
 }
 
-void SplatComponent::CreateBuffers()
+void SplatSystem::CreateBuffers()
 {
     if (gpu_splats_.empty()) return;
 
@@ -93,14 +92,14 @@ void SplatComponent::CreateBuffers()
     index_buffer_ = StorageBuffer::Create(index_size, StorageBuffer::AccessMode::CpuAccessible);
 }
 
-void SplatComponent::CreateDescriptorSets(Renderer* renderer)
+void SplatSystem::CreateDescriptorSets(Renderer* renderer)
 {
     descriptor_set_ = renderer->AllocateDescriptorSet();
     renderer->UpdateSplatDescriptorSet(descriptor_set_, splat_buffer_, index_buffer_);
 }
 
 
-void SplatComponent::SortSplats(SplatDataComponent& data, const glm::mat4& view)
+void SplatSystem::SortSplats(SplatDataComponent& data, const glm::mat4& view)
 {
     if (splat_indices_.empty()) return;
 

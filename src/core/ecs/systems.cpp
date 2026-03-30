@@ -1,11 +1,11 @@
-#include "core/systems.h"
-#include "core/components.h"
+#include "core/ecs/systems.h"
+#include "core/ecs/components.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 
 using namespace tri;
 
-static void UpdateTransformRecursive(Registry& registry, EntityId entity, const glm::mat4& parent_world)
+static void UpdateTransformRecursive(Registry& registry, Entity entity, const glm::mat4& parent_world)
 {
     auto* transform = registry.GetComponent<TransformComponent>(entity);
     if (!transform) return;
@@ -33,7 +33,7 @@ static void UpdateTransformRecursive(Registry& registry, EntityId entity, const 
 void TransformSystem::Update(Registry& registry)
 {
     // Process all roots (entities with Transform but either no Hierarchy or parent is Null)
-    registry.ForEach<TransformComponent>([&](EntityId entity, TransformComponent& transform)
+    registry.ForEach<TransformComponent>([&](Entity entity, TransformComponent& transform)
         {
             auto* hierarchy = registry.GetComponent<HierarchyComponent>(entity);
             if (!hierarchy || hierarchy->parent == NullEntity)

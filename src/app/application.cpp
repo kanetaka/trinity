@@ -2,9 +2,8 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "app/application.h"
-#include "core/entity.h"
 #include "render/renderer.h"
-#include "render/components/splat_component.h"
+#include "render/systems/splat_system.h"
 #include "render/vulkan_context.h"
 #include "render/swapchain.h"
 #include "render/surface/sdl3_surface_provider.h"
@@ -13,9 +12,9 @@
 #include <iostream>
 #include <algorithm>
 #include <chrono>
-#include "core/registry.h"
-#include "core/systems.h"
-#include "core/components.h"
+#include "core/ecs/registry.h"
+#include "core/ecs/systems.h"
+#include "core/ecs/components.h"
 
 tri::Application::Application(const std::string& plyFile)
     : ply_file_(plyFile), camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
@@ -34,26 +33,28 @@ void tri::Application::OnInitialize()
     auto extent = VulkanContext::Get().GetSwapchain()->GetExtent();
     renderer_->Initialize((float)extent.width, (float)extent.height);
 
-    root_entity_ = std::make_unique<Entity>(*registry_, registry_->Create());
-    RegisterEntity(root_entity_->GetId(), root_entity_.get());
+    root_entity_ = registry_->Create();
+    registry_->AddComponent<TransformComponent>(root_entity_);
+    registry_->AddComponent<HierarchyComponent>(root_entity_);
 
     // Create Splat Entity as a child of root
-    EntityId splat_id = registry_->Create();
-    Entity* splat_entity = new Entity(*registry_, splat_id);
-    RegisterEntity(splat_id, splat_entity);
-    root_entity_->AddChild(splat_id);
+    Entity splat_id = registry_->Create();
+    registry_->AddComponent<TransformComponent>(splat_id);
+    registry_->AddComponent<HierarchyComponent>(splat_id);
+    
+    // Setup hierarchy
+    registry_->GetComponent<HierarchyComponent>(root_entity_)->children.push_back(splat_id);
+    registry_->GetComponent<HierarchyComponent>(splat_id)->parent = root_entity_;
 
-    // Use member splat_component_ to initialize ECS component
-    splat_component_ = std::make_unique<SplatComponent>(ply_file_, renderer_.get());
-    splat_component_->Initialize(*registry_, splat_id, renderer_.get());
+    // Use member splat_system_ to initialize ECS component
+    splat_system_ = std::make_unique<SplatSystem>(ply_file_, renderer_.get());
+    splat_system_->Initialize(*registry_, splat_id, renderer_.get());
 }
 
 void tri::Application::OnCleanup()
 {
     // Vulkan resources must be released before the device is destroyed.
-    splat_component_.reset();
-    entity_map_.clear();
-    root_entity_.reset();
+    splat_system_.reset();
     registry_.reset();
 
     if (renderer_)
@@ -79,35 +80,23 @@ void tri::Application::OnDrawFrame()
     TransformSystem::Update(*registry_);
     renderer_->UpdateTransformBuffer(*registry_);
 
-    if (root_entity_)
+    if (root_entity_ != NullEntity)
     {
-        root_entity_->Update(delta_time);
-        
-        // Use member splat_component_ for specific logic (like sorting)
-        if (splat_component_)
+        // Use member splat_system_ for specific logic (like sorting)
+        if (splat_system_)
         {
-            // We need the entity ID for the splat data. 
-            // Looking up by name or just keeping the ID in application.
-            // For now, let's find it or use a known ID if we stored it.
-            // Assuming the last created splat_id in OnInitialize was what we want.
-            // To be safe, we can iterate entities or store the ID.
-            // Let's assume we want to update all SplatDataComponents.
-            registry_->ForEach<SplatDataComponent>([&](EntityId entity, SplatDataComponent& data) {
-                splat_component_->UpdateWithCamera(*registry_, entity, camera_);
+            registry_->ForEach<SplatDataComponent>([&](Entity entity, SplatDataComponent& data) {
+                splat_system_->UpdateWithCamera(*registry_, entity, camera_);
             });
         }
     }
 
-    renderer_->Draw(root_entity_.get());
+    renderer_->Draw(root_entity_);
 }
 
 void tri::Application::ProcessInput(const Uint8* state, float delta_time)
 {
     camera_.ProcessKeyboard(state, delta_time);
-    if (root_entity_)
-    {
-        root_entity_->ProcessInput(state);
-    }
 }
 
 void tri::Application::ProcessMouseMotion(float xrel, float yrel)

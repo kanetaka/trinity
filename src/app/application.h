@@ -9,17 +9,14 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "app/common/trinity_app.h"
-#include "core/camera.h"
-#include "core/registry.h"
-#include <unordered_map>
+#include "core/math/camera.h"
+#include "core/ecs/registry.h"
 
 namespace tri
 {
-    class Entity;
     class Registry;
-    using EntityId = uint32_t;
     class Renderer;
-    class SplatComponent;
+    class SplatSystem;
 
     class Application : public ITrinityApp
     {
@@ -33,19 +30,11 @@ namespace tri
 
         static int Run(const std::string& plyFile);
 
-        tri::Entity* GetRootEntity() { return root_entity_.get(); }
+        Entity GetRootEntity() const { return root_entity_; }
 
         tri::Renderer* GetRenderer() { return renderer_.get(); }
         tri::Camera& GetCamera() { return camera_; }
         tri::Registry& GetRegistry() { return *registry_; }
-
-        void RegisterEntity(tri::EntityId id, tri::Entity* entity) { entity_map_[id] = entity; }
-        void UnregisterEntity(tri::EntityId id) { entity_map_.erase(id); }
-        tri::Entity* GetEntity(tri::EntityId id)
-        {
-            auto it = entity_map_.find(id);
-            return it != entity_map_.end() ? it->second : nullptr;
-        }
 
 
 #if defined(__ANDROID__)
@@ -61,13 +50,12 @@ namespace tri
         void UpdateEntities(float delta_time);
 
         std::string ply_file_;
-        std::unique_ptr<tri::SplatComponent> splat_component_;
+        std::unique_ptr<tri::SplatSystem> splat_system_;
         tri::Camera camera_;
 
         std::unique_ptr<tri::Renderer> renderer_;
         std::unique_ptr<tri::Registry> registry_;
-        std::unique_ptr<tri::Entity> root_entity_;
-        std::unordered_map<tri::EntityId, tri::Entity*> entity_map_;
+        Entity root_entity_ = NullEntity;
 
         bool updating_entities_ = false;
 

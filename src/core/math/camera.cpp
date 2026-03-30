@@ -1,4 +1,4 @@
-#include "core/camera.h"
+#include "core/math/camera.h"
 
 
 tri::Camera::Camera(glm::vec3 position, glm::vec3 up, float yaw, float pitch)

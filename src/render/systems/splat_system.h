@@ -12,20 +12,20 @@ namespace tri
 {
     class Camera;
     class Registry;
-    using EntityId = uint32_t;
+    using Entity = uint32_t;
 
     class Renderer;
     class StorageBuffer;
     struct SplatDataComponent;
 
-    class SplatComponent
+    class SplatSystem
     {
     public:
-        SplatComponent(const std::string& ply_file, Renderer* renderer);
-        ~SplatComponent();
+        SplatSystem(const std::string& ply_file, Renderer* renderer);
+        ~SplatSystem();
 
-        void Initialize(Registry& registry, EntityId entity, Renderer* renderer);
-        void UpdateWithCamera(Registry& registry, EntityId entity, const Camera& camera);
+        void Initialize(Registry& registry, Entity entity, Renderer* renderer);
+        void UpdateWithCamera(Registry& registry, Entity entity, const Camera& camera);
 
 
     private:

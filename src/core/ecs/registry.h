@@ -8,21 +8,21 @@
 
 namespace tri
 {
-    using EntityId = uint32_t;
-    const EntityId NullEntity = 0;
+    using Entity = uint32_t;
+    const Entity NullEntity = 0;
 
     class IComponentPool
     {
     public:
         virtual ~IComponentPool() = default;
-        virtual void Remove(EntityId entity) = 0;
+        virtual void Remove(Entity entity) = 0;
     };
 
     template<typename T>
     class ComponentPool : public IComponentPool
     {
     public:
-        T& Add(EntityId entity, T&& component)
+        T& Add(Entity entity, T&& component)
         {
             if (entity_to_index_.find(entity) != entity_to_index_.end())
             {
@@ -36,7 +36,7 @@ namespace tri
             return components_.back();
         }
 
-        void Remove(EntityId entity) override
+        void Remove(Entity entity) override
         {
             auto it = entity_to_index_.find(entity);
             if (it == entity_to_index_.end()) return;
@@ -47,7 +47,7 @@ namespace tri
             if (index_to_remove != last_index)
             {
                 // Swap with last
-                EntityId last_entity = index_to_entity_[last_index];
+                Entity last_entity = index_to_entity_[last_index];
                 components_[index_to_remove] = std::move(components_[last_index]);
                 entity_to_index_[last_entity] = index_to_remove;
                 index_to_entity_[index_to_remove] = last_entity;
@@ -58,20 +58,20 @@ namespace tri
             index_to_entity_.erase(last_index);
         }
 
-        T* Get(EntityId entity)
+        T* Get(Entity entity)
         {
             auto it = entity_to_index_.find(entity);
             if (it == entity_to_index_.end()) return nullptr;
             return &components_[it->second];
         }
 
-        EntityId GetEntityAtIndex(uint32_t index) const
+        Entity GetEntityAtIndex(uint32_t index) const
         {
             auto it = index_to_entity_.find(index);
             return it != index_to_entity_.end() ? it->second : NullEntity;
         }
 
-        bool Has(EntityId entity) const
+        bool Has(Entity entity) const
         {
             return entity_to_index_.find(entity) != entity_to_index_.end();
         }
@@ -79,7 +79,7 @@ namespace tri
         std::vector<T>& GetComponents() { return components_; }
         const std::vector<T>& GetComponents() const { return components_; }
 
-        uint32_t GetIndex(EntityId entity) const
+        uint32_t GetIndex(Entity entity) const
         {
             auto it = entity_to_index_.find(entity);
             return it != entity_to_index_.end() ? it->second : 0xFFFFFFFF;
@@ -87,19 +87,19 @@ namespace tri
 
     private:
         std::vector<T> components_;
-        std::unordered_map<EntityId, uint32_t> entity_to_index_;
-        std::unordered_map<uint32_t, EntityId> index_to_entity_;
+        std::unordered_map<Entity, uint32_t> entity_to_index_;
+        std::unordered_map<uint32_t, Entity> index_to_entity_;
     };
 
     class Registry
     {
     public:
-        EntityId Create()
+        Entity Create()
         {
             return ++next_entity_id_;
         }
 
-        void Destroy(EntityId entity)
+        void Destroy(Entity entity)
         {
             for (auto& pair : pools_)
             {
@@ -108,25 +108,25 @@ namespace tri
         }
 
         template<typename T>
-        T& AddComponent(EntityId entity, T&& component = T())
+        T& AddComponent(Entity entity, T&& component = T())
         {
             return GetPool<T>()->Add(entity, std::move(component));
         }
 
         template<typename T>
-        void RemoveComponent(EntityId entity)
+        void RemoveComponent(Entity entity)
         {
             GetPool<T>()->Remove(entity);
         }
 
         template<typename T>
-        T* GetComponent(EntityId entity)
+        T* GetComponent(Entity entity)
         {
             return GetPool<T>()->Get(entity);
         }
 
         template<typename T>
-        bool HasComponent(EntityId entity)
+        bool HasComponent(Entity entity)
         {
             return GetPool<T>()->Has(entity);
         }
@@ -138,7 +138,7 @@ namespace tri
         }
 
         template<typename T>
-        uint32_t GetPoolIndex(EntityId entity)
+        uint32_t GetPoolIndex(Entity entity)
         {
             return GetPool<T>()->GetIndex(entity);
         }
@@ -150,7 +150,7 @@ namespace tri
             auto& components = pool->GetComponents();
             for (size_t i = 0; i < components.size(); ++i)
             {
-                EntityId entity = pool->GetEntityAtIndex(static_cast<uint32_t>(i));
+                Entity entity = pool->GetEntityAtIndex(static_cast<uint32_t>(i));
                 func(entity, components[i]);
             }
         }
@@ -174,7 +174,7 @@ namespace tri
             return type_id;
         }
 
-        EntityId next_entity_id_ = 0;
+        Entity next_entity_id_ = 0;
         inline static uint32_t next_type_id_ = 0;
         std::unordered_map<uint32_t, std::unique_ptr<IComponentPool>> pools_;
     };
