@@ -34,13 +34,13 @@ target_include_directories(tri_core PUBLIC src)
 # Core uses Vulkan SDK for GLM etc
 target_link_libraries(tri_core PUBLIC Vulkan::Vulkan)
 
-# --- Library: tri_math ---
-add_library(tri_math STATIC
-    src/math/camera.h
-    src/math/camera.cpp
+# --- Library: tri_geom ---
+add_library(tri_geom STATIC
+    src/geom/camera.h
+    src/geom/camera.cpp
 )
-target_include_directories(tri_math PUBLIC src)
-target_link_libraries(tri_math PUBLIC tri_core SDL3::SDL3)
+target_include_directories(tri_geom PUBLIC src)
+target_link_libraries(tri_geom PUBLIC tri_core SDL3::SDL3)
 
 # --- Library: tri_io ---
 add_library(tri_io STATIC
@@ -84,7 +84,7 @@ add_library(tri_render STATIC
     src/render/systems/splat_system.cpp
 )
 target_include_directories(tri_render PUBLIC src)
-target_link_libraries(tri_render PUBLIC tri_core tri_math tri_io Vulkan::Vulkan SDL3::SDL3)
+target_link_libraries(tri_render PUBLIC tri_core tri_geom tri_io Vulkan::Vulkan SDL3::SDL3)
 
 # --- Executable: trinity ---
 add_executable(trinity
@@ -98,7 +98,7 @@ target_include_directories(trinity PRIVATE src)
 target_link_libraries(trinity
     PRIVATE
     tri_core
-    tri_math
+    tri_geom
     tri_io
     tri_render
     SDL3::SDL3
