@@ -1,3 +1,7 @@
+---
+trigger: always_on
+---
+
 # プロジェクトルール（trinity）
 
 ## プロジェクトの目的
@@ -8,29 +12,6 @@
 - 開発言語はC/C++
 - 3D APIはVulkan
 - ビルドシステムはCMake
-
-## アーキテクチャ
-- ECSアーキテクチャを採用し、同じ型のメモリを連続させるようにする
-- 変換マトリックスは連続したメモリ領域に配置し、GPUで一括処理できるようにする
-
-# ファイル構成
-- assets : 3Dモデルやテクスチャなどのアセットを格納する
-- assets/models : 3Dモデルを格納する
-- assets/textures : テクスチャを格納する
-- assets/shaders : シェーダープログラムを格納する
-- build : ビルド成果物を格納する。コミットしない
-- docs : ドキュメントを格納する
-- docs/specs : 仕様書を格納する
-- src : ソースコードを格納する
-- src/core : コアライブラリのコードを格納する。Entity, Component, System, Registryなど
-- src/core/ecs : ECSアーキテクチャのコードを格納する
-- src/core/math : 数学ライブラリのコードを格納する
-- src/stream : 入出力ライブラリのコードを格納する
-- src/render : レンダリングのコードを格納する
-- src/render/components : 具象コンポーネントのコードを格納する
-- src/ui : UIのコードを格納する
-- src/app : アプリケーションのコードを格納する
-- tools : ツールプログラムのコードを格納する
 
 ## コード規約
 - 文字コードはBOMなしUTF-8にする
