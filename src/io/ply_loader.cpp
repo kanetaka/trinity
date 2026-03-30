@@ -1,4 +1,4 @@
-#include "stream/ply_loader.h"
+#include "io/ply_loader.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>

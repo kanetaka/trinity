@@ -1,5 +1,5 @@
 #pragma once
-#include "stream/splat_types.h"
+#include "io/splat_types.h"
 #include <string>
 #include <vector>
 

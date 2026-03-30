@@ -12,9 +12,9 @@
 #include <iostream>
 #include <algorithm>
 #include <chrono>
-#include "core/ecs/registry.h"
-#include "core/ecs/systems.h"
-#include "core/ecs/components.h"
+#include "core/registry.h"
+#include "core/systems.h"
+#include "core/components.h"
 
 tri::Application::Application(const std::string& plyFile)
     : ply_file_(plyFile), camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),

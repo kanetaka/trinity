@@ -1,5 +1,5 @@
 #pragma once
-#include "core/ecs/registry.h"
+#include "core/registry.h"
 
 namespace tri
 {

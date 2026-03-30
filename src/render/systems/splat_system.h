@@ -4,7 +4,7 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
-#include "stream/splat_types.h"
+#include "io/splat_types.h"
 #include "render/components/splat_data_component.h"
 #include "render/resources/buffer_resource.h"
 

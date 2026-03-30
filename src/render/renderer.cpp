@@ -1,13 +1,13 @@
 #include "render/renderer.h"
 #include "render/vulkan_context.h"
 #include "render/swapchain.h"
-#include "stream/shader_loader.h"
+#include "io/shader_loader.h"
 #include "core/asset_path.h"
 #include "render/pipeline/graphics_pipeline_builder.h"
 #include "render/resources/buffer_resource.h"
 #include "app/application.h"
-#include "core/ecs/registry.h"
-#include "core/ecs/components.h"
+#include "core/registry.h"
+#include "core/components.h"
 #include "render/components/splat_data_component.h"
 #include <stdexcept>
 #include <algorithm>

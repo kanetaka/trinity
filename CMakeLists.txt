@@ -11,79 +11,104 @@ if(WIN32)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 endif()
 
-# Vulkan SDK path from environment variable
-set(VK_SDK_PATH $ENV{VK_SDK_PATH})
-
-# Check if VK_SDK_PATH is set
-if(NOT VK_SDK_PATH)
-    message(FATAL_ERROR "VK_SDK_PATH environment variable is not set. Please set it to your Vulkan SDK installation path.")
-endif()
-
-# Add Vulkan SDK to the prefix path so find_package can locate SDL3
-# Note: Newer Vulkan SDKs (e.g. 1.4.341.1) place SDL3Config.cmake in the 'cmake' subdirectory,
-# while older versions (e.g. 1.4.328.1) may place it in 'Lib/cmake/SDL3'.
-# We add both to ensure the correct one is found.
-list(APPEND CMAKE_PREFIX_PATH ${VK_SDK_PATH}/cmake ${VK_SDK_PATH})
+# Find Vulkan
+find_package(Vulkan REQUIRED)
 
 # Find SDL3
+set(VK_SDK_PATH $ENV{VK_SDK_PATH})
+if(VK_SDK_PATH)
+    list(APPEND CMAKE_PREFIX_PATH ${VK_SDK_PATH}/cmake ${VK_SDK_PATH})
+endif()
 find_package(SDL3 REQUIRED)
 
-# Include directories
-include_directories(${VK_SDK_PATH}/Include)
-link_directories(${VK_SDK_PATH}/Lib)
-include_directories(${CMAKE_SOURCE_DIR}/src)
-include_directories(${CMAKE_SOURCE_DIR}/src/app)
-include_directories(${CMAKE_SOURCE_DIR}/src/app/common)
-include_directories(${CMAKE_SOURCE_DIR}/src/core)
-include_directories(${CMAKE_SOURCE_DIR}/src/render)
-include_directories(${CMAKE_SOURCE_DIR}/src/render/pipeline)
-include_directories(${CMAKE_SOURCE_DIR}/src/render/resources)
-include_directories(${CMAKE_SOURCE_DIR}/src/render/surface)
-include_directories(${CMAKE_SOURCE_DIR}/src/core)
-include_directories(${CMAKE_SOURCE_DIR}/src/render)
-include_directories(${CMAKE_SOURCE_DIR}/src/utils)
+# --- Library: tri_core ---
+add_library(tri_core STATIC
+    src/core/asset_path.h
+    src/core/asset_path.cpp
+    src/core/registry.h
+    src/core/components.h
+    src/core/systems.h
+    src/core/systems.cpp
+)
+target_include_directories(tri_core PUBLIC src)
+# Core uses Vulkan SDK for GLM etc
+target_link_libraries(tri_core PUBLIC Vulkan::Vulkan)
 
-# Header files (for IDE organization)
-file(GLOB_RECURSE CORE_HEADERS "src/core/*.h")
-file(GLOB_RECURSE IO_HEADERS "src/stream/*.h")
-file(GLOB_RECURSE RENDER_HEADERS "src/render/*.h")
-file(GLOB_RECURSE APP_HEADERS "src/app/*.h")
-# Source files
-file(GLOB_RECURSE CORE_SOURCES "src/core/*.cpp")
-file(GLOB_RECURSE IO_SOURCES "src/stream/*.cpp")
-file(GLOB_RECURSE RENDER_SOURCES "src/render/*.cpp")
-file(GLOB_RECURSE APP_SOURCES "src/app/*.cpp" "src/main.cpp")
-# Core library
-add_library(tri_core STATIC ${CORE_HEADERS} ${CORE_SOURCES})
-target_include_directories(tri_core PUBLIC ${CMAKE_SOURCE_DIR}/src)
+# --- Library: tri_math ---
+add_library(tri_math STATIC
+    src/math/camera.h
+    src/math/camera.cpp
+)
+target_include_directories(tri_math PUBLIC src)
+target_link_libraries(tri_math PUBLIC tri_core SDL3::SDL3)
 
+# --- Library: tri_io ---
+add_library(tri_io STATIC
+    src/io/ply_loader.h
+    src/io/ply_loader.cpp
+    src/io/shader_loader.h
+    src/io/shader_loader.cpp
+    src/io/splat_types.h
+)
+target_include_directories(tri_io PUBLIC src)
+target_link_libraries(tri_io PUBLIC tri_core Vulkan::Vulkan)
 
-# IO static library
-add_library(tri_stream STATIC ${IO_HEADERS} ${IO_SOURCES})
-target_link_libraries(tri_stream PRIVATE tri_core vulkan-1)
+# --- Library: tri_render ---
+add_library(tri_render STATIC
+    src/render/command_buffer.h
+    src/render/command_buffer.cpp
+    src/render/extension_features.h
+    src/render/image_barrier.h
+    src/render/image_barrier.cpp
+    src/render/renderer.h
+    src/render/renderer.cpp
+    src/render/swapchain.h
+    src/render/swapchain.cpp
+    src/render/vulkan_context.h
+    src/render/vulkan_context.cpp
+    src/render/pipeline/graphics_pipeline.h
+    src/render/pipeline/graphics_pipeline_builder.h
+    src/render/pipeline/graphics_pipeline_builder.cpp
+    src/render/resources/buffer_resource.h
+    src/render/resources/buffer_resource.cpp
+    src/render/resources/gpu_resource_base.h
+    src/render/resources/image_resource.h
+    src/render/resources/image_resource.cpp
+    src/render/resources/sampler.h
+    src/render/resources/sampler.cpp
+    src/render/surface/surface_provider.h
+    src/render/surface/sdl3_surface_provider.h
+    src/render/surface/sdl3_surface_provider.cpp
+    src/render/components/splat_data_component.h
+    src/render/systems/splat_system.h
+    src/render/systems/splat_system.cpp
+)
+target_include_directories(tri_render PUBLIC src)
+target_link_libraries(tri_render PUBLIC tri_core tri_math tri_io Vulkan::Vulkan SDL3::SDL3)
 
-# Render static library
-add_library(tri_render STATIC ${RENDER_HEADERS} ${RENDER_SOURCES})
-target_link_libraries(tri_render PRIVATE tri_core tri_stream vulkan-1)
-
-# Create executable
-add_executable(trinity ${APP_HEADERS} ${APP_SOURCES})
+# --- Executable: trinity ---
+add_executable(trinity
+    src/main.cpp
+    src/app/application.h
+    src/app/application.cpp
+    src/app/common/trinity_app.h
+)
 target_compile_definitions(trinity PRIVATE GLM_FORCE_DEPTH_ZERO_TO_ONE)
-
-# Link libraries
+target_include_directories(trinity PRIVATE src)
 target_link_libraries(trinity
     PRIVATE
     tri_core
-    tri_stream
+    tri_math
+    tri_io
     tri_render
-    vulkan-1
     SDL3::SDL3
+    Vulkan::Vulkan
 )
 
 # Compile shaders
 find_program(GLSLC_EXECUTABLE NAMES glslc PATHS ${VK_SDK_PATH}/Bin)
 if(GLSLC_EXECUTABLE)
-    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/assets)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/assets/shaders/splat)
     add_custom_command(
         OUTPUT ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.vert.spv
                ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.frag.spv
@@ -99,7 +124,7 @@ if(GLSLC_EXECUTABLE)
     add_dependencies(trinity compile_shaders)
 endif()
 
-# Set this as a GUI application (equivalent to gui_app : true in meson)
+# Platform specific settings
 if(WIN32)
     set_target_properties(trinity PROPERTIES
         WIN32_EXECUTABLE FALSE
@@ -113,7 +138,7 @@ if(WIN32)
     )
 endif()
 
-# Set output directory (optional)
+# Set output directory
 set_target_properties(trinity PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )

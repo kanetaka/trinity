@@ -17,7 +17,7 @@
 #include "render/components/splat_data_component.h"
 #include "app/application.h"
 #include "render/renderer.h"
-#include "stream/ply_loader.h"
+#include "io/ply_loader.h"
 #include "render/vulkan_context.h"
 #include "core/asset_path.h"
 #include "render/command_buffer.h"

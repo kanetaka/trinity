@@ -9,8 +9,8 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "app/common/trinity_app.h"
-#include "core/math/camera.h"
-#include "core/ecs/registry.h"
+#include "math/camera.h"
+#include "core/registry.h"
 
 namespace tri
 {

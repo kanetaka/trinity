@@ -1,5 +1,5 @@
-#include "core/ecs/systems.h"
-#include "core/ecs/components.h"
+#include "core/systems.h"
+#include "core/components.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 

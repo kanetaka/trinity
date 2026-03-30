@@ -8,7 +8,7 @@
 
 #endif
 #include <glm/glm.hpp>
-#include "core/ecs/registry.h"
+#include "core/registry.h"
 
 namespace tri
 {
