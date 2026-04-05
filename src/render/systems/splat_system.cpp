@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <cmath>
 #include <chrono>
 #include <execution>
 #include <memory>
@@ -112,10 +113,12 @@ void SplatSystem::SortSplats(SplatDataComponent& data, const glm::mat4& view)
         splat_indices_[i].depth = view_pos.z;
     }
 
-    std::sort(std::execution::par_unseq, splat_indices_.begin(),
+    std::sort(std::execution::par, splat_indices_.begin(),
         splat_indices_.end(),
         [](const SplatSortEntry& a, const SplatSortEntry& b)
         {
+            if (std::isnan(a.depth)) return false;
+            if (std::isnan(b.depth)) return true;
             return a.depth < b.depth;
         });
 

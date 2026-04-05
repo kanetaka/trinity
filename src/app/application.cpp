@@ -16,11 +16,44 @@
 #include "core/systems.h"
 #include "core/components.h"
 
-tri::Application::Application(const std::string& plyFile)
-    : ply_file_(plyFile), camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
+tri::Application::Application()
+    : camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
     updating_entities_(false)
 {
     registry_ = std::make_unique<Registry>();
+    ui_manager_ = std::make_unique<UiManager>();
+}
+
+void tri::Application::LoadPly(const std::string& path)
+{
+    if (splat_system_) {
+        auto device = VulkanContext::Get().GetVkDevice();
+        vkDeviceWaitIdle(device);
+        splat_system_.reset();
+    }
+
+    auto* root_hierarchy = registry_->GetComponent<HierarchyComponent>(root_entity_);
+    if (root_hierarchy) {
+        std::vector<Entity> children_to_destroy = root_hierarchy->children;
+        root_hierarchy->children.clear();
+        for (auto child : children_to_destroy) {
+            registry_->Destroy(child);
+        }
+    }
+
+    Entity splat_id = registry_->Create();
+    registry_->AddComponent<TransformComponent>(splat_id);
+    registry_->AddComponent<HierarchyComponent>(splat_id);
+    
+    // Component pointers may be invalidated by Destroy(), so re-fetch root_hierarchy
+    root_hierarchy = registry_->GetComponent<HierarchyComponent>(root_entity_);
+    if (root_hierarchy) {
+        root_hierarchy->children.push_back(splat_id);
+    }
+    registry_->GetComponent<HierarchyComponent>(splat_id)->parent = root_entity_;
+
+    splat_system_ = std::make_unique<SplatSystem>(path, renderer_.get());
+    splat_system_->Initialize(*registry_, splat_id, renderer_.get());
 }
 
 tri::Application::~Application()
@@ -36,19 +69,6 @@ void tri::Application::OnInitialize()
     root_entity_ = registry_->Create();
     registry_->AddComponent<TransformComponent>(root_entity_);
     registry_->AddComponent<HierarchyComponent>(root_entity_);
-
-    // Create Splat Entity as a child of root
-    Entity splat_id = registry_->Create();
-    registry_->AddComponent<TransformComponent>(splat_id);
-    registry_->AddComponent<HierarchyComponent>(splat_id);
-    
-    // Setup hierarchy
-    registry_->GetComponent<HierarchyComponent>(root_entity_)->children.push_back(splat_id);
-    registry_->GetComponent<HierarchyComponent>(splat_id)->parent = root_entity_;
-
-    // Use member splat_system_ to initialize ECS component
-    splat_system_ = std::make_unique<SplatSystem>(ply_file_, renderer_.get());
-    splat_system_->Initialize(*registry_, splat_id, renderer_.get());
 }
 
 void tri::Application::OnCleanup()
@@ -129,7 +149,7 @@ void Application::OnSurfaceChanged()
 }
 #endif
 
-int tri::Application::Run(const std::string& plyFile)
+int tri::Application::Run()
 {
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
@@ -173,8 +193,13 @@ int tri::Application::Run(const std::string& plyFile)
         vulkan_ctx.Initialize("Trinity", &surface_provider);
         vulkan_ctx.RecreateSwapchain();
 
-        Application app{plyFile};
+        Application app;
         app.OnInitialize();
+
+        app.GetUiManager().Initialize(window);
+        app.GetUiManager().SetOnFileOpenCallback([&app](const std::string& path) {
+            app.LoadPly(path);
+        });
 
         // Set dimensions for projection matrix
         auto extent = vulkan_ctx.GetSwapchain()->GetExtent();
@@ -191,6 +216,8 @@ int tri::Application::Run(const std::string& plyFile)
 
             while (SDL_PollEvent(&event))
             {
+                app.GetUiManager().ProcessEvent(&event);
+
                 if (event.type == SDL_EVENT_QUIT)
                 {
                     is_running = false;
@@ -212,9 +239,11 @@ int tri::Application::Run(const std::string& plyFile)
                 }
             }
 
+            app.GetUiManager().BeginFrame();
             app.OnDrawFrame();
         }
         // cleanup
+        app.GetUiManager().Shutdown();
         app.OnCleanup();
         vulkan_ctx.Cleanup();
 

@@ -6,6 +6,7 @@
 #include "render/pipeline/graphics_pipeline_builder.h"
 #include "render/resources/buffer_resource.h"
 #include "app/application.h"
+#include "ui/ui_manager.h"
 #include "core/registry.h"
 #include "core/components.h"
 #include "render/components/splat_data_component.h"
@@ -117,6 +118,8 @@ namespace tri
         vkCmdBindPipeline(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
 
         DrawEntity(root, app_->GetRegistry(), command_buffer);
+
+        app_->GetUiManager().Render(command_buffer);
 
         vkCmdEndRendering(command_buffer->Get());
 

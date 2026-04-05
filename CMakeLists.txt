@@ -6,6 +6,10 @@ project(trinity LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+if(MSVC)
+    add_compile_options(/utf-8)
+endif()
+
 # Set runtime library to avoid conflicts (global setting)
 if(WIN32)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
@@ -86,6 +90,21 @@ add_library(tri_render STATIC
 target_include_directories(tri_render PUBLIC src)
 target_link_libraries(tri_render PUBLIC tri_core tri_geom tri_io Vulkan::Vulkan SDL3::SDL3)
 
+# --- Library: tri_ui ---
+add_library(tri_ui STATIC
+    src/ui/ui_manager.h
+    src/ui/ui_manager.cpp
+    3rd/imgui/imgui.cpp
+    3rd/imgui/imgui_demo.cpp
+    3rd/imgui/imgui_draw.cpp
+    3rd/imgui/imgui_tables.cpp
+    3rd/imgui/imgui_widgets.cpp
+    3rd/imgui/backends/imgui_impl_sdl3.cpp
+    3rd/imgui/backends/imgui_impl_vulkan.cpp
+)
+target_include_directories(tri_ui PUBLIC src 3rd/imgui 3rd/imgui/backends)
+target_link_libraries(tri_ui PUBLIC tri_core tri_render Vulkan::Vulkan SDL3::SDL3)
+
 # --- Executable: trinity ---
 add_executable(trinity
     src/main.cpp
@@ -101,6 +120,7 @@ target_link_libraries(trinity
     tri_geom
     tri_io
     tri_render
+    tri_ui
     SDL3::SDL3
     Vulkan::Vulkan
 )

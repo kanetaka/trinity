@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     std::filesystem::path asset_dir = exe_dir / "../../../assets";
     tri::SetAssetRootPath(asset_dir);
 
-    return tri::Application::Run(tri::GetAssetRootPath().string() + "/models/gs/sample.ply");
+    return tri::Application::Run();
 }
 #elif defined(__linux__)
 #include <unistd.h>
@@ -42,14 +42,11 @@ int main(int argc, char *argv[])
     std::filesystem::path exe_dir = std::filesystem::path(exe_path).parent_path();
     chdir(exe_dir.c_str());
 
-    std::filesystem::path asset_dir = exe_dir / "../assets";
-    tri::SetAssetRootPath(asset_dir);
-
-    return tri::Application::Run(tri::GetAssetRootPath().string() + "/models/gs/sample.ply");
+    return tri::Application::Run();
 }
 #else
 int main(int argc, char *argv[]) 
 { 
-    return tri::Application::Run(tri::GetAssetRootPath().string() + "/models/gs/sample.ply"); 
+    return tri::Application::Run(); 
 }
 #endif

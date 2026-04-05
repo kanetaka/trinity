@@ -10,6 +10,7 @@
 #endif
 #include "app/common/trinity_app.h"
 #include "geom/camera.h"
+#include "ui/ui_manager.h"
 #include "core/registry.h"
 
 namespace tri
@@ -21,20 +22,23 @@ namespace tri
     class Application : public ITrinityApp
     {
     public:
-        Application(const std::string& plyFile);
+        Application();
         virtual ~Application() override;
 
         void OnInitialize() override;
         void OnDrawFrame() override;
         void OnCleanup() override;
 
-        static int Run(const std::string& plyFile);
+        static int Run();
+
+        void LoadPly(const std::string& path);
 
         Entity GetRootEntity() const { return root_entity_; }
 
         tri::Renderer* GetRenderer() { return renderer_.get(); }
         tri::Camera& GetCamera() { return camera_; }
         tri::Registry& GetRegistry() { return *registry_; }
+        tri::UiManager& GetUiManager() { return *ui_manager_; }
 
 
 #if defined(__ANDROID__)
@@ -55,6 +59,7 @@ namespace tri
 
         std::unique_ptr<tri::Renderer> renderer_;
         std::unique_ptr<tri::Registry> registry_;
+        std::unique_ptr<tri::UiManager> ui_manager_;
         Entity root_entity_ = NullEntity;
 
         bool updating_entities_ = false;
