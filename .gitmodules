@@ -1,6 +1,6 @@
-[submodule "3rd/trimgui"]
-	path = 3rd/trimgui
-	url = https://github.com/photron-limited/trimgui.git
 [submodule "3rd/web_beast"]
 	path = 3rd/web_beast
 	url = https://github.com/photron-limited/web_beast.git
+[submodule "3rd/imgui"]
+	path = 3rd/imgui
+	url = https://github.com/ocornut/imgui.git

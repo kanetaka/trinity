@@ -94,15 +94,15 @@ target_link_libraries(tri_render PUBLIC tri_core tri_geom tri_io Vulkan::Vulkan 
 add_library(tri_ui STATIC
     src/ui/ui_manager.h
     src/ui/ui_manager.cpp
-    3rd/trimgui/imgui.cpp
-    3rd/trimgui/imgui_demo.cpp
-    3rd/trimgui/imgui_draw.cpp
-    3rd/trimgui/imgui_tables.cpp
-    3rd/trimgui/imgui_widgets.cpp
-    3rd/trimgui/backends/imgui_impl_sdl3.cpp
-    3rd/trimgui/backends/imgui_impl_vulkan.cpp
+    3rd/imgui/imgui.cpp
+    3rd/imgui/imgui_demo.cpp
+    3rd/imgui/imgui_draw.cpp
+    3rd/imgui/imgui_tables.cpp
+    3rd/imgui/imgui_widgets.cpp
+    3rd/imgui/backends/imgui_impl_sdl3.cpp
+    3rd/imgui/backends/imgui_impl_vulkan.cpp
 )
-target_include_directories(tri_ui PUBLIC src 3rd/trimgui 3rd/trimgui/backends)
+target_include_directories(tri_ui PUBLIC src 3rd/imgui 3rd/imgui/backends)
 target_link_libraries(tri_ui PUBLIC tri_core tri_render Vulkan::Vulkan SDL3::SDL3)
 
 # --- Executable: trinity ---
