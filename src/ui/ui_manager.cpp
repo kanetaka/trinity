@@ -147,6 +147,17 @@ namespace tri
         ImGui::NewFrame();
 
         ShowMenu();
+
+        if (show_fps_)
+        {
+            ImGui::SetNextWindowPos(ImVec2(ImGui::GetIO().DisplaySize.x - 10.0f, 40.0f), ImGuiCond_Always, ImVec2(1.0f, 0.0f));
+            ImGui::SetNextWindowBgAlpha(0.35f);
+            if (ImGui::Begin("FPS Overlay", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoMove))
+            {
+                ImGui::Text("%.1f FPS", fps_);
+                ImGui::End();
+            }
+        }
     }
 
     bool UiManager::ProcessEvent(const SDL_Event* event)
@@ -177,6 +188,11 @@ namespace tri
                 {
                     OpenFileDialog();
                 }
+                ImGui::EndMenu();
+            }
+            if (ImGui::BeginMenu("View"))
+            {
+                ImGui::MenuItem("Show FPS", nullptr, &show_fps_);
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();

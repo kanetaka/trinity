@@ -3,7 +3,7 @@
 #endif
 #include "app/application.h"
 #include "render/renderer.h"
-#include "render/systems/splat_system.h"
+#include "render/system/splat_system.h"
 #include "render/vulkan_context.h"
 #include "render/swapchain.h"
 #include "render/surface/sdl3_surface_provider.h"
@@ -17,7 +17,7 @@
 #include "core/components.h"
 
 tri::Application::Application()
-    : camera_(glm::vec3(0.0f, 0.0f, 5.0f), glm::vec3(0.0f, -1.0f, 0.0f), -90.0f, 0.0f),
+    : camera_(glm::dvec3(0.0, 0.0, 5.0), glm::dvec3(0.0, -1.0, 0.0), -90.0f, 0.0f),
     updating_entities_(false)
 {
     registry_ = std::make_unique<Registry>();
@@ -92,9 +92,13 @@ void tri::Application::OnDrawFrame()
     float delta_time = diff.count();
     last_time = current_time;
 
+    float fps = (delta_time > 0.0f) ? (1.0f / delta_time) : 0.0f;
+    ui_manager_->SetFps(fps);
+
     // Update Renderer matrices
     renderer_->SetViewMatrix(camera_.GetViewMatrix());
     renderer_->SetProjectionMatrix(camera_.GetProjectionMatrix(width_ / height_));
+    renderer_->SetCameraPosition(camera_.GetPosition());
     renderer_->UpdateUniformBuffer();
 
     TransformSystem::Update(*registry_);
@@ -121,7 +125,7 @@ void tri::Application::ProcessInput(const Uint8* state, float delta_time)
 
 void tri::Application::ProcessMouseMotion(float xrel, float yrel)
 {
-    camera_.ProcessMouseMovement(xrel, -yrel); // Invert y
+    camera_.ProcessMouseMovement(xrel, yrel);
 }
 
 void tri::Application::ProcessMouseScroll(float yoffset)
@@ -131,7 +135,7 @@ void tri::Application::ProcessMouseScroll(float yoffset)
 
 void tri::Application::ProcessMousePanning(float xrel, float yrel)
 {
-    camera_.ProcessMousePanning(xrel, -yrel);
+    camera_.ProcessMousePanning(xrel, yrel);
 }
 
 #if defined(__ANDROID__)
@@ -149,7 +153,7 @@ void Application::OnSurfaceChanged()
 }
 #endif
 
-int tri::Application::Run()
+int tri::Application::Run(int argc, char** argv)
 {
     if (!SDL_Init(SDL_INIT_VIDEO))
     {

@@ -12,11 +12,11 @@ namespace tri
     public:
         Swapchain() = default;
 
-        bool Recreate(uint32_t newWidth, uint32_t newHeight);
+        bool Recreate(uint32_t new_width, uint32_t new_height);
         void Cleanup();
 
         VkResult AcquireNextImage();
-        VkResult QueuePresent(VkQueue queuePresent);
+        VkResult QueuePresent(VkQueue queue_present);
 
         operator const VkSwapchainKHR() { return swapchain_; }
 

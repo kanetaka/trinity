@@ -8,10 +8,10 @@ namespace tri
 {
     struct TransformComponent
     {
-        glm::vec3 position = glm::vec3(0.0f);
+        glm::dvec3 position = glm::dvec3(0.0);
         glm::quat rotation = glm::identity<glm::quat>();
         float scale = 1.0f;
-        glm::mat4 world_transform = glm::mat4(1.0f);
+        glm::dmat4 world_transform = glm::dmat4(1.0);
         bool recompute = true;
     };
 

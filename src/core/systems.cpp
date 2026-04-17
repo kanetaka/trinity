@@ -5,16 +5,16 @@
 
 using namespace tri;
 
-static void UpdateTransformRecursive(Registry& registry, Entity entity, const glm::mat4& parent_world)
+static void UpdateTransformRecursive(Registry& registry, Entity entity, const glm::dmat4& parent_world)
 {
     auto* transform = registry.GetComponent<TransformComponent>(entity);
     if (!transform) return;
 
     if (transform->recompute)
     {
-        transform->world_transform = glm::translate(glm::mat4(1.0f), transform->position);
-        transform->world_transform *= glm::mat4_cast(transform->rotation);
-        transform->world_transform = glm::scale(transform->world_transform, glm::vec3(transform->scale));
+        transform->world_transform = glm::translate(glm::dmat4(1.0), transform->position);
+        transform->world_transform *= glm::dmat4(glm::mat4_cast(transform->rotation));
+        transform->world_transform = glm::scale(transform->world_transform, glm::dvec3(transform->scale));
         transform->recompute = false;
     }
 
@@ -41,9 +41,9 @@ void TransformSystem::Update(Registry& registry)
                 // It's a root
                 if (transform.recompute)
                 {
-                    transform.world_transform = glm::translate(glm::mat4(1.0f), transform.position);
-                    transform.world_transform *= glm::mat4_cast(transform.rotation);
-                    transform.world_transform = glm::scale(transform.world_transform, glm::vec3(transform.scale));
+                    transform.world_transform = glm::translate(glm::dmat4(1.0), transform.position);
+                    transform.world_transform *= glm::dmat4(glm::mat4_cast(transform.rotation));
+                    transform.world_transform = glm::scale(transform.world_transform, glm::dvec3(transform.scale));
                     transform.recompute = false;
                 }
 

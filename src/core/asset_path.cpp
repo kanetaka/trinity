@@ -6,12 +6,12 @@ using namespace tri;
 
 namespace
 {
-    std::filesystem::path asset_root__ = "assets/";
+    std::filesystem::path asset_root__ = "asset/";
 
     std::string_view ToSubDirectoryName(AssetType type)
     {
         constexpr std::array<std::string_view, int(AssetType::AssetTypeMax)> kAssetDirs = {
-            "shaders", "textures", "models",
+            "shader", "texture", "model",
         };
         return kAssetDirs[int(type)];
     }
@@ -19,8 +19,7 @@ namespace
 
 void tri::SetAssetRootPath(const std::filesystem::path& path)
 {
-    auto fullPath = std::filesystem::absolute(path);
-    asset_root__ = std::filesystem::canonical(fullPath);
+    asset_root__ = std::filesystem::absolute(path);
 }
 
 std::filesystem::path tri::GetAssetRootPath()

@@ -22,7 +22,7 @@ namespace tri
         static VulkanContext& Get();
 
         // Initialization
-        void Initialize(const char* appName, ISurfaceProvider* surfaceProvider);
+        void Initialize(const char* app_name, ISurfaceProvider* surface_provider);
 
         // Cleanup
         void Cleanup();
@@ -49,7 +49,7 @@ namespace tri
         // Allocate descriptor set
         VkDescriptorSet AllocateDescriptorSet(VkDescriptorSetLayout layout);
         // Free descriptor set
-        void FreeDescriptorSet(VkDescriptorSet descriptorSet);
+        void FreeDescriptorSet(VkDescriptorSet descriptor_set);
 
         // Context information handled per rendering frame
         struct FrameContext
@@ -66,7 +66,7 @@ namespace tri
         void SubmitPresent();
 
         // Submit specified command buffer and wait for completion
-        void SubmitAndWait(std::shared_ptr<CommandBuffer> commandBuffer);
+        void SubmitAndWait(std::shared_ptr<CommandBuffer> command_buffer);
 
         // Get current frame context
         FrameContext* GetCurrentFrameContext();
@@ -100,7 +100,7 @@ namespace tri
         ~VulkanContext() = default;
 
     private:
-        void CreateInstance(const char* appName);
+        void CreateInstance(const char* app_name);
         void CreateSurface();
         void PickPhysicalDevice();
         void CreateLogicalDevice();

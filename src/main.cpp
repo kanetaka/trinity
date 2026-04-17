@@ -21,10 +21,19 @@ int main(int argc, char *argv[])
     std::filesystem::path exe_dir = std::filesystem::path(exe_path).parent_path();
     SetCurrentDirectoryW(exe_dir.c_str());
 
-    std::filesystem::path asset_dir = exe_dir / "../../../assets";
+    std::filesystem::path asset_dir = exe_dir / "asset";
+    if (!std::filesystem::exists(asset_dir)) {
+        asset_dir = exe_dir / "../asset";
+    }
+    if (!std::filesystem::exists(asset_dir)) {
+        asset_dir = exe_dir / "../../asset";
+    }
+    if (!std::filesystem::exists(asset_dir)) {
+        asset_dir = exe_dir / "../../../asset";
+    }
     tri::SetAssetRootPath(asset_dir);
 
-    return tri::Application::Run();
+    return tri::Application::Run(argc, argv);
 }
 #elif defined(__linux__)
 #include <unistd.h>
@@ -37,16 +46,23 @@ int main(int argc, char *argv[])
     if (len == -1)
     {
         std::cerr << "Failed to read /proc/self/exe" << std::endl;
+        return -1;
     }
     exe_path[len] = '\0'; // Null-terminate
     std::filesystem::path exe_dir = std::filesystem::path(exe_path).parent_path();
-    chdir(exe_dir.c_str());
+    chdir(exe_dir.string().c_str());
 
-    return tri::Application::Run();
+    std::filesystem::path asset_dir = exe_dir / "asset";
+    if (!std::filesystem::exists(asset_dir)) {
+        asset_dir = exe_dir / "../asset";
+    }
+    tri::SetAssetRootPath(asset_dir);
+
+    return tri::Application::Run(argc, argv);
 }
 #else
 int main(int argc, char *argv[]) 
 { 
-    return tri::Application::Run(); 
+    return tri::Application::Run(argc, argv); 
 }
 #endif

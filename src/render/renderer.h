@@ -34,6 +34,7 @@ namespace tri
 
         void SetViewMatrix(const glm::mat4& view) { view_ = view; }
         void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
+        void SetCameraPosition(const glm::dvec3& pos) { camera_pos_ = pos; }
 
         void UpdateUniformBuffer();
         void UpdateTransformBuffer(Registry& registry);
@@ -65,6 +66,7 @@ namespace tri
 
         glm::mat4 view_;
         glm::mat4 projection_;
+        glm::dvec3 camera_pos_;
         float screen_width_;
         float screen_height_;
     };

@@ -38,13 +38,13 @@ target_include_directories(tri_core PUBLIC src)
 # Core uses Vulkan SDK for GLM etc
 target_link_libraries(tri_core PUBLIC Vulkan::Vulkan)
 
-# --- Library: tri_geom ---
-add_library(tri_geom STATIC
-    src/geom/camera.h
-    src/geom/camera.cpp
+# --- Library: tri_geo ---
+add_library(tri_geo STATIC
+    src/geo/camera.h
+    src/geo/camera.cpp
 )
-target_include_directories(tri_geom PUBLIC src)
-target_link_libraries(tri_geom PUBLIC tri_core SDL3::SDL3)
+target_include_directories(tri_geo PUBLIC src)
+target_link_libraries(tri_geo PUBLIC tri_core SDL3::SDL3)
 
 # --- Library: tri_io ---
 add_library(tri_io STATIC
@@ -73,36 +73,36 @@ add_library(tri_render STATIC
     src/render/pipeline/graphics_pipeline.h
     src/render/pipeline/graphics_pipeline_builder.h
     src/render/pipeline/graphics_pipeline_builder.cpp
-    src/render/resources/buffer_resource.h
-    src/render/resources/buffer_resource.cpp
-    src/render/resources/gpu_resource_base.h
-    src/render/resources/image_resource.h
-    src/render/resources/image_resource.cpp
-    src/render/resources/sampler.h
-    src/render/resources/sampler.cpp
+    src/render/resource/buffer_resource.h
+    src/render/resource/buffer_resource.cpp
+    src/render/resource/gpu_resource_base.h
+    src/render/resource/image_resource.h
+    src/render/resource/image_resource.cpp
+    src/render/resource/sampler.h
+    src/render/resource/sampler.cpp
     src/render/surface/surface_provider.h
     src/render/surface/sdl3_surface_provider.h
     src/render/surface/sdl3_surface_provider.cpp
-    src/render/components/splat_data_component.h
-    src/render/systems/splat_system.h
-    src/render/systems/splat_system.cpp
+    src/render/component/splat_data_component.h
+    src/render/system/splat_system.h
+    src/render/system/splat_system.cpp
 )
 target_include_directories(tri_render PUBLIC src)
-target_link_libraries(tri_render PUBLIC tri_core tri_geom tri_io Vulkan::Vulkan SDL3::SDL3)
+target_link_libraries(tri_render PUBLIC tri_core tri_geo tri_io Vulkan::Vulkan SDL3::SDL3)
 
 # --- Library: tri_ui ---
 add_library(tri_ui STATIC
     src/ui/ui_manager.h
     src/ui/ui_manager.cpp
-    3rd/imgui/imgui.cpp
-    3rd/imgui/imgui_demo.cpp
-    3rd/imgui/imgui_draw.cpp
-    3rd/imgui/imgui_tables.cpp
-    3rd/imgui/imgui_widgets.cpp
-    3rd/imgui/backends/imgui_impl_sdl3.cpp
-    3rd/imgui/backends/imgui_impl_vulkan.cpp
+    3rd/trimgui/imgui.cpp
+    3rd/trimgui/imgui_demo.cpp
+    3rd/trimgui/imgui_draw.cpp
+    3rd/trimgui/imgui_tables.cpp
+    3rd/trimgui/imgui_widgets.cpp
+    3rd/trimgui/backends/imgui_impl_sdl3.cpp
+    3rd/trimgui/backends/imgui_impl_vulkan.cpp
 )
-target_include_directories(tri_ui PUBLIC src 3rd/imgui 3rd/imgui/backends)
+target_include_directories(tri_ui PUBLIC src 3rd/trimgui 3rd/trimgui/backends)
 target_link_libraries(tri_ui PUBLIC tri_core tri_render Vulkan::Vulkan SDL3::SDL3)
 
 # --- Executable: trinity ---
@@ -117,7 +117,7 @@ target_include_directories(trinity PRIVATE src)
 target_link_libraries(trinity
     PRIVATE
     tri_core
-    tri_geom
+    tri_geo
     tri_io
     tri_render
     tri_ui
@@ -128,18 +128,18 @@ target_link_libraries(trinity
 # Compile shaders
 find_program(GLSLC_EXECUTABLE NAMES glslc PATHS ${VK_SDK_PATH}/Bin)
 if(GLSLC_EXECUTABLE)
-    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/assets/shaders/splat)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/asset/shader/splat)
     add_custom_command(
-        OUTPUT ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.vert.spv
-               ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.frag.spv
-        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.vert -o ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.vert.spv
-        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.frag -o ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.frag.spv
-        DEPENDS ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.vert ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.frag
+        OUTPUT ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert.spv
+               ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag.spv
+        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert -o ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert.spv
+        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag -o ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag.spv
+        DEPENDS ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag
         COMMENT "Compiling 3DGS shaders..."
     )
     add_custom_target(compile_shaders ALL DEPENDS 
-        ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.vert.spv 
-        ${CMAKE_SOURCE_DIR}/assets/shaders/splat/splat.frag.spv
+        ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert.spv 
+        ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag.spv
     )
     add_dependencies(trinity compile_shaders)
 endif()

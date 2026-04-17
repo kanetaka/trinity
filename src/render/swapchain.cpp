@@ -5,7 +5,7 @@
 using namespace tri;
 
 
-bool Swapchain::Recreate(uint32_t width, uint32_t height)
+bool Swapchain::Recreate(uint32_t new_width, uint32_t new_height)
 {
         auto& vulkan_ctx = VulkanContext::Get();
         auto vk_physical_device = vulkan_ctx.GetVkPhysicalDevice();
@@ -17,8 +17,8 @@ bool Swapchain::Recreate(uint32_t width, uint32_t height)
         VkExtent2D extent = caps.currentExtent;
         if (extent.width == UINT32_MAX)
         {
-                extent.width = width;
-                extent.height = height;
+                extent.width = new_width;
+                extent.height = new_height;
         }
 
         uint32_t count;
@@ -171,7 +171,7 @@ VkResult Swapchain::AcquireNextImage()
         return result;
 }
 
-VkResult Swapchain::QueuePresent(VkQueue queuePresent)
+VkResult Swapchain::QueuePresent(VkQueue queue_present)
 {
         VkPresentInfoKHR present_info{};
         present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
@@ -182,7 +182,7 @@ VkResult Swapchain::QueuePresent(VkQueue queuePresent)
         present_info.pWaitSemaphores = &frames_[current_index_].renderComplete;
 
         auto& vulkan_ctx = VulkanContext::Get();
-        auto result = vkQueuePresentKHR(queuePresent, &present_info);
+        auto result = vkQueuePresentKHR(queue_present, &present_info);
 
         return result;
 }

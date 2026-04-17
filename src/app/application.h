@@ -9,7 +9,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "app/common/trinity_app.h"
-#include "geom/camera.h"
+#include "geo/camera.h"
 #include "ui/ui_manager.h"
 #include "core/registry.h"
 
@@ -29,7 +29,7 @@ namespace tri
         void OnDrawFrame() override;
         void OnCleanup() override;
 
-        static int Run();
+        static int Run(int argc, char** argv);
 
         void LoadPly(const std::string& path);
 
@@ -45,7 +45,7 @@ namespace tri
         void OnSurfaceChanged() override;
 #endif
 
-        void ProcessInput(const Uint8* state, float deltaTime);
+        void ProcessInput(const Uint8* state, float delta_time);
         void ProcessMouseMotion(float xrel, float yrel);
         void ProcessMouseScroll(float yoffset);
         void ProcessMousePanning(float xrel, float yrel);

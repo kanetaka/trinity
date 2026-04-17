@@ -1,5 +1,5 @@
 #include "render/vulkan_context.h"
-#include "render/resources/image_resource.h"
+#include "render/resource/image_resource.h"
 #include "render/image_barrier.h"
 
 using namespace tri;

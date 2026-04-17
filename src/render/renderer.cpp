@@ -4,12 +4,12 @@
 #include "io/shader_loader.h"
 #include "core/asset_path.h"
 #include "render/pipeline/graphics_pipeline_builder.h"
-#include "render/resources/buffer_resource.h"
+#include "render/resource/buffer_resource.h"
 #include "app/application.h"
 #include "ui/ui_manager.h"
 #include "core/registry.h"
 #include "core/components.h"
-#include "render/components/splat_data_component.h"
+#include "render/component/splat_data_component.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -273,7 +273,11 @@ namespace tri
         matrices.reserve(transforms.size());
         for (const auto& t : transforms)
         {
-            matrices.push_back(t.world_transform);
+            glm::dmat4 rel = t.world_transform;
+            rel[3][0] -= camera_pos_.x;
+            rel[3][1] -= camera_pos_.y;
+            rel[3][2] -= camera_pos_.z;
+            matrices.push_back(glm::mat4(rel));
         }
 
         void* data = transform_buffer_->Map();
@@ -354,9 +358,9 @@ namespace tri
 
         // Load Shaders
         auto vert_module =
-            LoadShaderModule(VulkanContext::Get().GetVkDevice(), GetAssetRootPath() / "shaders" / "splat" / "splat.vert.spv");
+            LoadShaderModule(VulkanContext::Get().GetVkDevice(), GetAssetRootPath() / "shader" / "splat" / "splat.vert.spv");
         auto frag_module =
-            LoadShaderModule(VulkanContext::Get().GetVkDevice(), GetAssetRootPath() / "shaders" / "splat" / "splat.frag.spv");
+            LoadShaderModule(VulkanContext::Get().GetVkDevice(), GetAssetRootPath() / "shader" / "splat" / "splat.frag.spv");
 
         VkPushConstantRange pushRange{};
         pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;

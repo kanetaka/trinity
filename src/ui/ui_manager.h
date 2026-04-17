@@ -29,11 +29,15 @@ namespace tri
             on_file_open_ = callback;
         }
 
+        void SetFps(float fps) { fps_ = fps; }
+
     private:
         void ShowMenu();
         void OpenFileDialog();
 
         std::function<void(const std::string&)> on_file_open_;
         bool is_initialized_{false};
+        bool show_fps_{true};
+        float fps_{0.0f};
     };
 }
