@@ -1,0 +1,3 @@
+[submodule "3rd/trimgui"]
+	path = 3rd/trimgui
+	url = https://github.com/kanetaka/trimgui.git
