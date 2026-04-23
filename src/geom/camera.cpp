@@ -1,4 +1,4 @@
-#include "geo/camera.h"
+#include "geom/camera.h"
 
 tri::Camera::Camera(glm::dvec3 position, glm::dvec3 up, float yaw, float pitch)
     : front_(glm::dvec3(0.0, 0.0, -1.0)), movement_speed_(2.5),

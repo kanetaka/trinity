@@ -9,7 +9,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "app/common/trinity_app.h"
-#include "geo/camera.h"
+#include "geom/camera.h"
 #include "ui/ui_manager.h"
 #include "core/registry.h"
 
