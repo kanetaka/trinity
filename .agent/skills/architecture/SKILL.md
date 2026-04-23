@@ -5,7 +5,7 @@ description: アーキテクチャに関するスキル
     クラス、構造体、関数、モジュールを定義する際は、必ずこのスキルを呼び出すこと
 ---
 
-## アーキテクチャ
+# アーキテクチャ
 - データ指向
 - ECSアーキテクチャを採用する
 - Entity、Component、Systemの3層構造にする
@@ -36,12 +36,15 @@ description: アーキテクチャに関するスキル
 - docs : ドキュメントを格納する
 - doc/spec : 仕様書を格納する
 - src : ソースコードを格納する
+- src/app : アプリケーションのコードを格納する
 - src/core : コアライブラリのコードを格納する。Entity, Component, System, Registryなど
-- src/core/ecs : ECSアーキテクチャのコードを格納する
-- src/geo : 数学ライブラリのコードを格納する
+- src/geom : 数学ライブラリのコードを格納する
 - src/io : 入出力ライブラリのコードを格納する
 - src/render : レンダリングのコードを格納する
 - src/render/component : 具象コンポーネントのコードを格納する
+- src/render/pipeline : レンダリングパイプラインのコードを格納する
+- src/render/resource : レンダリングリソースのコードを格納する
+- src/redner/surface : レンダリングサーフェスのコードを格納する
+- src/render/system : レンダリングシステムのコードを格納する
 - src/ui : UIのコードを格納する
-- src/app : アプリケーションのコードを格納する
 - tool : ツールプログラムのコードを格納する
