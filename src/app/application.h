@@ -8,7 +8,7 @@
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
-#include "app/common/trinity_app.h"
+#include "app/iapplication.hpp"
 #include "geom/camera.h"
 #include "ui/ui_manager.h"
 #include "core/registry.h"
@@ -19,7 +19,7 @@ namespace tri
     class Renderer;
     class SplatSystem;
 
-    class Application : public ITrinityApp
+    class Application : public IApplication
     {
     public:
         Application();

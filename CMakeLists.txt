@@ -105,17 +105,16 @@ add_library(tri_ui STATIC
 target_include_directories(tri_ui PUBLIC src 3rd/trimgui 3rd/trimgui/backends)
 target_link_libraries(tri_ui PUBLIC tri_core tri_render Vulkan::Vulkan SDL3::SDL3)
 
-# --- Executable: trinity ---
-add_executable(trinity
-    src/main.cpp
+# --- Library: tri_app ---
+add_library(tri_app STATIC
     src/app/application.h
     src/app/application.cpp
-    src/app/common/trinity_app.h
+    src/app/iapplication.hpp
 )
-target_compile_definitions(trinity PRIVATE GLM_FORCE_DEPTH_ZERO_TO_ONE)
-target_include_directories(trinity PRIVATE src)
-target_link_libraries(trinity
-    PRIVATE
+target_compile_definitions(tri_app PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
+target_include_directories(tri_app PUBLIC src)
+target_link_libraries(tri_app
+    PUBLIC
     tri_core
     tri_geom
     tri_io
@@ -123,6 +122,16 @@ target_link_libraries(trinity
     tri_ui
     SDL3::SDL3
     Vulkan::Vulkan
+)
+
+# --- Executable: trinity ---
+add_executable(trinity
+    src/main.cpp
+)
+target_include_directories(trinity PRIVATE src)
+target_link_libraries(trinity
+    PRIVATE
+    tri_app
 )
 
 # Compile shaders

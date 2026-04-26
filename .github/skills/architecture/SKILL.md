@@ -30,8 +30,8 @@ description: アーキテクチャに関するスキル
 # ファイル構成
 - asset : 3Dモデルやテクスチャなどのアセットを格納する
 - asset/model : 3Dモデルを格納する
-- asset/texture : テクスチャを格納する
 - asset/shader : シェーダープログラムを格納する
+- asset/texture : テクスチャを格納する
 - build : ビルド成果物を格納する。コミットしない
 - docs : ドキュメントを格納する
 - doc/spec : 仕様書を格納する
