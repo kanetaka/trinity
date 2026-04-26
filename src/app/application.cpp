@@ -17,7 +17,9 @@
 #include "core/components.h"
 #include <nlohmann/json.hpp>
 
-tri::Application::Application()
+using namespace tri;
+
+Application::Application()
     : camera_(glm::dvec3(0.0, 0.0, 5.0), glm::dvec3(0.0, -1.0, 0.0), -90.0f, 0.0f),
     updating_entities_(false)
 {
@@ -25,7 +27,7 @@ tri::Application::Application()
     ui_manager_ = std::make_unique<UiManager>();
 }
 
-void tri::Application::LoadPly(const std::string& path)
+void Application::LoadPly(const std::string& path)
 {
     if (splat_system_) {
         auto device = VulkanContext::Get().GetVkDevice();
@@ -57,11 +59,11 @@ void tri::Application::LoadPly(const std::string& path)
     splat_system_->Initialize(*registry_, splat_id, renderer_.get());
 }
 
-tri::Application::~Application()
+Application::~Application()
 {
 }
 
-void tri::Application::OnInitialize()
+void Application::OnInitialize()
 {
     renderer_ = std::make_unique<Renderer>(this);
     auto extent = VulkanContext::Get().GetSwapchain()->GetExtent();
@@ -72,7 +74,7 @@ void tri::Application::OnInitialize()
     registry_->AddComponent<HierarchyComponent>(root_entity_);
 }
 
-void tri::Application::OnCleanup()
+void Application::OnCleanup()
 {
     // Vulkan resources must be released before the device is destroyed.
     splat_system_.reset();
@@ -85,7 +87,7 @@ void tri::Application::OnCleanup()
     }
 }
 
-void tri::Application::OnDrawFrame()
+void Application::OnDrawFrame()
 {
     static auto last_time = std::chrono::high_resolution_clock::now();
     auto current_time = std::chrono::high_resolution_clock::now();
@@ -119,22 +121,22 @@ void tri::Application::OnDrawFrame()
     renderer_->Draw(root_entity_);
 }
 
-void tri::Application::ProcessInput(const Uint8* state, float delta_time)
+void Application::ProcessInput(const Uint8* state, float delta_time)
 {
     camera_.ProcessKeyboard(state, delta_time);
 }
 
-void tri::Application::ProcessMouseMotion(float xrel, float yrel)
+void Application::ProcessMouseMotion(float xrel, float yrel)
 {
     camera_.ProcessMouseMovement(xrel, yrel);
 }
 
-void tri::Application::ProcessMouseScroll(float yoffset)
+void Application::ProcessMouseScroll(float yoffset)
 {
     camera_.ProcessMouseScroll(yoffset);
 }
 
-void tri::Application::ProcessMousePanning(float xrel, float yrel)
+void Application::ProcessMousePanning(float xrel, float yrel)
 {
     camera_.ProcessMousePanning(xrel, yrel);
 }
@@ -154,7 +156,7 @@ void Application::OnSurfaceChanged()
 }
 #endif
 
-int tri::Application::Run(const std::string& json_args)
+int Application::Run(const std::string& json_args)
 {
     std::string app_title = "Trinity";
     try

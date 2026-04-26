@@ -1,6 +1,8 @@
 #include "geom/camera.h"
 
-tri::Camera::Camera(glm::dvec3 position, glm::dvec3 up, float yaw, float pitch)
+using namespace tri;
+
+Camera::Camera(glm::dvec3 position, glm::dvec3 up, float yaw, float pitch)
     : front_(glm::dvec3(0.0, 0.0, -1.0)), movement_speed_(2.5),
     mouse_sensitivity_(0.1), zoom_(45.0)
 {
@@ -11,12 +13,12 @@ tri::Camera::Camera(glm::dvec3 position, glm::dvec3 up, float yaw, float pitch)
     UpdateCameraVectors();
 }
 
-glm::mat4 tri::Camera::GetViewMatrix() const
+glm::mat4 Camera::GetViewMatrix() const
 {
     return glm::lookAt(glm::vec3(0.0f), glm::vec3(front_), glm::vec3(up_));
 }
 
-glm::mat4 tri::Camera::GetProjectionMatrix(float aspect) const
+glm::mat4 Camera::GetProjectionMatrix(float aspect) const
 {
     // Note: GLM projection uses OpenGL clip space (-1 to 1 Z).
     // Vulkan clip space is 0 to 1 Z. We will fix this in the projection matrix
@@ -26,7 +28,7 @@ glm::mat4 tri::Camera::GetProjectionMatrix(float aspect) const
     return proj;
 }
 
-void tri::Camera::ProcessKeyboard(const Uint8* state, float delta_time)
+void Camera::ProcessKeyboard(const Uint8* state, float delta_time)
 {
     double velocity = movement_speed_ * (double)delta_time;
     if (state[SDL_SCANCODE_W])
@@ -43,7 +45,7 @@ void tri::Camera::ProcessKeyboard(const Uint8* state, float delta_time)
         position_ += up_ * velocity;
 }
 
-void tri::Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrain_pitch)
+void Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constrain_pitch)
 {
     xoffset *= (float)mouse_sensitivity_;
     yoffset *= (float)mouse_sensitivity_;
@@ -62,7 +64,7 @@ void tri::Camera::ProcessMouseMovement(float xoffset, float yoffset, bool constr
     UpdateCameraVectors();
 }
 
-void tri::Camera::ProcessMouseScroll(float yoffset)
+void Camera::ProcessMouseScroll(float yoffset)
 {
     zoom_ -= (double)yoffset;
     if (zoom_ < 1.0f)
@@ -71,14 +73,14 @@ void tri::Camera::ProcessMouseScroll(float yoffset)
         zoom_ = 45.0f;
 }
 
-void tri::Camera::ProcessMousePanning(float xoffset, float yoffset)
+void Camera::ProcessMousePanning(float xoffset, float yoffset)
 {
     double velocity = mouse_sensitivity_ * 0.1;
     position_ -= right_ * (static_cast<double>(xoffset) * velocity);
     position_ += up_ * (static_cast<double>(yoffset) * velocity);
 }
 
-void tri::Camera::UpdateCameraVectors()
+void Camera::UpdateCameraVectors()
 {
     glm::dvec3 front;
     front.x = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
