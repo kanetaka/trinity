@@ -112,7 +112,7 @@ add_library(tri_app STATIC
     src/app/iapplication.hpp
 )
 target_compile_definitions(tri_app PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
-target_include_directories(tri_app PUBLIC src)
+target_include_directories(tri_app PUBLIC src 3rd/json/include)
 target_link_libraries(tri_app
     PUBLIC
     tri_core
@@ -128,7 +128,7 @@ target_link_libraries(tri_app
 add_executable(trinity
     src/main.cpp
 )
-target_include_directories(trinity PRIVATE src)
+target_include_directories(trinity PRIVATE src 3rd/CLI11/include 3rd/json/include)
 target_link_libraries(trinity
     PRIVATE
     tri_app

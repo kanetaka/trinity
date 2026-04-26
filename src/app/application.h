@@ -29,7 +29,7 @@ namespace tri
         void OnDrawFrame() override;
         void OnCleanup() override;
 
-        static int Run(int argc, char** argv);
+        static int Run(const std::string& json_args);
 
         void LoadPly(const std::string& path);
 

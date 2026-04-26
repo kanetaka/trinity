@@ -1,3 +1,9 @@
 [submodule "3rd/trimgui"]
 	path = 3rd/trimgui
 	url = https://github.com/kanetaka/trimgui.git
+[submodule "3rd/CLI11"]
+	path = 3rd/CLI11
+	url = https://github.com/CLIUtils/CLI11.git
+[submodule "3rd/json"]
+	path = 3rd/json
+	url = https://github.com/nlohmann/json.git

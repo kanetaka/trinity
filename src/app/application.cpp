@@ -15,6 +15,7 @@
 #include "core/registry.h"
 #include "core/systems.h"
 #include "core/components.h"
+#include <nlohmann/json.hpp>
 
 tri::Application::Application()
     : camera_(glm::dvec3(0.0, 0.0, 5.0), glm::dvec3(0.0, -1.0, 0.0), -90.0f, 0.0f),
@@ -153,19 +154,33 @@ void Application::OnSurfaceChanged()
 }
 #endif
 
-int tri::Application::Run(int argc, char** argv)
+int tri::Application::Run(const std::string& json_args)
 {
+    std::string app_title = "Trinity";
+    try
+    {
+        auto args = nlohmann::json::parse(json_args);
+        if (args.contains("title"))
+        {
+            app_title = args["title"];
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Failed to parse arguments: " << e.what() << std::endl;
+    }
+
     if (!SDL_Init(SDL_INIT_VIDEO))
     {
         std::cerr << "SDL_Init failed" << std::endl;
         return -1;
     }
 
-    SDL_Window *window = nullptr;
+    SDL_Window* window = nullptr;
 
     try
     {
-        window = SDL_CreateWindow("Trinity",
+        window = SDL_CreateWindow(app_title.c_str(),
                 1280, 720,
                 SDL_WINDOW_VULKAN | SDL_WINDOW_HIGH_PIXEL_DENSITY);
 
@@ -194,7 +209,7 @@ int tri::Application::Run(int argc, char** argv)
             }
         };
 
-        vulkan_ctx.Initialize("Trinity", &surface_provider);
+        vulkan_ctx.Initialize(app_title.c_str(), &surface_provider);
         vulkan_ctx.RecreateSwapchain();
 
         Application app;
