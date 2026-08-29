@@ -94,15 +94,15 @@ target_link_libraries(tri_render PUBLIC tri_core tri_geom tri_io Vulkan::Vulkan 
 add_library(tri_ui STATIC
     src/ui/ui_manager.h
     src/ui/ui_manager.cpp
-    3rd/trimgui/imgui.cpp
-    3rd/trimgui/imgui_demo.cpp
-    3rd/trimgui/imgui_draw.cpp
-    3rd/trimgui/imgui_tables.cpp
-    3rd/trimgui/imgui_widgets.cpp
-    3rd/trimgui/backends/imgui_impl_sdl3.cpp
-    3rd/trimgui/backends/imgui_impl_vulkan.cpp
+    lib/trimgui/imgui.cpp
+    lib/trimgui/imgui_demo.cpp
+    lib/trimgui/imgui_draw.cpp
+    lib/trimgui/imgui_tables.cpp
+    lib/trimgui/imgui_widgets.cpp
+    lib/trimgui/backends/imgui_impl_sdl3.cpp
+    lib/trimgui/backends/imgui_impl_vulkan.cpp
 )
-target_include_directories(tri_ui PUBLIC src 3rd/trimgui 3rd/trimgui/backends)
+target_include_directories(tri_ui PUBLIC src lib/trimgui lib/trimgui/backends)
 target_link_libraries(tri_ui PUBLIC tri_core tri_render Vulkan::Vulkan SDL3::SDL3)
 
 # --- Library: tri_app ---
@@ -112,7 +112,7 @@ add_library(tri_app STATIC
     src/app/iapplication.hpp
 )
 target_compile_definitions(tri_app PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
-target_include_directories(tri_app PUBLIC src 3rd/json/include)
+target_include_directories(tri_app PUBLIC src lib/json/include)
 target_link_libraries(tri_app
     PUBLIC
     tri_core
@@ -128,7 +128,7 @@ target_link_libraries(tri_app
 add_executable(trinity
     src/main.cpp
 )
-target_include_directories(trinity PRIVATE src 3rd/CLI11/include 3rd/json/include)
+target_include_directories(trinity PRIVATE src lib/CLI11/include lib/json/include)
 target_link_libraries(trinity
     PRIVATE
     tri_app
