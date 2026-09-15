@@ -1,7 +1,7 @@
 #include "ui/ui_manager.h"
-#include "render/vulkan_context.h"
-#include "render/swapchain.h"
-#include "render/command_buffer.h"
+#include "gfx/vulkan_context.h"
+#include "gfx/swapchain.h"
+#include "gfx/command_buffer.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>

@@ -5,7 +5,7 @@
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
 #include "core/component.h"
-#include "render/component/i_renderable.h"
+#include "gfx/component/i_renderable.h"
 #include "io/splat_types.h"
 
 namespace tri

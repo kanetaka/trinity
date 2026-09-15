@@ -14,14 +14,14 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <SDL3/SDL.h>
 
-#include "render/component/splat_component.h"
+#include "gfx/component/splat_component.h"
 #include "geom/camera.h"
-#include "render/renderer.h"
+#include "gfx/renderer.h"
 #include "io/ply_loader.h"
-#include "render/vulkan_context.h"
+#include "gfx/vulkan_context.h"
 #include "core/asset_path.h"
-#include "render/command_buffer.h"
-#include "render/resource/buffer_resource.h"
+#include "gfx/command_buffer.h"
+#include "gfx/resource/buffer_resource.h"
 
 using namespace tri;
 

@@ -58,38 +58,38 @@ add_library(tri_io STATIC
 target_include_directories(tri_io PUBLIC src)
 target_link_libraries(tri_io PUBLIC tri_core Vulkan::Vulkan)
 
-# --- Library: tri_render ---
-add_library(tri_render STATIC
-    src/render/command_buffer.h
-    src/render/command_buffer.cpp
-    src/render/extension_features.h
-    src/render/image_barrier.h
-    src/render/image_barrier.cpp
-    src/render/renderer.h
-    src/render/renderer.cpp
-    src/render/swapchain.h
-    src/render/swapchain.cpp
-    src/render/vulkan_context.h
-    src/render/vulkan_context.cpp
-    src/render/pipeline/graphics_pipeline.h
-    src/render/pipeline/graphics_pipeline_builder.h
-    src/render/pipeline/graphics_pipeline_builder.cpp
-    src/render/resource/buffer_resource.h
-    src/render/resource/buffer_resource.cpp
-    src/render/resource/gpu_resource_base.h
-    src/render/resource/image_resource.h
-    src/render/resource/image_resource.cpp
-    src/render/resource/sampler.h
-    src/render/resource/sampler.cpp
-    src/render/surface/surface_provider.h
-    src/render/surface/sdl3_surface_provider.h
-    src/render/surface/sdl3_surface_provider.cpp
-    src/render/component/i_renderable.h
-    src/render/component/splat_component.h
-    src/render/component/splat_component.cpp
+# --- Library: tri_gfx ---
+add_library(tri_gfx STATIC
+    src/gfx/command_buffer.h
+    src/gfx/command_buffer.cpp
+    src/gfx/extension_features.h
+    src/gfx/image_barrier.h
+    src/gfx/image_barrier.cpp
+    src/gfx/renderer.h
+    src/gfx/renderer.cpp
+    src/gfx/swapchain.h
+    src/gfx/swapchain.cpp
+    src/gfx/vulkan_context.h
+    src/gfx/vulkan_context.cpp
+    src/gfx/pipeline/graphics_pipeline.h
+    src/gfx/pipeline/graphics_pipeline_builder.h
+    src/gfx/pipeline/graphics_pipeline_builder.cpp
+    src/gfx/resource/buffer_resource.h
+    src/gfx/resource/buffer_resource.cpp
+    src/gfx/resource/gpu_resource_base.h
+    src/gfx/resource/image_resource.h
+    src/gfx/resource/image_resource.cpp
+    src/gfx/resource/sampler.h
+    src/gfx/resource/sampler.cpp
+    src/gfx/surface/surface_provider.h
+    src/gfx/surface/sdl3_surface_provider.h
+    src/gfx/surface/sdl3_surface_provider.cpp
+    src/gfx/component/i_renderable.h
+    src/gfx/component/splat_component.h
+    src/gfx/component/splat_component.cpp
 )
-target_include_directories(tri_render PUBLIC src)
-target_link_libraries(tri_render PUBLIC tri_core tri_geom tri_io Vulkan::Vulkan SDL3::SDL3)
+target_include_directories(tri_gfx PUBLIC src)
+target_link_libraries(tri_gfx PUBLIC tri_core tri_geom tri_io Vulkan::Vulkan SDL3::SDL3)
 
 # --- Library: tri_ui ---
 add_library(tri_ui STATIC
@@ -104,7 +104,7 @@ add_library(tri_ui STATIC
     lib/imgui/backends/imgui_impl_vulkan.cpp
 )
 target_include_directories(tri_ui PUBLIC src lib/imgui lib/imgui/backends)
-target_link_libraries(tri_ui PUBLIC tri_core tri_render Vulkan::Vulkan SDL3::SDL3)
+target_link_libraries(tri_ui PUBLIC tri_core tri_gfx Vulkan::Vulkan SDL3::SDL3)
 
 # --- Library: tri_app ---
 add_library(tri_app STATIC
@@ -119,7 +119,7 @@ target_link_libraries(tri_app
     tri_core
     tri_geom
     tri_io
-    tri_render
+    tri_gfx
     tri_ui
     SDL3::SDL3
     Vulkan::Vulkan

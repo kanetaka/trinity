@@ -12,10 +12,10 @@ description: アーキテクチャに関するスキル
 - 継承は原則インターフェイス（純粋仮想関数のみを持つ抽象クラス）の実装のみで行う。具象クラス同士の実装継承は避け、コンポジション（コンポーネントの合成）で再利用する
 - 変換マトリックスは連続したメモリ領域に配置し、GPUで一括処理できるようにする
 - MVPアーキテクチャを採用する
-- coreはgeom, io, render, ui, appに依存しないようにする
-- geomはio, render, ui, appに依存しないようにする
-- ioはrender, ui, appに依存しないようにする
-- renderはui, appに依存しないようにする
+- coreはgeom, io, gfx, ui, appに依存しないようにする
+- geomはio, gfx, ui, appに依存しないようにする
+- ioはgfx, ui, appに依存しないようにする
+- gfxはui, appに依存しないようにする
 - uiはappに依存しないようにする
 - appはあらゆるモジュールに依存してもよい
 
@@ -32,10 +32,10 @@ description: アーキテクチャに関するスキル
 - src/core : コアライブラリのコードを格納。Object, World, IComponentなど
 - src/geom : 数学ライブラリのコードを格納
 - src/io : 入出力ライブラリのコードを格納
-- src/render : レンダリングのコードを格納
-- src/render/component : 具象コンポーネント（IComponent実装）のコードを格納
-- src/render/pipeline : レンダリングパイプラインのコードを格納
-- src/render/resource : レンダリングリソースのコードを格納
-- src/redner/surface : レンダリングサーフェスのコードを格納
+- src/gfx : レンダリング(Vulkan)のコードを格納
+- src/gfx/component : 具象コンポーネント（IComponent実装）のコードを格納
+- src/gfx/pipeline : レンダリングパイプラインのコードを格納
+- src/gfx/resource : レンダリングリソースのコードを格納
+- src/gfx/surface : レンダリングサーフェスのコードを格納
 - src/ui : UIのコードを格納
 - tool : ツールプログラムのコードを格納
