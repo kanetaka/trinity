@@ -3,7 +3,7 @@
 #endif
 #include "app/application.h"
 #include "render/renderer.h"
-#include "render/system/splat_system.h"
+#include "render/component/splat_component.h"
 #include "render/vulkan_context.h"
 #include "render/swapchain.h"
 #include "render/surface/sdl3_surface_provider.h"
@@ -12,51 +12,27 @@
 #include <iostream>
 #include <algorithm>
 #include <chrono>
-#include "core/registry.h"
-#include "core/systems.h"
-#include "core/components.h"
 #include <nlohmann/json.hpp>
 
 using namespace tri;
 
 Application::Application()
-    : camera_(glm::dvec3(0.0, 0.0, 5.0), glm::dvec3(0.0, -1.0, 0.0), -90.0f, 0.0f),
-    updating_entities_(false)
+    : camera_(glm::dvec3(0.0, 0.0, 5.0), glm::dvec3(0.0, -1.0, 0.0), -90.0f, 0.0f)
 {
-    registry_ = std::make_unique<Registry>();
+    world_ = std::make_unique<World>();
     ui_manager_ = std::make_unique<UiManager>();
 }
 
 void Application::LoadPly(const std::string& path)
 {
-    if (splat_system_) {
-        auto device = VulkanContext::Get().GetVkDevice();
-        vkDeviceWaitIdle(device);
-        splat_system_.reset();
-    }
+    auto device = VulkanContext::Get().GetVkDevice();
+    vkDeviceWaitIdle(device);
 
-    auto* root_hierarchy = registry_->GetComponent<HierarchyComponent>(root_entity_);
-    if (root_hierarchy) {
-        std::vector<Entity> children_to_destroy = root_hierarchy->children;
-        root_hierarchy->children.clear();
-        for (auto child : children_to_destroy) {
-            registry_->Destroy(child);
-        }
-    }
+    Object& root = world_->GetRoot();
+    world_->DestroyChildren(root);
 
-    Entity splat_id = registry_->Create();
-    registry_->AddComponent<TransformComponent>(splat_id);
-    registry_->AddComponent<HierarchyComponent>(splat_id);
-    
-    // Component pointers may be invalidated by Destroy(), so re-fetch root_hierarchy
-    root_hierarchy = registry_->GetComponent<HierarchyComponent>(root_entity_);
-    if (root_hierarchy) {
-        root_hierarchy->children.push_back(splat_id);
-    }
-    registry_->GetComponent<HierarchyComponent>(splat_id)->parent = root_entity_;
-
-    splat_system_ = std::make_unique<SplatSystem>(path, renderer_.get());
-    splat_system_->Initialize(*registry_, splat_id, renderer_.get());
+    Object& splat_object = world_->CreateObject(root, "Splat");
+    splat_object.AddComponent<SplatComponent>(path, renderer_.get());
 }
 
 Application::~Application()
@@ -68,17 +44,12 @@ void Application::OnInitialize()
     renderer_ = std::make_unique<Renderer>(this);
     auto extent = VulkanContext::Get().GetSwapchain()->GetExtent();
     renderer_->Initialize((float)extent.width, (float)extent.height);
-
-    root_entity_ = registry_->Create();
-    registry_->AddComponent<TransformComponent>(root_entity_);
-    registry_->AddComponent<HierarchyComponent>(root_entity_);
 }
 
 void Application::OnCleanup()
 {
     // Vulkan resources must be released before the device is destroyed.
-    splat_system_.reset();
-    registry_.reset();
+    world_.reset();
 
     if (renderer_)
     {
@@ -104,21 +75,18 @@ void Application::OnDrawFrame()
     renderer_->SetCameraPosition(camera_.GetPosition());
     renderer_->UpdateUniformBuffer();
 
-    TransformSystem::Update(*registry_);
-    renderer_->UpdateTransformBuffer(*registry_);
+    world_->Update();
+    renderer_->UpdateTransformBuffer(*world_);
 
-    if (root_entity_ != NullEntity)
+    for (auto* object : world_->GetOrderedObjects())
     {
-        // Use member splat_system_ for specific logic (like sorting)
-        if (splat_system_)
+        if (auto* splat = object->GetComponent<SplatComponent>())
         {
-            registry_->ForEach<SplatDataComponent>([&](Entity entity, SplatDataComponent& data) {
-                splat_system_->UpdateWithCamera(*registry_, entity, camera_);
-            });
+            splat->UpdateWithCamera(camera_, object->GetWorldTransform());
         }
     }
 
-    renderer_->Draw(root_entity_);
+    renderer_->Draw(world_->GetRoot());
 }
 
 void Application::ProcessInput(const Uint8* state, float delta_time)

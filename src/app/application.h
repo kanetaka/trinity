@@ -11,13 +11,11 @@
 #include "app/iapplication.hpp"
 #include "geom/camera.h"
 #include "ui/ui_manager.h"
-#include "core/registry.h"
+#include "core/world.h"
 
 namespace tri
 {
-    class Registry;
     class Renderer;
-    class SplatSystem;
 
     class Application : public IApplication
     {
@@ -33,11 +31,11 @@ namespace tri
 
         void LoadPly(const std::string& path);
 
-        Entity GetRootEntity() const { return root_entity_; }
+        Object& GetRootObject() { return world_->GetRoot(); }
 
         tri::Renderer* GetRenderer() { return renderer_.get(); }
         tri::Camera& GetCamera() { return camera_; }
-        tri::Registry& GetRegistry() { return *registry_; }
+        tri::World& GetWorld() { return *world_; }
         tri::UiManager& GetUiManager() { return *ui_manager_; }
 
 
@@ -51,18 +49,12 @@ namespace tri
         void ProcessMousePanning(float xrel, float yrel);
 
     private:
-        void UpdateEntities(float delta_time);
-
         std::string ply_file_;
-        std::unique_ptr<tri::SplatSystem> splat_system_;
         tri::Camera camera_;
 
         std::unique_ptr<tri::Renderer> renderer_;
-        std::unique_ptr<tri::Registry> registry_;
+        std::unique_ptr<tri::World> world_;
         std::unique_ptr<tri::UiManager> ui_manager_;
-        Entity root_entity_ = NullEntity;
-
-        bool updating_entities_ = false;
 
         float width_ = 1280.0f;
         float height_ = 720.0f;

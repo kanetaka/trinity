@@ -7,9 +7,9 @@
 #include "render/resource/buffer_resource.h"
 #include "app/application.h"
 #include "ui/ui_manager.h"
-#include "core/registry.h"
-#include "core/components.h"
-#include "render/component/splat_data_component.h"
+#include "core/object.h"
+#include "core/world.h"
+#include "render/component/i_renderable.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -72,9 +72,8 @@ void Renderer::Shutdown()
     }
 }
 
-void Renderer::Draw(Entity root)
+void Renderer::Draw(Object& root)
 {
-    if (root == NullEntity) return;
     auto& vulkan_ctx = VulkanContext::Get();
 
     if (vulkan_ctx.AcquireNextImage() != VK_SUCCESS)
@@ -117,7 +116,7 @@ void Renderer::Draw(Entity root)
 
     vkCmdBindPipeline(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
 
-    DrawEntity(root, app_->GetRegistry(), command_buffer);
+    DrawObject(root, command_buffer);
 
     app_->GetUiManager().Render(command_buffer);
 
@@ -131,35 +130,16 @@ void Renderer::Draw(Entity root)
     vulkan_ctx.SubmitPresent();
 }
 
-void Renderer::DrawEntity(Entity entity, Registry& registry, std::shared_ptr<CommandBuffer>& command_buffer)
+void Renderer::DrawObject(Object& object, std::shared_ptr<CommandBuffer>& command_buffer)
 {
-    if (auto* splat = registry.GetComponent<SplatDataComponent>(entity))
-    {
-        if (splat->descriptor_set != VK_NULL_HANDLE)
+    object.ForEachComponent<IRenderable>([&](IRenderable& renderable)
         {
-            vkCmdBindDescriptorSets(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout_, 0, 1, &splat->descriptor_set, 0, nullptr);
+            renderable.Render(*command_buffer, pipeline_layout_, object.GetTransformIndex());
+        });
 
-            uint32_t transform_index = registry.GetPoolIndex<TransformComponent>(entity);
-            vkCmdPushConstants(command_buffer->Get(), pipeline_layout_, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
-
-            // Access original vertex count/index through the splat buffer size or keep it in component
-            // For now, assume common 4 vertices per splat as before. 
-            // We need to know the number of splats. Let's assume splat_buffer size / sizeof(GpuSplat).
-            // But actually we have index_buffer.
-            if (splat->index_buffer)
-            {
-                uint32_t num_splats = static_cast<uint32_t>(splat->index_buffer->GetBufferSize() / sizeof(uint32_t));
-                vkCmdDraw(command_buffer->Get(), 4, num_splats, 0, 0);
-            }
-        }
-    }
-
-    if (auto* hierarchy = registry.GetComponent<HierarchyComponent>(entity))
+    for (auto& child : object.GetChildren())
     {
-        for (auto child_id : hierarchy->children)
-        {
-            DrawEntity(child_id, registry, command_buffer);
-        }
+        DrawObject(*child, command_buffer);
     }
 }
 
@@ -264,16 +244,16 @@ void Renderer::UpdateUniformBuffer()
     uniform_buffer_->Unmap();
 }
 
-void Renderer::UpdateTransformBuffer(Registry& registry)
+void Renderer::UpdateTransformBuffer(const World& world)
 {
-    auto transforms = registry.View<TransformComponent>();
-    if (transforms.empty()) return;
+    const auto& objects = world.GetOrderedObjects();
+    if (objects.empty()) return;
 
     std::vector<glm::mat4> matrices;
-    matrices.reserve(transforms.size());
-    for (const auto& t : transforms)
+    matrices.reserve(objects.size());
+    for (const auto* object : objects)
     {
-        glm::dmat4 rel = t.world_transform;
+        glm::dmat4 rel = object->GetWorldTransform();
         rel[3][0] -= camera_pos_.x;
         rel[3][1] -= camera_pos_.y;
         rel[3][2] -= camera_pos_.z;

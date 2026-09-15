@@ -6,18 +6,10 @@ description: アーキテクチャに関するスキル
 ---
 
 # アーキテクチャ
-- データ指向
-- ECSアーキテクチャを採用する
-- Entity、Component、Systemの3層構造にする
-- Entityは、レンダラ内のあらゆる実体のIDのみを持つ
-- Entityの特徴は、データもロジックも持たない
-- Entityの役割は、コンポーネントを紐づけるためのインデックス
-- Componentは、エンティティが持つデータの集まり
-- Componentの特徴は、ロジックを持たず構造体として定義する
-- Componentの役割は、位置、角度、色など、特定の性質を保持する
-- Systemは、特定のコンポーネントの組み合わせを持つエンティティ群を一括して処理するロジック
-- Systemの特徴は、状態を持たず、毎フレーム実行されるフィルターのような役割を果たす
-- Systemの役割は、データの更新を行う
+- オブジェクト指向 + コンポーネント指向（Unity, Unreal Engineに準ずる）
+- Entityに相当するものはObjectクラスとする。Objectは名前、階層（親子）、トランスフォーム、コンポーネントを持つ
+- 振る舞いはObjectに付与するコンポーネントとして実装する。コンポーネントはIComponentを実装する
+- 継承は原則インターフェイス（純粋仮想関数のみを持つ抽象クラス）の実装のみで行う。具象クラス同士の実装継承は避け、コンポジション（コンポーネントの合成）で再利用する
 - 変換マトリックスは連続したメモリ領域に配置し、GPUで一括処理できるようにする
 - MVPアーキテクチャを採用する
 - coreはgeom, io, render, ui, appに依存しないようにする
@@ -28,23 +20,22 @@ description: アーキテクチャに関するスキル
 - appはあらゆるモジュールに依存してもよい
 
 # ファイル構成
-- asset : 3Dモデルやテクスチャなどのアセットを格納する
-- asset/model : 3Dモデルを格納する
-- asset/shader : シェーダープログラムを格納する
-- asset/texture : テクスチャを格納する
-- build : ビルド成果物を格納する。コミットしない
-- docs : ドキュメントを格納する
-- doc/spec : 仕様書を格納する
-- src : ソースコードを格納する
-- src/app : アプリケーションのコードを格納する
-- src/core : コアライブラリのコードを格納する。Entity, Component, System, Registryなど
-- src/geom : 数学ライブラリのコードを格納する
-- src/io : 入出力ライブラリのコードを格納する
-- src/render : レンダリングのコードを格納する
-- src/render/component : 具象コンポーネントのコードを格納する
-- src/render/pipeline : レンダリングパイプラインのコードを格納する
-- src/render/resource : レンダリングリソースのコードを格納する
-- src/redner/surface : レンダリングサーフェスのコードを格納する
-- src/render/system : レンダリングシステムのコードを格納する
-- src/ui : UIのコードを格納する
-- tool : ツールプログラムのコードを格納する
+- asset : 3Dモデルやテクスチャなどのアセットを格納
+- asset/model : 3Dモデルを格納
+- asset/shader : シェーダープログラムを格納
+- asset/texture : テクスチャを格納
+- build : ビルド成果物を格納
+- docs : ドキュメントを格納
+- doc/spec : 仕様書を格納
+- src : ソースコードを格納
+- src/app : アプリケーションのコードを格納
+- src/core : コアライブラリのコードを格納。Object, World, IComponentなど
+- src/geom : 数学ライブラリのコードを格納
+- src/io : 入出力ライブラリのコードを格納
+- src/render : レンダリングのコードを格納
+- src/render/component : 具象コンポーネント（IComponent実装）のコードを格納
+- src/render/pipeline : レンダリングパイプラインのコードを格納
+- src/render/resource : レンダリングリソースのコードを格納
+- src/redner/surface : レンダリングサーフェスのコードを格納
+- src/ui : UIのコードを格納
+- tool : ツールプログラムのコードを格納

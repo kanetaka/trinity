@@ -14,51 +14,49 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <SDL3/SDL.h>
 
-#include "render/system/splat_system.h"
-#include "render/component/splat_data_component.h"
-#include "app/application.h"
+#include "render/component/splat_component.h"
+#include "geom/camera.h"
 #include "render/renderer.h"
 #include "io/ply_loader.h"
 #include "render/vulkan_context.h"
 #include "core/asset_path.h"
 #include "render/command_buffer.h"
-#include "core/components.h"
+#include "render/resource/buffer_resource.h"
 
 using namespace tri;
 
-SplatSystem::SplatSystem(const std::string& ply_file, Renderer* renderer)
-        : ply_file_(ply_file)
+SplatComponent::SplatComponent(const std::string& ply_file, Renderer* renderer)
+    : ply_file_(ply_file)
 {
     LoadSplats();
     CreateBuffers();
     CreateDescriptorSets(renderer);
 }
 
-SplatSystem::~SplatSystem()
+SplatComponent::~SplatComponent()
 {
 }
 
-void SplatSystem::Initialize(Registry& registry, Entity entity, Renderer* renderer)
+void SplatComponent::UpdateWithCamera(const Camera& camera, const glm::dmat4& world_transform)
 {
-    auto& data = registry.AddComponent<SplatDataComponent>(entity);
-    data.ply_file = ply_file_;
-    data.splat_buffer = splat_buffer_;
-    data.index_buffer = index_buffer_;
-    data.descriptor_set = descriptor_set_;
+    SortSplats(camera.GetViewMatrix(), world_transform, camera.GetPosition());
 }
 
-void SplatSystem::UpdateWithCamera(Registry& registry, Entity entity, const Camera& camera)
+void SplatComponent::Render(CommandBuffer& command_buffer, VkPipelineLayout pipeline_layout, uint32_t transform_index) const
 {
-    auto* data = registry.GetComponent<SplatDataComponent>(entity);
-    if (!data) return;
+    if (descriptor_set_ == VK_NULL_HANDLE) return;
 
-    auto* transform = registry.GetComponent<TransformComponent>(entity);
-    glm::dmat4 world_transform = transform ? transform->world_transform : glm::dmat4(1.0);
+    vkCmdBindDescriptorSets(command_buffer.Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_layout, 0, 1, &descriptor_set_, 0, nullptr);
+    vkCmdPushConstants(command_buffer.Get(), pipeline_layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(uint32_t), &transform_index);
 
-    SortSplats(*data, camera.GetViewMatrix(), world_transform, camera.GetPosition());
+    if (index_buffer_)
+    {
+        uint32_t num_splats = static_cast<uint32_t>(index_buffer_->GetBufferSize() / sizeof(uint32_t));
+        vkCmdDraw(command_buffer.Get(), 4, num_splats, 0, 0);
+    }
 }
 
-void SplatSystem::LoadSplats()
+void SplatComponent::LoadSplats()
 {
     std::vector<FullSplat> splats;
     if (!PlyLoader::LoadPly(ply_file_, splats))
@@ -83,7 +81,7 @@ void SplatSystem::LoadSplats()
     }
 }
 
-void SplatSystem::CreateBuffers()
+void SplatComponent::CreateBuffers()
 {
     if (gpu_splats_.empty()) return;
 
@@ -97,14 +95,13 @@ void SplatSystem::CreateBuffers()
     index_buffer_ = StorageBuffer::Create(index_size, StorageBuffer::AccessMode::CpuAccessible);
 }
 
-void SplatSystem::CreateDescriptorSets(Renderer* renderer)
+void SplatComponent::CreateDescriptorSets(Renderer* renderer)
 {
     descriptor_set_ = renderer->AllocateDescriptorSet();
     renderer->UpdateSplatDescriptorSet(descriptor_set_, splat_buffer_, index_buffer_);
 }
 
-
-void SplatSystem::SortSplats(SplatDataComponent& data, const glm::mat4& view, const glm::dmat4& world_transform, const glm::dvec3& camera_position)
+void SplatComponent::SortSplats(const glm::mat4& view, const glm::dmat4& world_transform, const glm::dvec3& camera_position)
 {
     if (splat_indices_.empty()) return;
 
@@ -134,14 +131,14 @@ void SplatSystem::SortSplats(SplatDataComponent& data, const glm::mat4& view, co
         });
 
     // Upload indices to SSBO
-    if (data.index_buffer)
+    if (index_buffer_)
     {
-        void* buf = data.index_buffer->Map();
+        void* buf = index_buffer_->Map();
         uint32_t* mapped_uints = reinterpret_cast<uint32_t*>(buf);
         for (size_t i = 0; i < splat_indices_.size(); ++i)
         {
             mapped_uints[i] = splat_indices_[i].index;
         }
-        data.index_buffer->Unmap();
+        index_buffer_->Unmap();
     }
 }

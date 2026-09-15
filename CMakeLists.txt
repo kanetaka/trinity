@@ -29,10 +29,11 @@ find_package(SDL3 REQUIRED)
 add_library(tri_core STATIC
     src/core/asset_path.h
     src/core/asset_path.cpp
-    src/core/registry.h
-    src/core/components.h
-    src/core/systems.h
-    src/core/systems.cpp
+    src/core/component.h
+    src/core/object.h
+    src/core/object.cpp
+    src/core/world.h
+    src/core/world.cpp
 )
 target_include_directories(tri_core PUBLIC src)
 # Core uses Vulkan SDK for GLM etc
@@ -83,9 +84,9 @@ add_library(tri_render STATIC
     src/render/surface/surface_provider.h
     src/render/surface/sdl3_surface_provider.h
     src/render/surface/sdl3_surface_provider.cpp
-    src/render/component/splat_data_component.h
-    src/render/system/splat_system.h
-    src/render/system/splat_system.cpp
+    src/render/component/i_renderable.h
+    src/render/component/splat_component.h
+    src/render/component/splat_component.cpp
 )
 target_include_directories(tri_render PUBLIC src)
 target_link_libraries(tri_render PUBLIC tri_core tri_geom tri_io Vulkan::Vulkan SDL3::SDL3)

@@ -8,11 +8,12 @@
 
 #endif
 #include <glm/glm.hpp>
-#include "core/registry.h"
 
 namespace tri
 {
     class Application;
+    class Object;
+    class World;
 }
 
 namespace tri
@@ -30,14 +31,14 @@ namespace tri
         bool Initialize(float screen_width, float screen_height);
         void Shutdown();
 
-        void Draw(Entity root);
+        void Draw(Object& root);
 
         void SetViewMatrix(const glm::mat4& view) { view_ = view; }
         void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
         void SetCameraPosition(const glm::dvec3& pos) { camera_pos_ = pos; }
 
         void UpdateUniformBuffer();
-        void UpdateTransformBuffer(Registry& registry);
+        void UpdateTransformBuffer(const World& world);
 
         VkDescriptorSetLayout GetSplatDescriptorSetLayout() const { return descriptor_set_layout_; }
         VkDescriptorSet AllocateDescriptorSet();
@@ -51,7 +52,7 @@ namespace tri
         bool CreateDescriptorPool();
         bool CreateDescriptorSets();
         bool InitializeGraphicsPipeline();
-        void DrawEntity(Entity entity, Registry& registry, std::shared_ptr<CommandBuffer>& command_buffer);
+        void DrawObject(Object& object, std::shared_ptr<CommandBuffer>& command_buffer);
 
         Application* app_;
 
