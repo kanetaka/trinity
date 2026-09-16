@@ -4,6 +4,7 @@
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
+#include <functional>
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
@@ -11,7 +12,7 @@
 
 namespace tri
 {
-    class Application;
+    class GraphicsContext;
     class Object;
     class Scene;
     class IComponent;
@@ -34,13 +35,14 @@ namespace tri
     class Renderer
     {
     public:
-        Renderer(Application* app);
+        Renderer(GraphicsContext& context);
         ~Renderer();
 
-        bool Initialize(float screen_width, float screen_height);
+        bool Initialize(float screen_width = 0.0f, float screen_height = 0.0f);
         void Shutdown();
+        void WaitIdle();
 
-        void Draw(Object& root);
+        void Draw(Object& root, std::function<void(std::shared_ptr<CommandBuffer>&)> post_render = nullptr);
 
         void SetViewMatrix(const glm::mat4& view) { view_ = view; }
         void SetProjectionMatrix(const glm::mat4& proj) { projection_ = proj; }
@@ -70,7 +72,7 @@ namespace tri
         bool InitializeGraphicsPipeline();
         void CollectRenderItems(Object& object, std::vector<RenderItem>& out_items);
 
-        Application* app_;
+        GraphicsContext& context_;
 
         VkDescriptorSetLayout descriptor_set_layout_ = VK_NULL_HANDLE;
         VkDescriptorPool descriptor_pool_ = VK_NULL_HANDLE;

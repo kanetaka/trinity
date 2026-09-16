@@ -17,15 +17,16 @@
 #include "scene/component/splat_component.h"
 #include "geometry/camera.h"
 #include "scene/io/ply_loader.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 #include "core/asset_path.h"
 #include "graphics/command_buffer.h"
 #include "graphics/resource/buffer_resource.h"
 
 using namespace tri;
 
-SplatComponent::SplatComponent(const std::string& ply_file)
+SplatComponent::SplatComponent(GraphicsContext& context, const std::string& ply_file)
     : ply_file_(ply_file)
+    , context_(context)
 {
     LoadSplats();
     CreateBuffers();
@@ -84,13 +85,13 @@ void SplatComponent::CreateBuffers()
     if (gpu_splats_.empty()) return;
 
     VkDeviceSize splat_size = gpu_splats_.size() * sizeof(GpuSplat);
-    splat_buffer_ = StorageBuffer::Create(splat_size, StorageBuffer::AccessMode::CpuAccessible);
+    splat_buffer_ = StorageBuffer::Create(context_, splat_size, StorageBuffer::AccessMode::CpuAccessible);
     void* data = splat_buffer_->Map();
     memcpy(data, gpu_splats_.data(), splat_size);
     splat_buffer_->Unmap();
 
     VkDeviceSize index_size = gpu_splats_.size() * sizeof(uint32_t);
-    index_buffer_ = StorageBuffer::Create(index_size, StorageBuffer::AccessMode::CpuAccessible);
+    index_buffer_ = StorageBuffer::Create(context_, index_size, StorageBuffer::AccessMode::CpuAccessible);
 }
 
 void SplatComponent::SetupResources(VkDescriptorSet descriptor_set, VkBuffer ubo, VkBuffer transform_buffer)
@@ -101,7 +102,7 @@ void SplatComponent::SetupResources(VkDescriptorSet descriptor_set, VkBuffer ubo
         return;
     }
 
-    auto device = VulkanContext::Get().GetVkDevice();
+    auto device = context_.GetVkDevice();
 
     VkDescriptorBufferInfo ubo_info{};
     ubo_info.buffer = ubo;

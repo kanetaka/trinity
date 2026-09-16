@@ -5,18 +5,21 @@ using namespace tri;
 template<typename T>
 void BufferResource<T>::Cleanup()
 {
-    VulkanContext& context = VulkanContext::Get();
-    VkDevice device = context.GetVkDevice();
+    if (context_)
+    {
+        VkDevice device = context_->GetVkDevice();
 
-    if (buffer_ != VK_NULL_HANDLE)
-    {
-        vkDestroyBuffer(device, buffer_, nullptr);
-        buffer_ = VK_NULL_HANDLE;
-    }
-    if (memory_ != VK_NULL_HANDLE)
-    {
-        vkFreeMemory(device, memory_, nullptr);
-        memory_ = VK_NULL_HANDLE;
+        if (buffer_ != VK_NULL_HANDLE)
+        {
+            vkDestroyBuffer(device, buffer_, nullptr);
+            buffer_ = VK_NULL_HANDLE;
+        }
+        if (memory_ != VK_NULL_HANDLE)
+        {
+            vkFreeMemory(device, memory_, nullptr);
+            memory_ = VK_NULL_HANDLE;
+        }
+        context_ = nullptr;
     }
     size_ = 0;
 }
@@ -33,10 +36,10 @@ VkDescriptorBufferInfo BufferResource<T>::GetDescriptorInfo() const
 }
 
 template<typename T>
-bool BufferResource<T>::CreateBuffer(const VkBufferCreateInfo& create_info, VkMemoryPropertyFlags mem_prop_flags)
+bool BufferResource<T>::CreateBuffer(GraphicsContext& context, const VkBufferCreateInfo& create_info, VkMemoryPropertyFlags mem_prop_flags)
 {
-    VulkanContext& context = VulkanContext::Get();
-    VkDevice device = context.GetVkDevice();
+    context_ = &context;
+    VkDevice device = context_->GetVkDevice();
 
     auto result = vkCreateBuffer(device, &create_info, nullptr, &buffer_);
     if (result != VK_SUCCESS)
@@ -52,7 +55,7 @@ bool BufferResource<T>::CreateBuffer(const VkBufferCreateInfo& create_info, VkMe
     {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
         .allocationSize = mem_requirements.size,
-        .memoryTypeIndex = context.FindMemoryType(mem_requirements, mem_prop_flags),
+        .memoryTypeIndex = context_->FindMemoryType(mem_requirements, mem_prop_flags),
     };
 
     result = vkAllocateMemory(device, &alloc_info, nullptr, &memory_);
@@ -68,9 +71,8 @@ bool BufferResource<T>::CreateBuffer(const VkBufferCreateInfo& create_info, VkMe
     return true;
 }
 
-bool VertexBuffer::Initialize(VkDeviceSize size, VkMemoryPropertyFlags mem_prop_flags)
+bool VertexBuffer::Initialize(GraphicsContext& context, VkDeviceSize size, VkMemoryPropertyFlags mem_prop_flags)
 {
-    auto& context = VulkanContext::Get();
     VkBufferCreateInfo buffer_info
     {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -80,26 +82,26 @@ bool VertexBuffer::Initialize(VkDeviceSize size, VkMemoryPropertyFlags mem_prop_
     };
 
     SetAccessFlags(VK_ACCESS_VERTEX_ATTRIBUTE_READ_BIT);
-    return CreateBuffer(buffer_info, mem_prop_flags);
+    return CreateBuffer(context, buffer_info, mem_prop_flags);
 }
 
 void* VertexBuffer::Map()
 {
-    if (!(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return nullptr;
+    if (!context_ || !(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return nullptr;
 
     void* mapped = nullptr;
-    vkMapMemory(VulkanContext::Get().GetVkDevice(), memory_, 0, size_, 0, &mapped);
+    vkMapMemory(context_->GetVkDevice(), memory_, 0, size_, 0, &mapped);
     return mapped;
 }
 
 void VertexBuffer::Unmap()
 {
-    if (!(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return;
+    if (!context_ || !(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return;
 
-    vkUnmapMemory(VulkanContext::Get().GetVkDevice(), memory_);
+    vkUnmapMemory(context_->GetVkDevice(), memory_);
 }
 
-bool IndexBuffer::Initialize(VkDeviceSize size, VkMemoryPropertyFlags mem_prop_flags)
+bool IndexBuffer::Initialize(GraphicsContext& context, VkDeviceSize size, VkMemoryPropertyFlags mem_prop_flags)
 {
     VkBufferCreateInfo buffer_info
     {
@@ -109,26 +111,26 @@ bool IndexBuffer::Initialize(VkDeviceSize size, VkMemoryPropertyFlags mem_prop_f
         .sharingMode = VK_SHARING_MODE_EXCLUSIVE,
     };
     SetAccessFlags(VK_ACCESS_INDEX_READ_BIT);
-    return CreateBuffer(buffer_info, mem_prop_flags);
+    return CreateBuffer(context, buffer_info, mem_prop_flags);
 }
 
 void* IndexBuffer::Map()
 {
-    if (!(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return nullptr;
+    if (!context_ || !(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return nullptr;
 
     void* mapped = nullptr;
-    vkMapMemory(VulkanContext::Get().GetVkDevice(), memory_, 0, size_, 0, &mapped);
+    vkMapMemory(context_->GetVkDevice(), memory_, 0, size_, 0, &mapped);
     return mapped;
 }
 
 void IndexBuffer::Unmap()
 {
-    if (!(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return;
+    if (!context_ || !(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return;
 
-    vkUnmapMemory(VulkanContext::Get().GetVkDevice(), memory_);
+    vkUnmapMemory(context_->GetVkDevice(), memory_);
 }
 
-bool UniformBuffer::Initialize(VkDeviceSize size)
+bool UniformBuffer::Initialize(GraphicsContext& context, VkDeviceSize size)
 {
     VkBufferCreateInfo buffer_info
     {
@@ -139,22 +141,24 @@ bool UniformBuffer::Initialize(VkDeviceSize size)
     };
     VkMemoryPropertyFlags mem_prop_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     SetAccessFlags(VK_ACCESS_SHADER_READ_BIT);
-    return CreateBuffer(buffer_info, mem_prop_flags);
+    return CreateBuffer(context, buffer_info, mem_prop_flags);
 }
 
 void* UniformBuffer::Map()
 {
+    if (!context_) return nullptr;
     void* mapped = nullptr;
-    vkMapMemory(VulkanContext::Get().GetVkDevice(), memory_, 0, size_, 0, &mapped);
+    vkMapMemory(context_->GetVkDevice(), memory_, 0, size_, 0, &mapped);
     return mapped;
 }
 
 void UniformBuffer::Unmap()
 {
-    vkUnmapMemory(VulkanContext::Get().GetVkDevice(), memory_);
+    if (!context_) return;
+    vkUnmapMemory(context_->GetVkDevice(), memory_);
 }
 
-bool StagingBuffer::Initialize(VkDeviceSize size)
+bool StagingBuffer::Initialize(GraphicsContext& context, VkDeviceSize size)
 {
     VkBufferCreateInfo buffer_info
     {
@@ -165,28 +169,30 @@ bool StagingBuffer::Initialize(VkDeviceSize size)
     };
     VkMemoryPropertyFlags mem_prop_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     SetAccessFlags(VK_ACCESS_HOST_WRITE_BIT);
-    return CreateBuffer(buffer_info, mem_prop_flags);
+    return CreateBuffer(context, buffer_info, mem_prop_flags);
 }
 
 void* StagingBuffer::Map()
 {
+    if (!context_) return nullptr;
     void* mapped = nullptr;
-    VkDevice device = VulkanContext::Get().GetVkDevice();
+    VkDevice device = context_->GetVkDevice();
     vkMapMemory(device, memory_, 0, size_, 0, &mapped);
     return mapped;
 }
 
 void StagingBuffer::Unmap()
 {
-    VkDevice device = VulkanContext::Get().GetVkDevice();
+    if (!context_) return;
+    VkDevice device = context_->GetVkDevice();
     vkUnmapMemory(device, memory_);
 }
 
 void* DynamicUniformBuffer::Map()
 {
-    auto& context = VulkanContext::Get();
-    VkDevice device = context.GetVkDevice();
-    auto frame_index = context.GetCurrentFrameIndex();
+    if (!context_) return nullptr;
+    VkDevice device = context_->GetVkDevice();
+    auto frame_index = context_->GetCurrentFrameIndex();
     auto offset = frame_index * block_size_;
 
     void* mapped = nullptr;
@@ -196,9 +202,9 @@ void* DynamicUniformBuffer::Map()
 
 void DynamicUniformBuffer::Unmap()
 {
-    auto& context = VulkanContext::Get();
-    VkDevice device = context.GetVkDevice();
-    auto frame_index = context.GetCurrentFrameIndex();
+    if (!context_) return;
+    VkDevice device = context_->GetVkDevice();
+    auto frame_index = context_->GetCurrentFrameIndex();
     auto offset = frame_index * block_size_;
 
     VkMappedMemoryRange mapped_range
@@ -212,15 +218,14 @@ void DynamicUniformBuffer::Unmap()
     vkUnmapMemory(device, memory_);
 }
 
-bool DynamicUniformBuffer::Initialize(VkDeviceSize size)
+bool DynamicUniformBuffer::Initialize(GraphicsContext& context, VkDeviceSize size)
 {
-    auto& context = VulkanContext::Get();
     auto ubo_offset_alignment = context.MinUniformOffsetAlignment();
     auto non_coherent_atom_size = context.NonCoherentAtomSize();
     auto align_size = std::max(ubo_offset_alignment, non_coherent_atom_size);
 
     block_size_ = (size + align_size - 1ULL) & ~(align_size - 1ULL);
-    VkDeviceSize buffer_size = block_size_ * context.MaxInflightFrames;
+    VkDeviceSize buffer_size = block_size_ * GraphicsContext::MaxInflightFrames;
     VkBufferCreateInfo buffer_info
     {
         .sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO,
@@ -230,7 +235,7 @@ bool DynamicUniformBuffer::Initialize(VkDeviceSize size)
     };
     VkMemoryPropertyFlags mem_prop_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT;
     SetAccessFlags(VK_ACCESS_SHADER_READ_BIT);
-    return CreateBuffer(buffer_info, mem_prop_flags);
+    return CreateBuffer(context, buffer_info, mem_prop_flags);
 }
 
 VkDescriptorBufferInfo DynamicUniformBuffer::GetDescriptorInfo() const
@@ -245,28 +250,28 @@ VkDescriptorBufferInfo DynamicUniformBuffer::GetDescriptorInfo() const
 
 uint32_t DynamicUniformBuffer::GetCurrentOffset() const
 {
-    auto& context = VulkanContext::Get();
-    VkDeviceSize offset = block_size_ * context.GetCurrentFrameIndex();
+    if (!context_) return 0;
+    VkDeviceSize offset = block_size_ * context_->GetCurrentFrameIndex();
     return uint32_t(offset);
 }
 
 void* StorageBuffer::Map()
 {
-    if (!(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return nullptr;
+    if (!context_ || !(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return nullptr;
 
     void* mapped = nullptr;
-    vkMapMemory(VulkanContext::Get().GetVkDevice(), memory_, 0, size_, 0, &mapped);
+    vkMapMemory(context_->GetVkDevice(), memory_, 0, size_, 0, &mapped);
     return mapped;
 }
 
 void StorageBuffer::Unmap()
 {
-    if (!(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return;
+    if (!context_ || !(mem_props_ & VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)) return;
 
-    vkUnmapMemory(VulkanContext::Get().GetVkDevice(), memory_);
+    vkUnmapMemory(context_->GetVkDevice(), memory_);
 }
 
-bool StorageBuffer::Initialize(VkDeviceSize size, AccessMode mode)
+bool StorageBuffer::Initialize(GraphicsContext& context, VkDeviceSize size, AccessMode mode)
 {
     VkBufferCreateInfo buffer_info
     {
@@ -281,7 +286,7 @@ bool StorageBuffer::Initialize(VkDeviceSize size, AccessMode mode)
         mem_prop_flags = VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT;
     }
     SetAccessFlags(VK_ACCESS_NONE);
-    return CreateBuffer(buffer_info, mem_prop_flags);
+    return CreateBuffer(context, buffer_info, mem_prop_flags);
 }
 
 

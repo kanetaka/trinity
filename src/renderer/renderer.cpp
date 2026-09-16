@@ -1,12 +1,10 @@
 #include "renderer/renderer.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 #include "graphics/swapchain.h"
 #include "scene/io/shader_loader.h"
 #include "core/asset_path.h"
 #include "graphics/pipeline/graphics_pipeline_builder.h"
 #include "graphics/resource/buffer_resource.h"
-#include "app/application.h"
-#include "ui/ui_manager.h"
 #include "scene/object.h"
 #include "scene/scene.h"
 #include "scene/component/i_renderable.h"
@@ -15,22 +13,37 @@
 
 using namespace tri;
 
-Renderer::Renderer(Application* app)
-    : app_(app), screen_width_(0), screen_height_(0) {}
+Renderer::Renderer(GraphicsContext& context)
+    : context_(context)
+    , screen_width_(0)
+    , screen_height_(0)
+{
+}
 
-Renderer::~Renderer() {}
+Renderer::~Renderer()
+{
+}
 
 bool Renderer::Initialize(float screen_width, float screen_height)
 {
-    screen_width_ = screen_width;
-    screen_height_ = screen_height;
+    if (screen_width <= 0.0f || screen_height <= 0.0f)
+    {
+        auto extent = context_.GetSwapchain()->GetExtent();
+        screen_width_ = static_cast<float>(extent.width);
+        screen_height_ = static_cast<float>(extent.height);
+    }
+    else
+    {
+        screen_width_ = screen_width;
+        screen_height_ = screen_height;
+    }
 
     // Create uniform buffer for camera data
-    uniform_buffer_ = UniformBuffer::Create(256); // Assuming sizeof(CameraUBO)
+    uniform_buffer_ = UniformBuffer::Create(context_, 256); // Assuming sizeof(CameraUBO)
 
     // Create storage buffer for entity transforms (batch transfer)
     // Assuming max 1024 entities for now
-    transform_buffer_ = StorageBuffer::Create(sizeof(glm::mat4) * 1024, StorageBuffer::AccessMode::CpuAccessible);
+    transform_buffer_ = StorageBuffer::Create(context_, sizeof(glm::mat4) * 1024, StorageBuffer::AccessMode::CpuAccessible);
 
     CreateDescriptorSetLayout();
     CreateDescriptorPool();
@@ -39,15 +52,26 @@ bool Renderer::Initialize(float screen_width, float screen_height)
     return true;
 }
 
+void Renderer::WaitIdle()
+{
+    context_.WaitIdle();
+}
+
 void Renderer::Shutdown()
 {
-    auto device = VulkanContext::Get().GetVkDevice();
-    vkDeviceWaitIdle(device);
+    context_.WaitIdle();
+    auto device = context_.GetVkDevice();
 
     if (uniform_buffer_)
     {
         uniform_buffer_->Cleanup();
         uniform_buffer_.reset();
+    }
+
+    if (transform_buffer_)
+    {
+        transform_buffer_->Cleanup();
+        transform_buffer_.reset();
     }
 
     if (pipeline_)
@@ -72,20 +96,20 @@ void Renderer::Shutdown()
     }
 }
 
-void Renderer::Draw(Object& root)
+void Renderer::Draw(Object& root, std::function<void(std::shared_ptr<CommandBuffer>&)> post_render)
 {
-    auto& vulkan_ctx = VulkanContext::Get();
+    auto& graphics_ctx = context_;
 
-    if (vulkan_ctx.AcquireNextImage() != VK_SUCCESS)
+    if (graphics_ctx.AcquireNextImage() != VK_SUCCESS)
     {
         return;
     }
 
-    auto* frame_ctx = vulkan_ctx.GetCurrentFrameContext();
+    auto* frame_ctx = graphics_ctx.GetCurrentFrameContext();
     auto& command_buffer = frame_ctx->commandBuffer;
     command_buffer->Begin();
 
-    auto& swapchain = vulkan_ctx.GetSwapchain();
+    auto& swapchain = graphics_ctx.GetSwapchain();
     auto image_view = swapchain->GetCurrentView();
     auto extent = swapchain->GetExtent();
 
@@ -130,7 +154,10 @@ void Renderer::Draw(Object& root)
         item.renderable->Render(*command_buffer, pipeline_layout_, item.transform_index);
     }
 
-    app_->GetUiManager().Render(command_buffer);
+    if (post_render)
+    {
+        post_render(command_buffer);
+    }
 
     vkCmdEndRendering(command_buffer->Get());
 
@@ -139,7 +166,7 @@ void Renderer::Draw(Object& root)
 
     command_buffer->End();
 
-    vulkan_ctx.SubmitPresent();
+    graphics_ctx.SubmitPresent();
 }
 
 void Renderer::CollectRenderItems(Object& object, std::vector<RenderItem>& out_items)
@@ -167,7 +194,7 @@ void Renderer::CollectRenderItems(Object& object, std::vector<RenderItem>& out_i
 
 VkDescriptorSet Renderer::AllocateDescriptorSet()
 {
-    auto device = VulkanContext::Get().GetVkDevice();
+    auto device = context_.GetVkDevice();
     VkDescriptorSetAllocateInfo alloc_info{};
     alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
     alloc_info.descriptorPool = descriptor_pool_;
@@ -245,7 +272,7 @@ void Renderer::UpdateTransformBuffer(const Scene& scene)
 
 bool Renderer::CreateDescriptorSetLayout()
 {
-    auto device = VulkanContext::Get().GetVkDevice();
+    auto device = context_.GetVkDevice();
 
     VkDescriptorSetLayoutBinding ubo_binding{};
     ubo_binding.binding = 0;
@@ -288,7 +315,7 @@ bool Renderer::CreateDescriptorSetLayout()
 
 bool Renderer::CreateDescriptorPool()
 {
-    auto device = VulkanContext::Get().GetVkDevice();
+    auto device = context_.GetVkDevice();
 
     std::vector<VkDescriptorPoolSize> pool_sizes =
     {
@@ -310,15 +337,15 @@ bool Renderer::CreateDescriptorPool()
 
 bool Renderer::InitializeGraphicsPipeline()
 {
-    auto& vulkan_ctx = VulkanContext::Get();
-    auto device = vulkan_ctx.GetVkDevice();
-    auto extent = vulkan_ctx.GetSwapchain()->GetExtent();
+    auto& graphics_ctx = context_;
+    auto device = graphics_ctx.GetVkDevice();
+    auto extent = graphics_ctx.GetSwapchain()->GetExtent();
 
     // Load Shaders
     auto vert_module =
-        LoadShaderModule(VulkanContext::Get().GetVkDevice(), GetAssetRootPath() / "shader" / "splat" / "splat.vert.spv");
+        LoadShaderModule(device, GetAssetRootPath() / "shader" / "splat" / "splat.vert.spv");
     auto frag_module =
-        LoadShaderModule(VulkanContext::Get().GetVkDevice(), GetAssetRootPath() / "shader" / "splat" / "splat.frag.spv");
+        LoadShaderModule(device, GetAssetRootPath() / "shader" / "splat" / "splat.frag.spv");
 
     VkPushConstantRange pushRange{};
     pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
@@ -343,9 +370,9 @@ bool Renderer::InitializeGraphicsPipeline()
         .SetVertexInput(nullptr, 0, nullptr, 0)
         .SetViewport(extent)
         .SetPipelineLayout(pipeline_layout_)
-        .UseDynamicRendering(vulkan_ctx.GetSwapchain()->GetFormat().format, VK_FORMAT_UNDEFINED)
+        .UseDynamicRendering(graphics_ctx.GetSwapchain()->GetFormat().format, VK_FORMAT_UNDEFINED)
         .EnableAlphaBlend()
-        .Build();
+        .Build(device);
 
     vkDestroyShaderModule(device, vert_module, nullptr);
     vkDestroyShaderModule(device, frag_module, nullptr);

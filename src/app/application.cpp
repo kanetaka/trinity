@@ -5,11 +5,9 @@
 #include "renderer/renderer.h"
 #include "scene/object.h"
 #include "scene/component/splat_component.h"
-#include "graphics/vulkan_context.h"
-#include "graphics/swapchain.h"
+#include "graphics/graphics_context.h"
 #include "graphics/surface/sdl3_surface_provider.h"
 #include <SDL3/SDL.h>
-#include <SDL3/SDL_vulkan.h>
 #include <iostream>
 #include <algorithm>
 #include <chrono>
@@ -20,20 +18,23 @@ using namespace tri;
 Application::Application()
     : camera_(glm::dvec3(0.0, 0.0, 5.0), glm::dvec3(0.0, -1.0, 0.0), -90.0f, 0.0f)
 {
+    graphics_context_ = std::make_unique<GraphicsContext>();
     scene_ = std::make_unique<Scene>();
     ui_manager_ = std::make_unique<UiManager>();
 }
 
 void Application::LoadPly(const std::string& path)
 {
-    auto device = VulkanContext::Get().GetVkDevice();
-    vkDeviceWaitIdle(device);
+    if (renderer_)
+    {
+        renderer_->WaitIdle();
+    }
 
     Object& root = scene_->GetRoot();
     scene_->DestroyChildren(root);
 
     Object& splat_object = scene_->CreateObject(root, "Splat");
-    auto& splat = splat_object.AddComponent<SplatComponent>(path);
+    auto& splat = splat_object.AddComponent<SplatComponent>(*graphics_context_, path);
     renderer_->RegisterComponent(splat);
 }
 
@@ -43,9 +44,10 @@ Application::~Application()
 
 void Application::OnInitialize()
 {
-    renderer_ = std::make_unique<Renderer>(this);
-    auto extent = VulkanContext::Get().GetSwapchain()->GetExtent();
-    renderer_->Initialize((float)extent.width, (float)extent.height);
+    renderer_ = std::make_unique<Renderer>(*graphics_context_);
+    renderer_->Initialize();
+    width_ = renderer_->GetScreenWidth();
+    height_ = renderer_->GetScreenHeight();
 }
 
 void Application::OnCleanup()
@@ -57,6 +59,11 @@ void Application::OnCleanup()
     {
         renderer_->Shutdown();
         renderer_.reset();
+    }
+
+    if (graphics_context_)
+    {
+        graphics_context_->Cleanup();
     }
 }
 
@@ -88,7 +95,10 @@ void Application::OnDrawFrame()
         }
     }
 
-    renderer_->Draw(scene_->GetRoot());
+    renderer_->Draw(scene_->GetRoot(), [this](auto& command_buffer)
+        {
+            ui_manager_->Render(command_buffer);
+        });
 }
 
 void Application::ProcessInput(const Uint8* state, float delta_time)
@@ -114,14 +124,15 @@ void Application::ProcessMousePanning(float xrel, float yrel)
 #if defined(__ANDROID__)
 void Application::OnSurfaceChanged()
 {
-    auto& vulkan_ctx = VulkanContext::Get();
-    vulkan_ctx.RecreateSwapchain();
-    auto extent = vulkan_ctx.GetSwapchainExtent();
-    width_ = (float)extent.width;
-    height_ = (float)extent.height;
+    if (graphics_context_)
+    {
+        graphics_context_->RecreateSwapchain();
+    }
     if (renderer_)
     {
-        renderer_->Initialize(width_, height_);
+        renderer_->Initialize();
+        width_ = renderer_->GetScreenWidth();
+        height_ = renderer_->GetScreenHeight();
     }
 }
 #endif
@@ -139,12 +150,12 @@ int Application::Run(const std::string& json_args)
     }
     catch (const std::exception& e)
     {
-        std::cerr << "Failed to parse arguments: " << e.what() << std::endl;
+        std::cerr << "JSON Parse error: " << e.what() << std::endl;
     }
 
-    if (!SDL_Init(SDL_INIT_VIDEO))
+    if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS))
     {
-        std::cerr << "SDL_Init failed" << std::endl;
+        std::cerr << "SDL_Init failed: " << SDL_GetError() << std::endl;
         return -1;
     }
 
@@ -163,39 +174,20 @@ int Application::Run(const std::string& json_args)
 
         Sdl3SurfaceProvider surface_provider(window);
 
-        auto& vulkan_ctx = VulkanContext::Get();
-
-        vulkan_ctx.GetWindowSystemExtensions = [=](auto& extension_list)
-        {
-            uint32_t ext_count = 0;
-            char const* const* extensions =
-                SDL_Vulkan_GetInstanceExtensions(&ext_count);
-            if (ext_count > 0 && extensions != nullptr)
-            {
-                size_t current_size = extension_list.size();
-                extension_list.resize(current_size + ext_count);
-                for (uint32_t i = 0; i < ext_count; ++i)
-                {
-                    extension_list[current_size + i] = extensions[i];
-                }
-            }
-        };
-
-        vulkan_ctx.Initialize(app_title.c_str(), &surface_provider);
-        vulkan_ctx.RecreateSwapchain();
-
         Application app;
+        app.GetGraphicsContext().Initialize(app_title.c_str(), &surface_provider);
+        app.GetGraphicsContext().RecreateSwapchain();
+
         app.OnInitialize();
 
-        app.GetUiManager().Initialize(window);
+        app.GetUiManager().Initialize(window, app.GetGraphicsContext());
         app.GetUiManager().SetOnFileOpenCallback([&app](const std::string& path) {
             app.LoadPly(path);
         });
 
-        // Set dimensions for projection matrix
-        auto extent = vulkan_ctx.GetSwapchain()->GetExtent();
-        app.width_ = (float)extent.width;
-        app.height_ = (float)extent.height;
+        // Dimensions are already set in OnInitialize via Renderer
+        app.width_ = app.GetRenderer()->GetScreenWidth();
+        app.height_ = app.GetRenderer()->GetScreenHeight();
 
         bool is_running = true;
         while (is_running)
@@ -236,7 +228,6 @@ int Application::Run(const std::string& json_args)
         // cleanup
         app.GetUiManager().Shutdown();
         app.OnCleanup();
-        vulkan_ctx.Cleanup();
 
     }
     catch (const std::exception &e)

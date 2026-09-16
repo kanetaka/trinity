@@ -1,5 +1,5 @@
 #include "ui/ui_manager.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 #include "graphics/swapchain.h"
 #include "graphics/command_buffer.h"
 
@@ -25,7 +25,7 @@ namespace tri
         Shutdown();
     }
 
-    void UiManager::Initialize(SDL_Window* window)
+    void UiManager::Initialize(SDL_Window* window, GraphicsContext& graphics_ctx)
     {
         if (is_initialized_) return;
 
@@ -99,25 +99,22 @@ namespace tri
         style.FramePadding      = ImVec2(5, 5);
         style.ItemSpacing       = ImVec2(10, 8);
 
-
-        auto& vulkan_ctx = VulkanContext::Get();
-
         ImGui_ImplSDL3_InitForVulkan(window);
 
         ImGui_ImplVulkan_InitInfo init_info = {};
-        init_info.Instance = vulkan_ctx.GetVkInstance();
-        init_info.PhysicalDevice = vulkan_ctx.GetVkPhysicalDevice();
-        init_info.Device = vulkan_ctx.GetVkDevice();
-        init_info.QueueFamily = vulkan_ctx.GetGraphicsFamily();
-        init_info.Queue = vulkan_ctx.GetGraphicsQueue();
+        init_info.Instance = graphics_ctx.GetVkInstance();
+        init_info.PhysicalDevice = graphics_ctx.GetVkPhysicalDevice();
+        init_info.Device = graphics_ctx.GetVkDevice();
+        init_info.QueueFamily = graphics_ctx.GetGraphicsFamily();
+        init_info.Queue = graphics_ctx.GetGraphicsQueue();
         init_info.PipelineCache = VK_NULL_HANDLE;
         init_info.DescriptorPoolSize = 1000;
         init_info.MinImageCount = 2;
-        init_info.ImageCount = vulkan_ctx.GetSwapchain()->GetImageCount();
+        init_info.ImageCount = graphics_ctx.GetSwapchain()->GetImageCount();
         init_info.PipelineInfoMain.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
         
         init_info.UseDynamicRendering = true;
-        VkFormat color_format = vulkan_ctx.GetSwapchain()->GetFormat().format;
+        VkFormat color_format = graphics_ctx.GetSwapchain()->GetFormat().format;
         init_info.PipelineInfoMain.PipelineRenderingCreateInfo = { VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO };
         init_info.PipelineInfoMain.PipelineRenderingCreateInfo.colorAttachmentCount = 1;
         init_info.PipelineInfoMain.PipelineRenderingCreateInfo.pColorAttachmentFormats = &color_format;

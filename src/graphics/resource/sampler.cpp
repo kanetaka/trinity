@@ -4,6 +4,7 @@
 using namespace tri;
 
 void Sampler::Initialize(
+    GraphicsContext& context,
     VkFilter minFilter,
     VkFilter magFilter,
     VkSamplerMipmapMode mipmapMode,
@@ -12,7 +13,7 @@ void Sampler::Initialize(
     float minLod,
     float maxLod)
 {
-    auto& vulkan_ctx = VulkanContext::Get();
+    context_ = &context;
     VkSamplerCreateInfo createInfo{
         .sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO,
         .magFilter = magFilter,
@@ -26,7 +27,7 @@ void Sampler::Initialize(
         .maxLod = maxLod,
     };
 
-    auto result = vkCreateSampler(vulkan_ctx.GetVkDevice(), &createInfo, nullptr, &sampler_);
+    auto result = vkCreateSampler(context_->GetVkDevice(), &createInfo, nullptr, &sampler_);
     if (result != VK_SUCCESS)
     {
         throw std::runtime_error("failed to sampler !");
@@ -35,10 +36,10 @@ void Sampler::Initialize(
 
 void Sampler::Cleanup()
 {
-    auto& vulkan_ctx = VulkanContext::Get();
-    if (sampler_ != VK_NULL_HANDLE)
+    if (context_ && sampler_ != VK_NULL_HANDLE)
     {
-        vkDestroySampler(vulkan_ctx.GetVkDevice(), sampler_, nullptr);
+        vkDestroySampler(context_->GetVkDevice(), sampler_, nullptr);
+        context_ = nullptr;
     }
     sampler_ = VK_NULL_HANDLE;
 }

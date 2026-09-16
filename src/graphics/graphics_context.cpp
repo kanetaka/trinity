@@ -1,4 +1,4 @@
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 #include "graphics/swapchain.h"
 
 
@@ -43,13 +43,10 @@ VulkanDebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT severity,
     return VK_FALSE;
 }
 
-VulkanContext& VulkanContext::Get()
-{
-    static VulkanContext instance;
-    return instance;
-}
+GraphicsContext::GraphicsContext() = default;
+GraphicsContext::~GraphicsContext() = default;
 
-void VulkanContext::Initialize(const char* app_name,
+void GraphicsContext::Initialize(const char* app_name,
     ISurfaceProvider* surface_provider)
 {
     surface_provider_ = surface_provider;
@@ -63,7 +60,7 @@ void VulkanContext::Initialize(const char* app_name,
     CreateDescriptorPool();
 }
 
-void VulkanContext::Cleanup()
+void GraphicsContext::Cleanup()
 {
     // Wait for the device to be idle before proceeding with cleanup
     vkDeviceWaitIdle(vk_device_);
@@ -100,11 +97,19 @@ void VulkanContext::Cleanup()
     vk_instance_ = VK_NULL_HANDLE;
 }
 
-void VulkanContext::RecreateSwapchain()
+void GraphicsContext::WaitIdle()
+{
+    if (vk_device_ != VK_NULL_HANDLE)
+    {
+        vkDeviceWaitIdle(vk_device_);
+    }
+}
+
+void GraphicsContext::RecreateSwapchain()
 {
     if (swapchain_ == nullptr)
     {
-        swapchain_ = std::make_unique<Swapchain>();
+        swapchain_ = std::make_unique<Swapchain>(*this);
     }
 
     if (surface_ == VK_NULL_HANDLE)
@@ -120,7 +125,7 @@ void VulkanContext::RecreateSwapchain()
     CreateFrameContexts();
 }
 
-VkResult VulkanContext::AcquireNextImage()
+VkResult GraphicsContext::AcquireNextImage()
 {
     auto* frame = GetCurrentFrameContext();
     auto fence = frame->inflightFence;
@@ -145,7 +150,7 @@ VkResult VulkanContext::AcquireNextImage()
     return result;
 }
 
-void VulkanContext::SubmitPresent()
+void GraphicsContext::SubmitPresent()
 {
     auto& frame = frame_context_[GetCurrentFrameIndex()];
 
@@ -172,7 +177,7 @@ void VulkanContext::SubmitPresent()
     AdvanceFrame();
 }
 
-void VulkanContext::SubmitAndWait(
+void GraphicsContext::SubmitAndWait(
     std::shared_ptr<CommandBuffer> command_buffer)
 {
     auto command_buf = command_buffer->Get();
@@ -193,12 +198,12 @@ void VulkanContext::SubmitAndWait(
     vkDestroyFence(vk_device_, fence, nullptr);
 }
 
-VulkanContext::FrameContext* VulkanContext::GetCurrentFrameContext()
+GraphicsContext::FrameContext* GraphicsContext::GetCurrentFrameContext()
 {
     return &frame_context_[current_frame_index_];
 }
 
-uint32_t VulkanContext::FindMemoryType(const VkMemoryRequirements& requirements,
+uint32_t GraphicsContext::FindMemoryType(const VkMemoryRequirements& requirements,
     VkMemoryPropertyFlags properties) const {
     for (uint32_t i = 0; i < memory_properties_.memoryTypeCount; i++)
     {
@@ -218,26 +223,26 @@ uint32_t VulkanContext::FindMemoryType(const VkMemoryRequirements& requirements,
     throw std::runtime_error("failed to find suitable memory type!");
 }
 
-uint32_t VulkanContext::MinUniformOffsetAlignment() const
+uint32_t GraphicsContext::MinUniformOffsetAlignment() const
 {
     const auto& limits = physical_device_properties_.limits;
     return limits.minUniformBufferOffsetAlignment;
 }
 
-uint32_t VulkanContext::MinStorageBufferOffsetAlignment() const
+uint32_t GraphicsContext::MinStorageBufferOffsetAlignment() const
 {
     const auto& limits = physical_device_properties_.limits;
     return limits.minStorageBufferOffsetAlignment;
     ;
 }
 
-uint32_t VulkanContext::NonCoherentAtomSize() const
+uint32_t GraphicsContext::NonCoherentAtomSize() const
 {
     const auto& limits = physical_device_properties_.limits;
     return limits.nonCoherentAtomSize;
 }
 
-void VulkanContext::SetDebugObjectName(void* object_handle, VkObjectType type,
+void GraphicsContext::SetDebugObjectName(void* object_handle, VkObjectType type,
     const char* name)
 {
 #if _DEBUG || DEBUG
@@ -255,7 +260,7 @@ void VulkanContext::SetDebugObjectName(void* object_handle, VkObjectType type,
 #endif
 }
 
-void VulkanContext::CreateInstance(const char* app_name)
+void GraphicsContext::CreateInstance(const char* app_name)
 {
     VkApplicationInfo app_info{};
     app_info.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -275,7 +280,15 @@ void VulkanContext::CreateInstance(const char* app_name)
     // Enable validation layers for development
     layer_list.push_back("VK_LAYER_KHRONOS_validation");
 #endif
-    GetWindowSystemExtensions(extension_list);
+
+    if (surface_provider_)
+    {
+        surface_provider_->GetRequiredExtensions(extension_list);
+    }
+    if (GetWindowSystemExtensions)
+    {
+        GetWindowSystemExtensions(extension_list);
+    }
 
     VkInstanceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
@@ -289,7 +302,7 @@ void VulkanContext::CreateInstance(const char* app_name)
         throw std::runtime_error("failed to create instance");
 }
 
-void VulkanContext::CreateSurface()
+void GraphicsContext::CreateSurface()
 {
     surface_ = surface_provider_->CreateSurface(vk_instance_);
 
@@ -303,7 +316,7 @@ void VulkanContext::CreateSurface()
     }
 }
 
-void VulkanContext::PickPhysicalDevice()
+void GraphicsContext::PickPhysicalDevice()
 {
     uint32_t count = 0;
     vkEnumeratePhysicalDevices(vk_instance_, &count, nullptr);
@@ -316,7 +329,7 @@ void VulkanContext::PickPhysicalDevice()
         &physical_device_properties_);
 }
 
-void VulkanContext::CreateLogicalDevice()
+void GraphicsContext::CreateLogicalDevice()
 {
     // Find graphics queue family index
     uint32_t queue_count = 0;
@@ -386,7 +399,7 @@ void VulkanContext::CreateLogicalDevice()
 #endif
 }
 
-void VulkanContext::CreateDebugMessenger()
+void GraphicsContext::CreateDebugMessenger()
 {
     VkDebugUtilsMessengerCreateInfoEXT create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
@@ -415,7 +428,7 @@ void VulkanContext::CreateDebugMessenger()
             vk_instance_, "vkSetDebugUtilsObjectNameEXT");
 }
 
-void VulkanContext::CreateCommandPool()
+void GraphicsContext::CreateCommandPool()
 {
     VkCommandPoolCreateInfo command_pool_ci
     {
@@ -426,7 +439,7 @@ void VulkanContext::CreateCommandPool()
     vkCreateCommandPool(vk_device_, &command_pool_ci, nullptr, &command_pool_);
 }
 
-void VulkanContext::CreateDescriptorPool()
+void GraphicsContext::CreateDescriptorPool()
 {
     std::vector<VkDescriptorPoolSize> pool_sizes =
     {
@@ -453,7 +466,7 @@ void VulkanContext::CreateDescriptorPool()
     }
 }
 
-void VulkanContext::CreateFrameContexts()
+void GraphicsContext::CreateFrameContexts()
 {
     frame_context_.resize(MaxInflightFrames);
     for (auto& frame : frame_context_)
@@ -469,7 +482,7 @@ void VulkanContext::CreateFrameContexts()
     }
 }
 
-void VulkanContext::DestroyFrameContexts()
+void GraphicsContext::DestroyFrameContexts()
 {
     for (auto& frame : frame_context_)
     {
@@ -478,7 +491,7 @@ void VulkanContext::DestroyFrameContexts()
     frame_context_.clear();
 }
 
-void VulkanContext::AdvanceFrame()
+void GraphicsContext::AdvanceFrame()
 {
     current_frame_index_ = (current_frame_index_ + 1) % MaxInflightFrames;
 }
@@ -496,7 +509,7 @@ void BuildVkExtensionChain(T& current, U& next, Rest &...rest)
     BuildVkExtensionChain(next, rest...);
 }
 
-void VulkanContext::BuildVkFeatures()
+void GraphicsContext::BuildVkFeatures()
 {
     // Enable desired features after getting support info from the device.
     // Enabling unsupported features will cause errors during device creation.
@@ -526,7 +539,7 @@ void VulkanContext::BuildVkFeatures()
     phys_dev_features_.features.robustBufferAccess = VK_FALSE;
 }
 
-std::shared_ptr<CommandBuffer> VulkanContext::CreateCommandBuffer()
+std::shared_ptr<CommandBuffer> GraphicsContext::CreateCommandBuffer()
 {
     VkCommandBufferAllocateInfo command_ai
     {
@@ -538,11 +551,11 @@ std::shared_ptr<CommandBuffer> VulkanContext::CreateCommandBuffer()
     VkCommandBuffer command_buffer{};
     vkAllocateCommandBuffers(vk_device_, &command_ai, &command_buffer);
 
-    return std::make_shared<CommandBuffer>(command_buffer);
+    return std::make_shared<CommandBuffer>(vk_device_, command_pool_, command_buffer);
 }
 
 VkDescriptorSet
-VulkanContext::AllocateDescriptorSet(VkDescriptorSetLayout layout)
+GraphicsContext::AllocateDescriptorSet(VkDescriptorSetLayout layout)
 {
     VkDescriptorSetAllocateInfo alloc_info
     {
@@ -562,7 +575,7 @@ VulkanContext::AllocateDescriptorSet(VkDescriptorSetLayout layout)
     return descriptor_set;
 }
 
-void VulkanContext::FreeDescriptorSet(VkDescriptorSet descriptor_set)
+void GraphicsContext::FreeDescriptorSet(VkDescriptorSet descriptor_set)
 {
     vkFreeDescriptorSets(vk_device_, descriptor_pool_, 1, &descriptor_set);
 }

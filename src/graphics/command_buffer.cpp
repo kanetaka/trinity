@@ -3,17 +3,20 @@
 using namespace tri;
 
 
-CommandBuffer::CommandBuffer(VkCommandBuffer command_buffer)
+CommandBuffer::CommandBuffer(VkDevice device, VkCommandPool command_pool, VkCommandBuffer command_buffer)
 {
+    device_ = device;
+    command_pool_ = command_pool;
     command_buffer_ = command_buffer;
 }
 
 CommandBuffer::~CommandBuffer()
 {
-    auto& vulkan_ctx = VulkanContext::Get();
-    vkFreeCommandBuffers(vulkan_ctx.GetVkDevice(), vulkan_ctx.GetCommandPool(), 1,
-        &command_buffer_);
-    command_buffer_ = VK_NULL_HANDLE;
+    if (command_buffer_ != VK_NULL_HANDLE && device_ != VK_NULL_HANDLE && command_pool_ != VK_NULL_HANDLE)
+    {
+        vkFreeCommandBuffers(device_, command_pool_, 1, &command_buffer_);
+        command_buffer_ = VK_NULL_HANDLE;
+    }
 }
 
 void CommandBuffer::Begin(VkCommandBufferUsageFlags usage_flag)

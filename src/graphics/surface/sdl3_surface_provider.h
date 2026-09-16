@@ -9,6 +9,7 @@ namespace tri
     public:
         explicit Sdl3SurfaceProvider(SDL_Window* window);
         VkSurfaceKHR CreateSurface(VkInstance instance) override;
+        void GetRequiredExtensions(std::vector<const char*>& extensions) const override;
         uint32_t GetFramebufferWidth() const override;
         uint32_t GetFramebufferHeight() const override;
 

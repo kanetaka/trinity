@@ -5,12 +5,17 @@
 using namespace tri;
 
 
+Swapchain::Swapchain(GraphicsContext& context)
+    : context_(context)
+{
+}
+
 bool Swapchain::Recreate(uint32_t new_width, uint32_t new_height)
 {
-        auto& vulkan_ctx = VulkanContext::Get();
-        auto vk_physical_device = vulkan_ctx.GetVkPhysicalDevice();
-        auto vk_device = vulkan_ctx.GetVkDevice();
-        auto surface = vulkan_ctx.GetSurface();
+    auto& graphics_ctx = context_;
+    auto vk_physical_device = graphics_ctx.GetVkPhysicalDevice();
+    auto vk_device = graphics_ctx.GetVkDevice();
+    auto surface = graphics_ctx.GetSurface();
 
         VkSurfaceCapabilitiesKHR caps;
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(vk_physical_device, surface, &caps);
@@ -126,65 +131,65 @@ bool Swapchain::Recreate(uint32_t new_width, uint32_t new_height)
 
 void Swapchain::Cleanup()
 {
-        auto& vulkan_ctx = VulkanContext::Get();
-        auto vk_device = vulkan_ctx.GetVkDevice();
-        DestroyFrameContext();
+    auto& graphics_ctx = context_;
+    auto vk_device = graphics_ctx.GetVkDevice();
+    DestroyFrameContext();
 
-        for (auto& view : image_views_)
-        {
-            vkDestroyImageView(vk_device, view, nullptr);
-        }
-        if (swapchain_)
-        {
-            vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
-            swapchain_ = VK_NULL_HANDLE;
-        }
-        images_.clear();
-        image_views_.clear();
+    for (auto& view : image_views_)
+    {
+        vkDestroyImageView(vk_device, view, nullptr);
+    }
+    if (swapchain_)
+    {
+        vkDestroySwapchainKHR(vk_device, swapchain_, nullptr);
+        swapchain_ = VK_NULL_HANDLE;
+    }
+    images_.clear();
+    image_views_.clear();
 }
 
 VkResult Swapchain::AcquireNextImage()
 {
-        auto& vulkan_ctx = VulkanContext::Get();
-        auto vk_device = vulkan_ctx.GetVkDevice();
+    auto& graphics_ctx = context_;
+    auto vk_device = graphics_ctx.GetVkDevice();
 
-        // Get the semaphore used to wait for presentation completion
-        assert(!present_semaphore_list_.empty());
-        VkSemaphore acquire_semaphore = present_semaphore_list_.back();
-        present_semaphore_list_.pop_back();
+    // Get the semaphore used to wait for presentation completion
+    assert(!present_semaphore_list_.empty());
+    VkSemaphore acquire_semaphore = present_semaphore_list_.back();
+    present_semaphore_list_.pop_back();
 
-        auto result = vkAcquireNextImageKHR(
-            vk_device, swapchain_, UINT64_MAX, acquire_semaphore, VK_NULL_HANDLE, &current_index_);
-        if (result != VK_SUCCESS)
-        {
-            present_semaphore_list_.push_back(acquire_semaphore);
-            return result;
-        }
-
-        VkSemaphore old_semaphore = frames_[current_index_].presentComplete;
-        if (old_semaphore != VK_NULL_HANDLE)
-        {
-            present_semaphore_list_.push_back(old_semaphore);
-        }
-        frames_[current_index_].presentComplete = acquire_semaphore;
-
+    auto result = vkAcquireNextImageKHR(
+        vk_device, swapchain_, UINT64_MAX, acquire_semaphore, VK_NULL_HANDLE, &current_index_);
+    if (result != VK_SUCCESS)
+    {
+        present_semaphore_list_.push_back(acquire_semaphore);
         return result;
+    }
+
+    VkSemaphore old_semaphore = frames_[current_index_].presentComplete;
+    if (old_semaphore != VK_NULL_HANDLE)
+    {
+        present_semaphore_list_.push_back(old_semaphore);
+    }
+    frames_[current_index_].presentComplete = acquire_semaphore;
+
+    return result;
 }
 
 VkResult Swapchain::QueuePresent(VkQueue queue_present)
 {
-        VkPresentInfoKHR present_info{};
-        present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-        present_info.swapchainCount = 1;
-        present_info.pSwapchains = &swapchain_;
-        present_info.pImageIndices = &current_index_;
-        present_info.waitSemaphoreCount = 1;
-        present_info.pWaitSemaphores = &frames_[current_index_].renderComplete;
+    VkPresentInfoKHR present_info{};
+    present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    present_info.swapchainCount = 1;
+    present_info.pSwapchains = &swapchain_;
+    present_info.pImageIndices = &current_index_;
+    present_info.waitSemaphoreCount = 1;
+    present_info.pWaitSemaphores = &frames_[current_index_].renderComplete;
 
-        auto& vulkan_ctx = VulkanContext::Get();
-        auto result = vkQueuePresentKHR(queue_present, &present_info);
+    auto& graphics_ctx = context_;
+    auto result = vkQueuePresentKHR(queue_present, &present_info);
 
-        return result;
+    return result;
 }
 
 VkSemaphore Swapchain::GetPresentCompleteSemaphore() const
@@ -199,8 +204,8 @@ VkSemaphore Swapchain::GetRenderCompleteSemaphore() const
 
 void Swapchain::CreateFrameContext()
 {
-    auto& vulkan_ctx = VulkanContext::Get();
-    auto vk_device = vulkan_ctx.GetVkDevice();
+    auto& graphics_ctx = context_;
+    auto vk_device = graphics_ctx.GetVkDevice();
     frames_.resize(images_.size());
     uint32_t index = 0;
     for (auto& frame : frames_)
@@ -228,8 +233,8 @@ void Swapchain::CreateFrameContext()
 
 void Swapchain::DestroyFrameContext()
 {
-    auto& vulkan_ctx = VulkanContext::Get();
-    auto vk_device = vulkan_ctx.GetVkDevice();
+    auto& graphics_ctx = context_;
+    auto vk_device = graphics_ctx.GetVkDevice();
     for (auto& frame : frames_)
     {
         vkDestroySemaphore(vk_device, frame.presentComplete, nullptr);

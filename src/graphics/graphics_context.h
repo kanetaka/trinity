@@ -15,11 +15,18 @@ namespace tri
     class CommandBuffer;
     class ISurfaceProvider;
 
-    class VulkanContext
+    class GraphicsContext
     {
     public:
         static constexpr uint32_t MaxInflightFrames = 2;
-        static VulkanContext& Get();
+
+        GraphicsContext();
+        ~GraphicsContext();
+
+        GraphicsContext(const GraphicsContext&) = delete;
+        GraphicsContext& operator=(const GraphicsContext&) = delete;
+        GraphicsContext(GraphicsContext&&) = delete;
+        GraphicsContext& operator=(GraphicsContext&&) = delete;
 
         // Initialization
         void Initialize(const char* app_name, ISurfaceProvider* surface_provider);
@@ -29,6 +36,9 @@ namespace tri
 
         // Create/Recreate swapchain
         void RecreateSwapchain();
+
+        // Wait for device idle
+        void WaitIdle();
 
         // Get various Vulkan objects
         VkInstance GetVkInstance() const { return vk_instance_; }
@@ -94,10 +104,6 @@ namespace tri
         // Set debug name for Vulkan object
         void SetDebugObjectName(void* objectHandle, VkObjectType type,
             const char* name);
-
-    private:
-        VulkanContext() = default;
-        ~VulkanContext() = default;
 
     private:
         void CreateInstance(const char* app_name);

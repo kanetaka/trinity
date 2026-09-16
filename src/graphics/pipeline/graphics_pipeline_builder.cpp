@@ -1,10 +1,11 @@
 #include "graphics/pipeline/graphics_pipeline_builder.h"
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 
 using namespace tri;
 
 
-GraphicsPipelineBuilder::GraphicsPipelineBuilder()
+GraphicsPipelineBuilder::GraphicsPipelineBuilder(VkDevice device)
+    : device_(device)
 {
     vertex_input_state_ =
     {
@@ -212,8 +213,13 @@ GraphicsPipelineBuilder& GraphicsPipelineBuilder::SetTessellation(
     return *this;
 }
 
-VkPipeline GraphicsPipelineBuilder::Build()
+VkPipeline GraphicsPipelineBuilder::Build(VkDevice device)
 {
+    if (device != VK_NULL_HANDLE)
+    {
+        device_ = device;
+    }
+
     VkGraphicsPipelineCreateInfo pipelineInfo
     {
         .sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO,
@@ -254,9 +260,8 @@ VkPipeline GraphicsPipelineBuilder::Build()
         pipelineInfo.pTessellationState = &tessellation_state_;
     };
 
-    auto device = VulkanContext::Get().GetVkDevice();
     VkPipeline pipeline = VK_NULL_HANDLE;
-    if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
+    if (vkCreateGraphicsPipelines(device_, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline) != VK_SUCCESS)
     {
         return VK_NULL_HANDLE;
     }

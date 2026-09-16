@@ -1,7 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 
 namespace tri
 {
@@ -54,10 +54,8 @@ namespace tri
             use_dynamic_rendering_ = true;
         }
 
-        VkPipeline Build()
+        VkPipeline Build(VkDevice device)
         {
-            auto& context = VulkanContext::Get();
-            VkDevice device = context.GetDevice();
 
             vertex_input_info_.pVertexBindingDescriptions = bindings_.data();
             vertex_input_info_.pVertexAttributeDescriptions = attributes_.data();

@@ -1,5 +1,5 @@
 #pragma once
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 
 namespace tri
 {
@@ -33,7 +33,7 @@ namespace tri
         }
 
         // Constructs the extension link chain from phys_dev_features_
-        virtual void BuildFeatures(VulkanContext* vulkanCtx) = 0;
+        virtual void BuildFeatures(GraphicsContext* vulkanCtx) = 0;
 
     protected:
         VkPhysicalDeviceFeatures2 phys_dev_features_{ .sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2 };

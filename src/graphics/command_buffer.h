@@ -1,5 +1,5 @@
 #pragma once
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 #include "graphics/image_barrier.h"
 
 namespace tri
@@ -7,10 +7,10 @@ namespace tri
     class CommandBuffer
     {
     public:
-        CommandBuffer(VkCommandBuffer commandBuffer);
+        CommandBuffer(VkDevice device, VkCommandPool command_pool, VkCommandBuffer command_buffer);
         virtual ~CommandBuffer();
 
-        void Begin(VkCommandBufferUsageFlags usageFlag = 0);
+        void Begin(VkCommandBufferUsageFlags usage_flag = 0);
         void End();
         void Reset();
 
@@ -30,6 +30,8 @@ namespace tri
             image->SetLayout(transition.newLayout);
         }
     private:
-        VkCommandBuffer command_buffer_{};
+        VkDevice device_ = VK_NULL_HANDLE;
+        VkCommandPool command_pool_ = VK_NULL_HANDLE;
+        VkCommandBuffer command_buffer_ = VK_NULL_HANDLE;
     };
 } // namespace tri

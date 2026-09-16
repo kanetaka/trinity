@@ -1,5 +1,5 @@
 #pragma once
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 #include "graphics/resource/gpu_resource_base.h"
 
 namespace tri
@@ -42,6 +42,7 @@ namespace tri
     protected:
         ImageResource() = default;
 
+        GraphicsContext* context_ = nullptr;
         VkImage image_ = VK_NULL_HANDLE;
         VkDeviceMemory memory_ = VK_NULL_HANDLE;
         VkImageSubresourceRange subresource_range_{};
@@ -60,15 +61,15 @@ namespace tri
         virtual ~DepthBuffer() { Cleanup(); }
         virtual void Cleanup() override;
 
-        bool Initialize(VkExtent2D extent, VkFormat depthFormat);
+        bool Initialize(GraphicsContext& context, VkExtent2D extent, VkFormat depthFormat);
 
         VkImageView GetVkImageView() const { return image_view_; }
 
         // Static factory method for creation and initialization
-        static std::shared_ptr<DepthBuffer> Create(VkExtent2D extent, VkFormat depthFormat)
+        static std::shared_ptr<DepthBuffer> Create(GraphicsContext& context, VkExtent2D extent, VkFormat depthFormat)
         {
             auto image = GpuResourceBase::Create();
-            if (!image->Initialize(extent, depthFormat)) { return nullptr; }
+            if (!image->Initialize(context, extent, depthFormat)) { return nullptr; }
             return image;
         }
     private:
@@ -82,7 +83,7 @@ namespace tri
         virtual ~Texture2D() { Cleanup(); }
         virtual void Cleanup() override;
 
-        bool Initialize(VkExtent2D extent, VkFormat format, uint32_t mipLevels);
+        bool Initialize(GraphicsContext& context, VkExtent2D extent, VkFormat format, uint32_t mipLevels);
 
         VkImageView GetVkImageView() const { return image_view_; }
         VkImageSubresourceRange GetSubresourceRange() const { return subresource_range_; }
@@ -90,10 +91,10 @@ namespace tri
         VkDescriptorImageInfo GetDescriptorInfo(VkSampler sampler) const;
 
         // Static factory method for creation and initialization
-        static std::shared_ptr<Texture2D> Create(VkExtent2D extent, VkFormat format, uint32_t mipLevels)
+        static std::shared_ptr<Texture2D> Create(GraphicsContext& context, VkExtent2D extent, VkFormat format, uint32_t mipLevels)
         {
             auto image = GpuResourceBase::Create();
-            if (!image->Initialize(extent, format, mipLevels)) { return nullptr; }
+            if (!image->Initialize(context, extent, format, mipLevels)) { return nullptr; }
             return image;
         }
 
@@ -110,7 +111,7 @@ namespace tri
         virtual ~StorageImage2D() { Cleanup(); }
         virtual void Cleanup() override;
 
-        bool Initialize(VkExtent2D extent, VkFormat format, uint32_t mipLevels);
+        bool Initialize(GraphicsContext& context, VkExtent2D extent, VkFormat format, uint32_t mipLevels);
 
         VkImageView GetVkImageView() const { return image_view_; }
         VkImageSubresourceRange GetSubresourceRange() const { return subresource_range_; }
@@ -119,10 +120,10 @@ namespace tri
         VkDescriptorImageInfo GetStorageReadWriteDescriptorInfo(VkSampler sampler) const;
 
         // Static factory method for creation and initialization
-        static std::shared_ptr<StorageImage2D> Create(VkExtent2D extent, VkFormat format, uint32_t mipLevels)
+        static std::shared_ptr<StorageImage2D> Create(GraphicsContext& context, VkExtent2D extent, VkFormat format, uint32_t mipLevels)
         {
             auto image = GpuResourceBase::Create();
-            if (!image->Initialize(extent, format, mipLevels)) { return nullptr; }
+            if (!image->Initialize(context, extent, format, mipLevels)) { return nullptr; }
             return image;
         }
     private:

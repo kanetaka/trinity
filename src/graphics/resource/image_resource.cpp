@@ -4,10 +4,10 @@
 using namespace tri;
 
 
-bool DepthBuffer::Initialize(VkExtent2D extent, VkFormat depthFormat)
+bool DepthBuffer::Initialize(GraphicsContext& context, VkExtent2D extent, VkFormat depthFormat)
 {
-    auto& vulkanCtx = VulkanContext::Get();
-    auto device = vulkanCtx.GetVkDevice();
+    context_ = &context;
+    auto device = context_->GetVkDevice();
 
     format_ = depthFormat;
     extent_ = extent;
@@ -42,7 +42,7 @@ bool DepthBuffer::Initialize(VkExtent2D extent, VkFormat depthFormat)
     {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
         .allocationSize = memRequirements.size,
-        .memoryTypeIndex = vulkanCtx.FindMemoryType(memRequirements, memProps)
+        .memoryTypeIndex = context_->FindMemoryType(memRequirements, memProps)
     };
     if (vkAllocateMemory(device, &allocInfo, nullptr, &memory_) != VK_SUCCESS)
     {
@@ -66,9 +66,10 @@ bool DepthBuffer::Initialize(VkExtent2D extent, VkFormat depthFormat)
         .sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO,
         .image = image_,
         .viewType = VK_IMAGE_VIEW_TYPE_2D,
-        .format = createInfo.format,
+        .format = format_,
         .subresourceRange = subresource_range_,
     };
+
     if (vkCreateImageView(device, &viewCreateInfo, nullptr, &image_view_) != VK_SUCCESS)
     {
         return false;
@@ -79,30 +80,32 @@ bool DepthBuffer::Initialize(VkExtent2D extent, VkFormat depthFormat)
 
 void DepthBuffer::Cleanup()
 {
-    auto& vulkanCtx = VulkanContext::Get();
-    auto device = vulkanCtx.GetVkDevice();
-
-    if (image_view_ != VK_NULL_HANDLE)
+    if (context_)
     {
-        vkDestroyImageView(device, image_view_, nullptr);
-    }
-    if (image_ != VK_NULL_HANDLE)
-    {
-        vkDestroyImage(device, image_, nullptr);
-    }
-    if (memory_ != VK_NULL_HANDLE)
-    {
-        vkFreeMemory(device, memory_, nullptr);
+        auto device = context_->GetVkDevice();
+        if (image_view_ != VK_NULL_HANDLE)
+        {
+            vkDestroyImageView(device, image_view_, nullptr);
+        }
+        if (image_ != VK_NULL_HANDLE)
+        {
+            vkDestroyImage(device, image_, nullptr);
+        }
+        if (memory_ != VK_NULL_HANDLE)
+        {
+            vkFreeMemory(device, memory_, nullptr);
+        }
+        context_ = nullptr;
     }
     image_ = VK_NULL_HANDLE;
     image_view_ = VK_NULL_HANDLE;
     memory_ = VK_NULL_HANDLE;
 }
 
-bool Texture2D::Initialize(VkExtent2D extent, VkFormat format, uint32_t mipLevels)
+bool Texture2D::Initialize(GraphicsContext& context, VkExtent2D extent, VkFormat format, uint32_t mipLevels)
 {
-    auto& vulkanCtx = VulkanContext::Get();
-    auto device = vulkanCtx.GetVkDevice();
+    context_ = &context;
+    auto device = context_->GetVkDevice();
 
     format_ = format;
     extent_ = extent;
@@ -139,7 +142,7 @@ bool Texture2D::Initialize(VkExtent2D extent, VkFormat format, uint32_t mipLevel
     {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
         .allocationSize = memRequirements.size,
-        .memoryTypeIndex = vulkanCtx.FindMemoryType(memRequirements, memProps)
+        .memoryTypeIndex = context_->FindMemoryType(memRequirements, memProps)
     };
     if (vkAllocateMemory(device, &allocInfo, nullptr, &memory_) != VK_SUCCESS)
     {
@@ -177,19 +180,22 @@ bool Texture2D::Initialize(VkExtent2D extent, VkFormat format, uint32_t mipLevel
 
 void Texture2D::Cleanup()
 {
-    auto& vulkanCtx = VulkanContext::Get();
-    auto device = vulkanCtx.GetVkDevice();
-    if (image_view_ != VK_NULL_HANDLE)
+    if (context_)
     {
-        vkDestroyImageView(device, image_view_, nullptr);
-    }
-    if (image_ != VK_NULL_HANDLE)
-    {
-        vkDestroyImage(device, image_, nullptr);
-    }
-    if (memory_ != VK_NULL_HANDLE)
-    {
-        vkFreeMemory(device, memory_, nullptr);
+        auto device = context_->GetVkDevice();
+        if (image_view_ != VK_NULL_HANDLE)
+        {
+            vkDestroyImageView(device, image_view_, nullptr);
+        }
+        if (image_ != VK_NULL_HANDLE)
+        {
+            vkDestroyImage(device, image_, nullptr);
+        }
+        if (memory_ != VK_NULL_HANDLE)
+        {
+            vkFreeMemory(device, memory_, nullptr);
+        }
+        context_ = nullptr;
     }
     image_ = VK_NULL_HANDLE;
     image_view_ = VK_NULL_HANDLE;
@@ -206,10 +212,10 @@ VkDescriptorImageInfo Texture2D::GetDescriptorInfo(VkSampler sampler) const
     };
 }
 
-bool StorageImage2D::Initialize(VkExtent2D extent, VkFormat format, uint32_t mipLevels)
+bool StorageImage2D::Initialize(GraphicsContext& context, VkExtent2D extent, VkFormat format, uint32_t mipLevels)
 {
-    auto& vulkanCtx = VulkanContext::Get();
-    auto device = vulkanCtx.GetVkDevice();
+    context_ = &context;
+    auto device = context_->GetVkDevice();
 
     format_ = format;
     extent_ = extent;
@@ -246,7 +252,7 @@ bool StorageImage2D::Initialize(VkExtent2D extent, VkFormat format, uint32_t mip
     {
         .sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO,
         .allocationSize = memRequirements.size,
-        .memoryTypeIndex = vulkanCtx.FindMemoryType(memRequirements, memProps)
+        .memoryTypeIndex = context_->FindMemoryType(memRequirements, memProps)
     };
     if (vkAllocateMemory(device, &allocInfo, nullptr, &memory_) != VK_SUCCESS)
     {
@@ -279,21 +285,25 @@ bool StorageImage2D::Initialize(VkExtent2D extent, VkFormat format, uint32_t mip
     }
     return true;
 }
+
 void StorageImage2D::Cleanup()
 {
-    auto& vulkanCtx = VulkanContext::Get();
-    auto device = vulkanCtx.GetVkDevice();
-    if (image_view_ != VK_NULL_HANDLE)
+    if (context_)
     {
-        vkDestroyImageView(device, image_view_, nullptr);
-    }
-    if (image_ != VK_NULL_HANDLE)
-    {
-        vkDestroyImage(device, image_, nullptr);
-    }
-    if (memory_ != VK_NULL_HANDLE)
-    {
-        vkFreeMemory(device, memory_, nullptr);
+        auto device = context_->GetVkDevice();
+        if (image_view_ != VK_NULL_HANDLE)
+        {
+            vkDestroyImageView(device, image_view_, nullptr);
+        }
+        if (image_ != VK_NULL_HANDLE)
+        {
+            vkDestroyImage(device, image_, nullptr);
+        }
+        if (memory_ != VK_NULL_HANDLE)
+        {
+            vkFreeMemory(device, memory_, nullptr);
+        }
+        context_ = nullptr;
     }
     image_ = VK_NULL_HANDLE;
     image_view_ = VK_NULL_HANDLE;

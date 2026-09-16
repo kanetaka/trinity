@@ -1,5 +1,5 @@
 #pragma once
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 #include "graphics/resource/gpu_resource_base.h"
 
 namespace tri
@@ -41,7 +41,8 @@ namespace tri
     protected:
         BufferResource() = default;
 
-        bool CreateBuffer(const VkBufferCreateInfo& createInfo, VkMemoryPropertyFlags memProps);
+        bool CreateBuffer(GraphicsContext& context, const VkBufferCreateInfo& createInfo, VkMemoryPropertyFlags memProps);
+        GraphicsContext* context_ = nullptr;
         VkBuffer buffer_{};
         VkDeviceMemory memory_{};
         VkDeviceSize size_{};
@@ -60,13 +61,13 @@ namespace tri
         virtual void* Map() override;
         virtual void Unmap() override;
 
-        bool Initialize(VkDeviceSize size, VkMemoryPropertyFlags memProps);
+        bool Initialize(GraphicsContext& context, VkDeviceSize size, VkMemoryPropertyFlags memProps);
 
         // Static factory method for creation and initialization
-        static std::shared_ptr<VertexBuffer> Create(VkDeviceSize size, VkMemoryPropertyFlags memProps)
+        static std::shared_ptr<VertexBuffer> Create(GraphicsContext& context, VkDeviceSize size, VkMemoryPropertyFlags memProps)
         {
             auto buffer = GpuResourceBase::Create();
-            if (!buffer->Initialize(size, memProps)) { return nullptr; }
+            if (!buffer->Initialize(context, size, memProps)) { return nullptr; }
             return buffer;
         }
     };
@@ -82,13 +83,13 @@ namespace tri
         virtual void* Map() override;
         virtual void Unmap() override;
 
-        bool Initialize(VkDeviceSize size, VkMemoryPropertyFlags memProps);
+        bool Initialize(GraphicsContext& context, VkDeviceSize size, VkMemoryPropertyFlags memProps);
 
         // Static factory method for creation and initialization
-        static std::shared_ptr<IndexBuffer> Create(VkDeviceSize size, VkMemoryPropertyFlags memProps)
+        static std::shared_ptr<IndexBuffer> Create(GraphicsContext& context, VkDeviceSize size, VkMemoryPropertyFlags memProps)
         {
             auto buffer = GpuResourceBase::Create();
-            if (!buffer->Initialize(size, memProps)) { return nullptr; }
+            if (!buffer->Initialize(context, size, memProps)) { return nullptr; }
             return buffer;
         }
     };
@@ -103,13 +104,13 @@ namespace tri
         virtual void* Map() override;
         virtual void Unmap() override;
 
-        bool Initialize(VkDeviceSize size);
+        bool Initialize(GraphicsContext& context, VkDeviceSize size);
 
         // Static factory method for creation and initialization
-        static std::shared_ptr<UniformBuffer> Create(VkDeviceSize size)
+        static std::shared_ptr<UniformBuffer> Create(GraphicsContext& context, VkDeviceSize size)
         {
             auto buffer = GpuResourceBase::Create();
-            if (!buffer->Initialize(size)) { return nullptr; }
+            if (!buffer->Initialize(context, size)) { return nullptr; }
             return buffer;
         }
     };
@@ -124,13 +125,13 @@ namespace tri
         virtual void* Map() override;
         virtual void Unmap() override;
 
-        bool Initialize(VkDeviceSize size);
+        bool Initialize(GraphicsContext& context, VkDeviceSize size);
 
         // Static factory method for creation and initialization
-        static std::shared_ptr<DynamicUniformBuffer> Create(VkDeviceSize size)
+        static std::shared_ptr<DynamicUniformBuffer> Create(GraphicsContext& context, VkDeviceSize size)
         {
             auto buffer = GpuResourceBase::Create();
-            if (!buffer->Initialize(size)) { return nullptr; }
+            if (!buffer->Initialize(context, size)) { return nullptr; }
             return buffer;
         }
 
@@ -153,13 +154,13 @@ namespace tri
         virtual void* Map() override;
         virtual void Unmap() override;
 
-        bool Initialize(VkDeviceSize size);
+        bool Initialize(GraphicsContext& context, VkDeviceSize size);
 
         // Static factory method for creation and initialization
-        static std::shared_ptr<StagingBuffer> Create(VkDeviceSize size)
+        static std::shared_ptr<StagingBuffer> Create(GraphicsContext& context, VkDeviceSize size)
         {
             auto buffer = GpuResourceBase::Create();
-            if (!buffer->Initialize(size)) { return nullptr; }
+            if (!buffer->Initialize(context, size)) { return nullptr; }
             return buffer;
         }
     };
@@ -181,16 +182,16 @@ namespace tri
             CpuAccessible,
         };
 
-        bool Initialize(VkDeviceSize size, AccessMode mode);
+        bool Initialize(GraphicsContext& context, VkDeviceSize size, AccessMode mode);
 
         template<typename T>
         T* MapTyped() { return reinterpret_cast<T*>(Map()); }
 
         // Static factory method for creation and initialization
-        static std::shared_ptr<StorageBuffer> Create(VkDeviceSize size, AccessMode mode)
+        static std::shared_ptr<StorageBuffer> Create(GraphicsContext& context, VkDeviceSize size, AccessMode mode)
         {
             auto buffer = GpuResourceBase::Create();
-            if (!buffer->Initialize(size, mode)) { return nullptr; }
+            if (!buffer->Initialize(context, size, mode)) { return nullptr; }
             return buffer;
         }
     };

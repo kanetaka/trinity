@@ -1,5 +1,4 @@
 #pragma once
-#include <vulkan/vulkan.h>
 #include <SDL3/SDL.h>
 #include <memory>
 #include <vector>
@@ -16,6 +15,7 @@
 namespace tri
 {
     class Renderer;
+    class GraphicsContext;
 
     class Application : public IApplication
     {
@@ -37,6 +37,8 @@ namespace tri
         tri::Camera& GetCamera() { return camera_; }
         tri::Scene& GetScene() { return *scene_; }
         tri::UiManager& GetUiManager() { return *ui_manager_; }
+        tri::GraphicsContext& GetGraphicsContext() { return *graphics_context_; }
+        const tri::GraphicsContext& GetGraphicsContext() const { return *graphics_context_; }
 
 
 #if defined(__ANDROID__)
@@ -55,6 +57,7 @@ namespace tri
         std::unique_ptr<tri::Renderer> renderer_;
         std::unique_ptr<tri::Scene> scene_;
         std::unique_ptr<tri::UiManager> ui_manager_;
+        std::unique_ptr<tri::GraphicsContext> graphics_context_;
 
         float width_ = 1280.0f;
         float height_ = 720.0f;

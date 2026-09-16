@@ -8,7 +8,7 @@ namespace tri
     class GraphicsPipelineBuilder
     {
     public:
-        GraphicsPipelineBuilder();
+        explicit GraphicsPipelineBuilder(VkDevice device = VK_NULL_HANDLE);
 
         // Add shader stages
         GraphicsPipelineBuilder& AddShaderStage(VkShaderStageFlagBits stage, VkShaderModule module, const char* entry = "main");
@@ -47,7 +47,7 @@ namespace tri
             UseDynamicRendering(VkFormat colorFormat, VkFormat depthFormat = VK_FORMAT_UNDEFINED);
 
         // Build the pipeline
-        VkPipeline Build();
+        VkPipeline Build(VkDevice device = VK_NULL_HANDLE);
 
         // Change input assembly (e.g., for tessellation)
         GraphicsPipelineBuilder&

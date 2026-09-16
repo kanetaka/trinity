@@ -13,12 +13,13 @@ namespace tri
     class Camera;
     class StorageBuffer;
     class CommandBuffer;
+    class GraphicsContext;
 
     // Owns a Gaussian-splat point cloud: loading, GPU buffers, camera-relative sorting and drawing.
     class SplatComponent : public IComponent, public IRenderable
     {
     public:
-        explicit SplatComponent(const std::string& ply_file);
+        SplatComponent(GraphicsContext& context, const std::string& ply_file);
         ~SplatComponent() override;
 
         void UpdateWithCamera(const Camera& camera, const glm::dmat4& world_transform);
@@ -43,5 +44,6 @@ namespace tri
         std::shared_ptr<StorageBuffer> splat_buffer_;
         std::shared_ptr<StorageBuffer> index_buffer_;
         VkDescriptorSet descriptor_set_ = VK_NULL_HANDLE;
+        GraphicsContext& context_;
     };
 } // namespace tri

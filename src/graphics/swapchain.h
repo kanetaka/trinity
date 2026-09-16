@@ -1,16 +1,16 @@
 #pragma once
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 #include "graphics/surface/surface_provider.h"
 #include <map>
 #include <string>
 
 namespace tri
 {
-    class VulkanContext;
+    class GraphicsContext;
     class Swapchain
     {
     public:
-        Swapchain() = default;
+        explicit Swapchain(GraphicsContext& context);
 
         bool Recreate(uint32_t new_width, uint32_t new_height);
         void Cleanup();
@@ -50,7 +50,8 @@ namespace tri
         };
         std::vector<FrameContext> frames_;
         std::vector<VkSemaphore> present_semaphore_list_;
-        friend class VulkanContext;
+        GraphicsContext& context_;
+        friend class GraphicsContext;
     };
 
 

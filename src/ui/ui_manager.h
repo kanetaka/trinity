@@ -9,6 +9,7 @@ struct SDL_Window;
 namespace tri
 {
     class CommandBuffer;
+    class GraphicsContext;
 
     class UiManager
     {
@@ -16,7 +17,7 @@ namespace tri
         UiManager();
         ~UiManager();
 
-        void Initialize(SDL_Window* window);
+        void Initialize(SDL_Window* window, GraphicsContext& graphics_ctx);
         void Shutdown();
 
         void BeginFrame();

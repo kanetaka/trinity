@@ -1,4 +1,4 @@
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 #include "graphics/resource/image_resource.h"
 #include "graphics/image_barrier.h"
 

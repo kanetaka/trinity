@@ -51,8 +51,8 @@ add_library(tri_graphics STATIC
     src/graphics/image_barrier.cpp
     src/graphics/swapchain.h
     src/graphics/swapchain.cpp
-    src/graphics/vulkan_context.h
-    src/graphics/vulkan_context.cpp
+    src/graphics/graphics_context.h
+    src/graphics/graphics_context.cpp
     src/graphics/pipeline/graphics_pipeline.h
     src/graphics/pipeline/graphics_pipeline_builder.h
     src/graphics/pipeline/graphics_pipeline_builder.cpp

@@ -19,6 +19,19 @@ VkSurfaceKHR Sdl3SurfaceProvider::CreateSurface(VkInstance instance)
     return surface;
 }
 
+void Sdl3SurfaceProvider::GetRequiredExtensions(std::vector<const char*>& extensions) const
+{
+    uint32_t ext_count = 0;
+    char const* const* sdl_extensions = SDL_Vulkan_GetInstanceExtensions(&ext_count);
+    if (ext_count > 0 && sdl_extensions != nullptr)
+    {
+        for (uint32_t i = 0; i < ext_count; ++i)
+        {
+            extensions.push_back(sdl_extensions[i]);
+        }
+    }
+}
+
 uint32_t Sdl3SurfaceProvider::GetFramebufferWidth() const
 {
     int width, height;

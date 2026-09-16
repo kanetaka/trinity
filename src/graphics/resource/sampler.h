@@ -1,5 +1,5 @@
 #pragma once
-#include "graphics/vulkan_context.h"
+#include "graphics/graphics_context.h"
 #include "graphics/resource/gpu_resource_base.h"
 
 namespace tri
@@ -15,6 +15,7 @@ namespace tri
 
         virtual ~Sampler() { Cleanup(); }
         void Initialize(
+            GraphicsContext& context,
             VkFilter minFilter,
             VkFilter magFilter,
             VkSamplerMipmapMode mipmapMode,
@@ -28,6 +29,7 @@ namespace tri
         operator const VkSampler& () { return sampler_; }
 
     protected:
+        GraphicsContext* context_ = nullptr;
         VkSampler sampler_ = VK_NULL_HANDLE;
     };
 
