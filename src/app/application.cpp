@@ -87,13 +87,7 @@ void Application::OnDrawFrame()
     scene_->Update();
     renderer_->UpdateTransformBuffer(*scene_);
 
-    for (auto* object : scene_->GetOrderedObjects())
-    {
-        if (auto* splat = object->GetComponent<SplatComponent>())
-        {
-            splat->UpdateWithCamera(camera_, object->GetWorldTransform());
-        }
-    }
+    scene_->PreRender(camera_);
 
     renderer_->Draw(scene_->GetRoot(), [this](auto& command_buffer)
         {

@@ -1,4 +1,5 @@
 #include "scene/scene.h"
+#include "scene/component/i_pre_renderable.h"
 #include <algorithm>
 
 using namespace tri;
@@ -45,6 +46,17 @@ void Scene::DestroyChildren(Object& object)
 void Scene::Update()
 {
     root_->UpdateWorldTransform(glm::dmat4(1.0));
+}
+
+void Scene::PreRender(const Camera& camera)
+{
+    for (auto* object : ordered_objects_)
+    {
+        object->ForEachComponent<IPreRenderable>([&](IPreRenderable& component)
+        {
+            component.PreRender(camera, object->GetWorldTransform());
+        });
+    }
 }
 
 void Scene::RegisterObject(Object& object)

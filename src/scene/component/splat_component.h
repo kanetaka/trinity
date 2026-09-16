@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "scene/component.h"
 #include "scene/component/i_renderable.h"
+#include "scene/component/i_pre_renderable.h"
 #include "scene/io/splat_types.h"
 
 namespace tri
@@ -16,13 +17,13 @@ namespace tri
     class GraphicsContext;
 
     // Owns a Gaussian-splat point cloud: loading, GPU buffers, camera-relative sorting and drawing.
-    class SplatComponent : public IComponent, public IRenderable
+    class SplatComponent : public IComponent, public IRenderable, public IPreRenderable
     {
     public:
         SplatComponent(GraphicsContext& context, const std::string& ply_file);
         ~SplatComponent() override;
 
-        void UpdateWithCamera(const Camera& camera, const glm::dmat4& world_transform);
+        void PreRender(const Camera& camera, const glm::dmat4& world_transform) override;
 
         void Render(CommandBuffer& command_buffer, VkPipelineLayout pipeline_layout, uint32_t transform_index) const override;
 

@@ -36,7 +36,7 @@ SplatComponent::~SplatComponent()
 {
 }
 
-void SplatComponent::UpdateWithCamera(const Camera& camera, const glm::dmat4& world_transform)
+void SplatComponent::PreRender(const Camera& camera, const glm::dmat4& world_transform)
 {
     SortSplats(camera.GetViewMatrix(), world_transform, camera.GetPosition());
 }

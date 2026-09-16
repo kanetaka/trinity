@@ -78,6 +78,7 @@ add_library(tri_scene STATIC
     src/scene/scene.h
     src/scene/scene.cpp
     src/scene/component/i_renderable.h
+    src/scene/component/i_pre_renderable.h
     src/scene/component/splat_component.h
     src/scene/component/splat_component.cpp
     src/scene/io/ply_loader.h

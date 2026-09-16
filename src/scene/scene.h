@@ -6,6 +6,8 @@
 
 namespace tri
 {
+    class Camera;
+
     // Owns the Object hierarchy and keeps a flat, contiguous index per Object so that
     // per-object GPU data (e.g. transform matrices) can be uploaded as one packed buffer.
     class Scene
@@ -22,6 +24,9 @@ namespace tri
 
         // Advances the scene graph (currently: recomputes world transforms).
         void Update();
+
+        // Performs view-dependent preparation on components implementing IPreRenderable.
+        void PreRender(const Camera& camera);
 
         // Flat view of every live object, indexed by Object::GetTransformIndex().
         const std::vector<Object*>& GetOrderedObjects() const { return ordered_objects_; }
