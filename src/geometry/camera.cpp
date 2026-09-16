@@ -1,4 +1,4 @@
-#include "geom/camera.h"
+#include "geometry/camera.h"
 
 using namespace tri;
 

@@ -2,10 +2,10 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <memory>
+#include <typeindex>
+#include <unordered_map>
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
-
-
 #endif
 #include <glm/glm.hpp>
 
@@ -14,6 +14,8 @@ namespace tri
     class Application;
     class Object;
     class Scene;
+    class IComponent;
+    class IRenderable;
 }
 
 namespace tri
@@ -21,6 +23,13 @@ namespace tri
     class CommandBuffer;
     class UniformBuffer;
     class StorageBuffer;
+
+    struct RenderItem
+    {
+        IRenderable* renderable;
+        uint32_t transform_index;
+        int render_order;
+    };
 
     class Renderer
     {
@@ -40,9 +49,16 @@ namespace tri
         void UpdateUniformBuffer();
         void UpdateTransformBuffer(const Scene& scene);
 
-        VkDescriptorSetLayout GetSplatDescriptorSetLayout() const { return descriptor_set_layout_; }
+        void RegisterComponent(IComponent& component, int render_order = 0);
+
+        template<typename T>
+        void SetDefaultOrder(int order)
+        {
+            type_orders_[std::type_index(typeid(T))] = order;
+        }
+
+        VkDescriptorSetLayout GetDescriptorSetLayout() const { return descriptor_set_layout_; }
         VkDescriptorSet AllocateDescriptorSet();
-        void UpdateSplatDescriptorSet(VkDescriptorSet set, const std::shared_ptr<StorageBuffer>& splat_buffer, const std::shared_ptr<StorageBuffer>& index_buffer);
 
         float GetScreenWidth() const { return screen_width_; }
         float GetScreenHeight() const { return screen_height_; }
@@ -52,7 +68,7 @@ namespace tri
         bool CreateDescriptorPool();
         bool CreateDescriptorSets();
         bool InitializeGraphicsPipeline();
-        void DrawObject(Object& object, std::shared_ptr<CommandBuffer>& command_buffer);
+        void CollectRenderItems(Object& object, std::vector<RenderItem>& out_items);
 
         Application* app_;
 
@@ -64,6 +80,8 @@ namespace tri
 
         std::shared_ptr<UniformBuffer> uniform_buffer_;
         std::shared_ptr<StorageBuffer> transform_buffer_;
+
+        std::unordered_map<std::type_index, int> type_orders_;
 
         glm::mat4 view_;
         glm::mat4 projection_;

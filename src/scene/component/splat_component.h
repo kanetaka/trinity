@@ -11,7 +11,6 @@
 namespace tri
 {
     class Camera;
-    class Renderer;
     class StorageBuffer;
     class CommandBuffer;
 
@@ -19,17 +18,22 @@ namespace tri
     class SplatComponent : public IComponent, public IRenderable
     {
     public:
-        SplatComponent(const std::string& ply_file, Renderer* renderer);
+        explicit SplatComponent(const std::string& ply_file);
         ~SplatComponent() override;
 
         void UpdateWithCamera(const Camera& camera, const glm::dmat4& world_transform);
 
         void Render(CommandBuffer& command_buffer, VkPipelineLayout pipeline_layout, uint32_t transform_index) const override;
 
+        void SetupResources(VkDescriptorSet descriptor_set, VkBuffer ubo, VkBuffer transform_buffer) override;
+
+        void SetDescriptorSet(VkDescriptorSet descriptor_set) { descriptor_set_ = descriptor_set; }
+        const std::shared_ptr<StorageBuffer>& GetSplatBuffer() const { return splat_buffer_; }
+        const std::shared_ptr<StorageBuffer>& GetIndexBuffer() const { return index_buffer_; }
+
     private:
         void LoadSplats();
         void CreateBuffers();
-        void CreateDescriptorSets(Renderer* renderer);
         void SortSplats(const glm::mat4& view, const glm::dmat4& world_transform, const glm::dvec3& camera_position);
 
         std::string ply_file_;

@@ -2,12 +2,12 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "app/application.h"
-#include "scene/renderer.h"
+#include "renderer/renderer.h"
 #include "scene/object.h"
 #include "scene/component/splat_component.h"
-#include "gfx/vulkan_context.h"
-#include "gfx/swapchain.h"
-#include "gfx/surface/sdl3_surface_provider.h"
+#include "graphics/vulkan_context.h"
+#include "graphics/swapchain.h"
+#include "graphics/surface/sdl3_surface_provider.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
 #include <iostream>
@@ -33,7 +33,8 @@ void Application::LoadPly(const std::string& path)
     scene_->DestroyChildren(root);
 
     Object& splat_object = scene_->CreateObject(root, "Splat");
-    splat_object.AddComponent<SplatComponent>(path, renderer_.get());
+    auto& splat = splat_object.AddComponent<SplatComponent>(path);
+    renderer_->RegisterComponent(splat);
 }
 
 Application::~Application()

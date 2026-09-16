@@ -1,5 +1,5 @@
-#include "gfx/pipeline/graphics_pipeline_builder.h"
-#include "gfx/vulkan_context.h"
+#include "graphics/pipeline/graphics_pipeline_builder.h"
+#include "graphics/vulkan_context.h"
 
 using namespace tri;
 

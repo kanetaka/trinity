@@ -1,5 +1,5 @@
 #pragma once
-#include "gfx/surface/surface_provider.h"
+#include "graphics/surface/surface_provider.h"
 #include <SDL3/SDL.h>
 
 namespace tri

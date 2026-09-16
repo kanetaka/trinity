@@ -1,10 +1,10 @@
-#include "scene/renderer.h"
-#include "gfx/vulkan_context.h"
-#include "gfx/swapchain.h"
+#include "renderer/renderer.h"
+#include "graphics/vulkan_context.h"
+#include "graphics/swapchain.h"
 #include "scene/io/shader_loader.h"
 #include "core/asset_path.h"
-#include "gfx/pipeline/graphics_pipeline_builder.h"
-#include "gfx/resource/buffer_resource.h"
+#include "graphics/pipeline/graphics_pipeline_builder.h"
+#include "graphics/resource/buffer_resource.h"
 #include "app/application.h"
 #include "ui/ui_manager.h"
 #include "scene/object.h"
@@ -116,7 +116,19 @@ void Renderer::Draw(Object& root)
 
     vkCmdBindPipeline(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
 
-    DrawObject(root, command_buffer);
+    std::vector<RenderItem> render_items;
+    CollectRenderItems(root, render_items);
+
+    std::stable_sort(render_items.begin(), render_items.end(),
+        [](const RenderItem& a, const RenderItem& b)
+        {
+            return a.render_order < b.render_order;
+        });
+
+    for (const auto& item : render_items)
+    {
+        item.renderable->Render(*command_buffer, pipeline_layout_, item.transform_index);
+    }
 
     app_->GetUiManager().Render(command_buffer);
 
@@ -130,16 +142,26 @@ void Renderer::Draw(Object& root)
     vulkan_ctx.SubmitPresent();
 }
 
-void Renderer::DrawObject(Object& object, std::shared_ptr<CommandBuffer>& command_buffer)
+void Renderer::CollectRenderItems(Object& object, std::vector<RenderItem>& out_items)
 {
     object.ForEachComponent<IRenderable>([&](IRenderable& renderable)
         {
-            renderable.Render(*command_buffer, pipeline_layout_, object.GetTransformIndex());
+            int order = 0;
+            if (auto* comp = dynamic_cast<IComponent*>(&renderable))
+            {
+                order = comp->GetRenderOrder();
+                auto it = type_orders_.find(std::type_index(typeid(*comp)));
+                if (it != type_orders_.end())
+                {
+                    order += it->second;
+                }
+            }
+            out_items.push_back(RenderItem{ &renderable, object.GetTransformIndex(), order });
         });
 
     for (auto& child : object.GetChildren())
     {
-        DrawObject(*child, command_buffer);
+        CollectRenderItems(*child, out_items);
     }
 }
 
@@ -160,69 +182,25 @@ VkDescriptorSet Renderer::AllocateDescriptorSet()
     return set;
 }
 
-void Renderer::UpdateSplatDescriptorSet(VkDescriptorSet set, const std::shared_ptr<StorageBuffer>& splat_buffer, const std::shared_ptr<StorageBuffer>& index_buffer)
+void Renderer::RegisterComponent(IComponent& component, int render_order)
 {
-    auto device = VulkanContext::Get().GetVkDevice();
+    if (render_order != 0)
+    {
+        component.SetRenderOrder(render_order);
+    }
+    else
+    {
+        auto it = type_orders_.find(std::type_index(typeid(component)));
+        if (it != type_orders_.end())
+        {
+            component.SetRenderOrder(it->second);
+        }
+    }
 
-    VkDescriptorBufferInfo ubo_info{};
-    ubo_info.buffer = uniform_buffer_->GetVkBuffer();
-    ubo_info.offset = 0;
-    ubo_info.range = VK_WHOLE_SIZE;
-
-    VkWriteDescriptorSet ubo_write{};
-    ubo_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    ubo_write.dstSet = set;
-    ubo_write.dstBinding = 0;
-    ubo_write.dstArrayElement = 0;
-    ubo_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    ubo_write.descriptorCount = 1;
-    ubo_write.pBufferInfo = &ubo_info;
-
-    VkDescriptorBufferInfo splat_info{};
-    splat_info.buffer = splat_buffer->GetVkBuffer();
-    splat_info.offset = 0;
-    splat_info.range = VK_WHOLE_SIZE;
-
-    VkWriteDescriptorSet splat_write{};
-    splat_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    splat_write.dstSet = set;
-    splat_write.dstBinding = 1;
-    splat_write.dstArrayElement = 0;
-    splat_write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    splat_write.descriptorCount = 1;
-    splat_write.pBufferInfo = &splat_info;
-
-    VkDescriptorBufferInfo idx_info{};
-    idx_info.buffer = index_buffer->GetVkBuffer();
-    idx_info.offset = 0;
-    idx_info.range = VK_WHOLE_SIZE;
-
-    VkWriteDescriptorSet idx_write{};
-    idx_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    idx_write.dstSet = set;
-    idx_write.dstBinding = 2;
-    idx_write.dstArrayElement = 0;
-    idx_write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    idx_write.descriptorCount = 1;
-    idx_write.pBufferInfo = &idx_info;
-
-    VkDescriptorBufferInfo transform_info{};
-    transform_info.buffer = transform_buffer_->GetVkBuffer();
-    transform_info.offset = 0;
-    transform_info.range = VK_WHOLE_SIZE;
-
-    VkWriteDescriptorSet transform_write{};
-    transform_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-    transform_write.dstSet = set;
-    transform_write.dstBinding = 3;
-    transform_write.dstArrayElement = 0;
-    transform_write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    transform_write.descriptorCount = 1;
-    transform_write.pBufferInfo = &transform_info;
-
-    std::vector<VkWriteDescriptorSet> writes = { ubo_write, splat_write, idx_write, transform_write };
-    vkUpdateDescriptorSets(device, static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
+    VkDescriptorSet set = AllocateDescriptorSet();
+    component.SetupResources(set, uniform_buffer_->GetVkBuffer(), transform_buffer_->GetVkBuffer());
 }
+
 
 struct CameraUbo
 {

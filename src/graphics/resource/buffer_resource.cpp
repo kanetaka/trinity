@@ -1,4 +1,4 @@
-#include "gfx/resource/buffer_resource.h"
+#include "graphics/resource/buffer_resource.h"
 
 using namespace tri;
 

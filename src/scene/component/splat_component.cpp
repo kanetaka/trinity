@@ -15,22 +15,20 @@
 #include <SDL3/SDL.h>
 
 #include "scene/component/splat_component.h"
-#include "geom/camera.h"
-#include "scene/renderer.h"
+#include "geometry/camera.h"
 #include "scene/io/ply_loader.h"
-#include "gfx/vulkan_context.h"
+#include "graphics/vulkan_context.h"
 #include "core/asset_path.h"
-#include "gfx/command_buffer.h"
-#include "gfx/resource/buffer_resource.h"
+#include "graphics/command_buffer.h"
+#include "graphics/resource/buffer_resource.h"
 
 using namespace tri;
 
-SplatComponent::SplatComponent(const std::string& ply_file, Renderer* renderer)
+SplatComponent::SplatComponent(const std::string& ply_file)
     : ply_file_(ply_file)
 {
     LoadSplats();
     CreateBuffers();
-    CreateDescriptorSets(renderer);
 }
 
 SplatComponent::~SplatComponent()
@@ -95,11 +93,76 @@ void SplatComponent::CreateBuffers()
     index_buffer_ = StorageBuffer::Create(index_size, StorageBuffer::AccessMode::CpuAccessible);
 }
 
-void SplatComponent::CreateDescriptorSets(Renderer* renderer)
+void SplatComponent::SetupResources(VkDescriptorSet descriptor_set, VkBuffer ubo, VkBuffer transform_buffer)
 {
-    descriptor_set_ = renderer->AllocateDescriptorSet();
-    renderer->UpdateSplatDescriptorSet(descriptor_set_, splat_buffer_, index_buffer_);
+    descriptor_set_ = descriptor_set;
+    if (descriptor_set_ == VK_NULL_HANDLE || !splat_buffer_ || !index_buffer_)
+    {
+        return;
+    }
+
+    auto device = VulkanContext::Get().GetVkDevice();
+
+    VkDescriptorBufferInfo ubo_info{};
+    ubo_info.buffer = ubo;
+    ubo_info.offset = 0;
+    ubo_info.range = VK_WHOLE_SIZE;
+
+    VkWriteDescriptorSet ubo_write{};
+    ubo_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    ubo_write.dstSet = descriptor_set_;
+    ubo_write.dstBinding = 0;
+    ubo_write.dstArrayElement = 0;
+    ubo_write.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    ubo_write.descriptorCount = 1;
+    ubo_write.pBufferInfo = &ubo_info;
+
+    VkDescriptorBufferInfo splat_info{};
+    splat_info.buffer = splat_buffer_->GetVkBuffer();
+    splat_info.offset = 0;
+    splat_info.range = VK_WHOLE_SIZE;
+
+    VkWriteDescriptorSet splat_write{};
+    splat_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    splat_write.dstSet = descriptor_set_;
+    splat_write.dstBinding = 1;
+    splat_write.dstArrayElement = 0;
+    splat_write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    splat_write.descriptorCount = 1;
+    splat_write.pBufferInfo = &splat_info;
+
+    VkDescriptorBufferInfo idx_info{};
+    idx_info.buffer = index_buffer_->GetVkBuffer();
+    idx_info.offset = 0;
+    idx_info.range = VK_WHOLE_SIZE;
+
+    VkWriteDescriptorSet idx_write{};
+    idx_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    idx_write.dstSet = descriptor_set_;
+    idx_write.dstBinding = 2;
+    idx_write.dstArrayElement = 0;
+    idx_write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    idx_write.descriptorCount = 1;
+    idx_write.pBufferInfo = &idx_info;
+
+    VkDescriptorBufferInfo transform_info{};
+    transform_info.buffer = transform_buffer;
+    transform_info.offset = 0;
+    transform_info.range = VK_WHOLE_SIZE;
+
+    VkWriteDescriptorSet transform_write{};
+    transform_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+    transform_write.dstSet = descriptor_set_;
+    transform_write.dstBinding = 3;
+    transform_write.dstArrayElement = 0;
+    transform_write.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+    transform_write.descriptorCount = 1;
+    transform_write.pBufferInfo = &transform_info;
+
+    std::vector<VkWriteDescriptorSet> writes = { ubo_write, splat_write, idx_write, transform_write };
+    vkUpdateDescriptorSets(device, static_cast<uint32_t>(writes.size()), writes.data(), 0, nullptr);
 }
+
 
 void SplatComponent::SortSplats(const glm::mat4& view, const glm::dmat4& world_transform, const glm::dvec3& camera_position)
 {

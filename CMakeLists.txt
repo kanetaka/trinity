@@ -34,41 +34,41 @@ target_include_directories(tri_core PUBLIC src)
 # Core uses Vulkan SDK for GLM etc
 target_link_libraries(tri_core PUBLIC Vulkan::Vulkan)
 
-# --- Library: tri_geom ---
-add_library(tri_geom STATIC
-    src/geom/camera.h
-    src/geom/camera.cpp
+# --- Library: tri_geometry ---
+add_library(tri_geometry STATIC
+    src/geometry/camera.h
+    src/geometry/camera.cpp
 )
-target_include_directories(tri_geom PUBLIC src)
-target_link_libraries(tri_geom PUBLIC tri_core SDL3::SDL3)
+target_include_directories(tri_geometry PUBLIC src)
+target_link_libraries(tri_geometry PUBLIC tri_core SDL3::SDL3)
 
-# --- Library: tri_gfx ---
-add_library(tri_gfx STATIC
-    src/gfx/command_buffer.h
-    src/gfx/command_buffer.cpp
-    src/gfx/extension_features.h
-    src/gfx/image_barrier.h
-    src/gfx/image_barrier.cpp
-    src/gfx/swapchain.h
-    src/gfx/swapchain.cpp
-    src/gfx/vulkan_context.h
-    src/gfx/vulkan_context.cpp
-    src/gfx/pipeline/graphics_pipeline.h
-    src/gfx/pipeline/graphics_pipeline_builder.h
-    src/gfx/pipeline/graphics_pipeline_builder.cpp
-    src/gfx/resource/buffer_resource.h
-    src/gfx/resource/buffer_resource.cpp
-    src/gfx/resource/gpu_resource_base.h
-    src/gfx/resource/image_resource.h
-    src/gfx/resource/image_resource.cpp
-    src/gfx/resource/sampler.h
-    src/gfx/resource/sampler.cpp
-    src/gfx/surface/surface_provider.h
-    src/gfx/surface/sdl3_surface_provider.h
-    src/gfx/surface/sdl3_surface_provider.cpp
+# --- Library: tri_graphics ---
+add_library(tri_graphics STATIC
+    src/graphics/command_buffer.h
+    src/graphics/command_buffer.cpp
+    src/graphics/extension_features.h
+    src/graphics/image_barrier.h
+    src/graphics/image_barrier.cpp
+    src/graphics/swapchain.h
+    src/graphics/swapchain.cpp
+    src/graphics/vulkan_context.h
+    src/graphics/vulkan_context.cpp
+    src/graphics/pipeline/graphics_pipeline.h
+    src/graphics/pipeline/graphics_pipeline_builder.h
+    src/graphics/pipeline/graphics_pipeline_builder.cpp
+    src/graphics/resource/buffer_resource.h
+    src/graphics/resource/buffer_resource.cpp
+    src/graphics/resource/gpu_resource_base.h
+    src/graphics/resource/image_resource.h
+    src/graphics/resource/image_resource.cpp
+    src/graphics/resource/sampler.h
+    src/graphics/resource/sampler.cpp
+    src/graphics/surface/surface_provider.h
+    src/graphics/surface/sdl3_surface_provider.h
+    src/graphics/surface/sdl3_surface_provider.cpp
 )
-target_include_directories(tri_gfx PUBLIC src)
-target_link_libraries(tri_gfx PUBLIC tri_core Vulkan::Vulkan SDL3::SDL3)
+target_include_directories(tri_graphics PUBLIC src)
+target_link_libraries(tri_graphics PUBLIC tri_core Vulkan::Vulkan SDL3::SDL3)
 
 # --- Library: tri_scene ---
 add_library(tri_scene STATIC
@@ -77,8 +77,6 @@ add_library(tri_scene STATIC
     src/scene/object.cpp
     src/scene/scene.h
     src/scene/scene.cpp
-    src/scene/renderer.h
-    src/scene/renderer.cpp
     src/scene/component/i_renderable.h
     src/scene/component/splat_component.h
     src/scene/component/splat_component.cpp
@@ -89,7 +87,15 @@ add_library(tri_scene STATIC
     src/scene/io/splat_types.h
 )
 target_include_directories(tri_scene PUBLIC src)
-target_link_libraries(tri_scene PUBLIC tri_core tri_geom tri_gfx Vulkan::Vulkan)
+target_link_libraries(tri_scene PUBLIC tri_core tri_geometry tri_graphics Vulkan::Vulkan)
+
+# --- Library: tri_renderer ---
+add_library(tri_renderer STATIC
+    src/renderer/renderer.h
+    src/renderer/renderer.cpp
+)
+target_include_directories(tri_renderer PUBLIC src)
+target_link_libraries(tri_renderer PUBLIC tri_core tri_graphics tri_scene Vulkan::Vulkan)
 
 # --- Library: tri_ui ---
 add_library(tri_ui STATIC
@@ -104,7 +110,7 @@ add_library(tri_ui STATIC
     lib/imgui/backends/imgui_impl_vulkan.cpp
 )
 target_include_directories(tri_ui PUBLIC src lib/imgui lib/imgui/backends)
-target_link_libraries(tri_ui PUBLIC tri_core tri_gfx Vulkan::Vulkan SDL3::SDL3)
+target_link_libraries(tri_ui PUBLIC tri_core tri_graphics Vulkan::Vulkan SDL3::SDL3)
 
 # --- Library: tri_app ---
 add_library(tri_app STATIC
@@ -117,9 +123,10 @@ target_include_directories(tri_app PUBLIC src lib/json/include)
 target_link_libraries(tri_app
     PUBLIC
     tri_core
-    tri_geom
-    tri_gfx
+    tri_geometry
+    tri_graphics
     tri_scene
+    tri_renderer
     tri_ui
     SDL3::SDL3
     Vulkan::Vulkan

@@ -1,4 +1,4 @@
-#include "gfx/resource/image_resource.h"
+#include "graphics/resource/image_resource.h"
 #include <stdexcept>
 
 using namespace tri;

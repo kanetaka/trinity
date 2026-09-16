@@ -1,6 +1,6 @@
 #pragma once
-#include "gfx/vulkan_context.h"
-#include "gfx/resource/gpu_resource_base.h"
+#include "graphics/vulkan_context.h"
+#include "graphics/resource/gpu_resource_base.h"
 
 namespace tri
 {

@@ -1,6 +1,6 @@
 #pragma once
-#include "gfx/vulkan_context.h"
-#include "gfx/image_barrier.h"
+#include "graphics/vulkan_context.h"
+#include "graphics/image_barrier.h"
 
 namespace tri
 {

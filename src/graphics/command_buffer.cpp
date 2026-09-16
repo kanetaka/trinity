@@ -1,4 +1,4 @@
-#include "gfx/command_buffer.h"
+#include "graphics/command_buffer.h"
 
 using namespace tri;
 

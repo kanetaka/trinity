@@ -1,4 +1,4 @@
-#include "gfx/surface/sdl3_surface_provider.h"
+#include "graphics/surface/sdl3_surface_provider.h"
 #include <SDL3/SDL_vulkan.h>
 #include <iostream>
 #include <stdexcept>

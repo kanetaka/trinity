@@ -7,7 +7,7 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 
-#include "gfx/command_buffer.h"
+#include "graphics/command_buffer.h"
 
 namespace tri
 {

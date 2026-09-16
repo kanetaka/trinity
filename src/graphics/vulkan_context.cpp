@@ -1,5 +1,5 @@
-#include "gfx/vulkan_context.h"
-#include "gfx/swapchain.h"
+#include "graphics/vulkan_context.h"
+#include "graphics/swapchain.h"
 
 
 

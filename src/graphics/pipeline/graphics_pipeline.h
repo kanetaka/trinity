@@ -1,7 +1,7 @@
 #pragma once
 #include <vulkan/vulkan.h>
 #include <vector>
-#include "gfx/vulkan_context.h"
+#include "graphics/vulkan_context.h"
 
 namespace tri
 {

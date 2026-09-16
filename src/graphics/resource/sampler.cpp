@@ -1,4 +1,4 @@
-#include "gfx/resource/sampler.h"
+#include "graphics/resource/sampler.h"
 #include <stdexcept>
 
 using namespace tri;

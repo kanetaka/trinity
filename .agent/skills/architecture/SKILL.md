@@ -10,11 +10,12 @@ description: アーキテクチャに関するスキル
 - Objectは名前、階層（親子）、トランスフォーム、コンポーネントを持つ。
 - 振る舞いはObjectに付与するコンポーネントとして実装する。コンポーネントはIComponentを実装する。
 - 継承は原則インターフェイス（純粋仮想関数のみを持つ抽象クラス）の実装のみで行う。具象クラス同士の実装継承は避け、コンポジション（コンポーネントの合成）で再利用する。
-- モジュールはcore,geom,gfx,scene,ui,appの6つとする。
-- coreはgeom,gfx,scene,ui,appに依存しない。
-- geomはgfx,scene,ui,appに依存しない。
-- gfxはgeom,scene,ui,appに依存しない。
-- sceneはui,appに依存しない。
+- モジュールはcore,geometry,graphics,scene,renderer,ui,appの7つとする。
+- coreはgeometry,graphics,scene,renderer,ui,appに依存しない。
+- geometryはgraphics,scene,renderer,ui,appに依存しない。
+- graphicsはgeometry,scene,renderer,ui,appに依存しない。
+- sceneはrenderer,ui,appに依存しない。
+- rendererはui,appに依存しない。
 - uiはappに依存しない。
 
 # ファイル構成
@@ -28,12 +29,13 @@ description: アーキテクチャに関するスキル
 - src:ソースコードを格納
 - src/app:アプリケーションのコードを格納
 - src/core:コアライブラリのコードを格納。AssetPathなど
-- src/geom:数学ライブラリのコードを格納
-- src/gfx:レンダリング(Vulkan)のコードを格納
-- src/gfx/pipeline:レンダリングパイプラインのコードを格納
-- src/gfx/resource:レンダリングリソースのコードを格納
-- src/gfx/surface:レンダリングサーフェスのコードを格納
-- src/scene:シーングラフ,オブジェクト,コンポーネント,レンダラーのコードを格納
+- src/geometry:数学ライブラリのコードを格納
+- src/graphics:レンダリング(Vulkan)のコードを格納
+- src/graphics/pipeline:レンダリングパイプラインのコードを格納
+- src/graphics/resource:レンダリングリソースのコードを格納
+- src/graphics/surface:レンダリングサーフェスのコードを格納
+- src/scene:シーングラフ,オブジェクト,コンポーネントのコードを格納
 - src/scene/io:入出力ライブラリのコードを格納
+- src/renderer:レンダラーのコードを格納
 - src/ui:UIのコードを格納
 - tool:ツールプログラムのコードを格納

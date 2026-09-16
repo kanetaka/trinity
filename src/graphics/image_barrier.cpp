@@ -1,6 +1,6 @@
-#include "gfx/vulkan_context.h"
-#include "gfx/resource/image_resource.h"
-#include "gfx/image_barrier.h"
+#include "graphics/vulkan_context.h"
+#include "graphics/resource/image_resource.h"
+#include "graphics/image_barrier.h"
 
 using namespace tri;
 
