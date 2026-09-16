@@ -29,11 +29,6 @@ find_package(SDL3 REQUIRED)
 add_library(tri_core STATIC
     src/core/asset_path.h
     src/core/asset_path.cpp
-    src/core/component.h
-    src/core/object.h
-    src/core/object.cpp
-    src/core/world.h
-    src/core/world.cpp
 )
 target_include_directories(tri_core PUBLIC src)
 # Core uses Vulkan SDK for GLM etc
@@ -47,17 +42,6 @@ add_library(tri_geom STATIC
 target_include_directories(tri_geom PUBLIC src)
 target_link_libraries(tri_geom PUBLIC tri_core SDL3::SDL3)
 
-# --- Library: tri_io ---
-add_library(tri_io STATIC
-    src/io/ply_loader.h
-    src/io/ply_loader.cpp
-    src/io/shader_loader.h
-    src/io/shader_loader.cpp
-    src/io/splat_types.h
-)
-target_include_directories(tri_io PUBLIC src)
-target_link_libraries(tri_io PUBLIC tri_core Vulkan::Vulkan)
-
 # --- Library: tri_gfx ---
 add_library(tri_gfx STATIC
     src/gfx/command_buffer.h
@@ -65,8 +49,6 @@ add_library(tri_gfx STATIC
     src/gfx/extension_features.h
     src/gfx/image_barrier.h
     src/gfx/image_barrier.cpp
-    src/gfx/renderer.h
-    src/gfx/renderer.cpp
     src/gfx/swapchain.h
     src/gfx/swapchain.cpp
     src/gfx/vulkan_context.h
@@ -84,12 +66,30 @@ add_library(tri_gfx STATIC
     src/gfx/surface/surface_provider.h
     src/gfx/surface/sdl3_surface_provider.h
     src/gfx/surface/sdl3_surface_provider.cpp
-    src/gfx/component/i_renderable.h
-    src/gfx/component/splat_component.h
-    src/gfx/component/splat_component.cpp
 )
 target_include_directories(tri_gfx PUBLIC src)
-target_link_libraries(tri_gfx PUBLIC tri_core tri_geom tri_io Vulkan::Vulkan SDL3::SDL3)
+target_link_libraries(tri_gfx PUBLIC tri_core Vulkan::Vulkan SDL3::SDL3)
+
+# --- Library: tri_scene ---
+add_library(tri_scene STATIC
+    src/scene/component.h
+    src/scene/object.h
+    src/scene/object.cpp
+    src/scene/scene.h
+    src/scene/scene.cpp
+    src/scene/renderer.h
+    src/scene/renderer.cpp
+    src/scene/component/i_renderable.h
+    src/scene/component/splat_component.h
+    src/scene/component/splat_component.cpp
+    src/scene/io/ply_loader.h
+    src/scene/io/ply_loader.cpp
+    src/scene/io/shader_loader.h
+    src/scene/io/shader_loader.cpp
+    src/scene/io/splat_types.h
+)
+target_include_directories(tri_scene PUBLIC src)
+target_link_libraries(tri_scene PUBLIC tri_core tri_geom tri_gfx Vulkan::Vulkan)
 
 # --- Library: tri_ui ---
 add_library(tri_ui STATIC
@@ -118,8 +118,8 @@ target_link_libraries(tri_app
     PUBLIC
     tri_core
     tri_geom
-    tri_io
     tri_gfx
+    tri_scene
     tri_ui
     SDL3::SDL3
     Vulkan::Vulkan

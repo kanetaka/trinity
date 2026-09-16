@@ -13,7 +13,7 @@ namespace tri
 {
     class Application;
     class Object;
-    class World;
+    class Scene;
 }
 
 namespace tri
@@ -38,7 +38,7 @@ namespace tri
         void SetCameraPosition(const glm::dvec3& pos) { camera_pos_ = pos; }
 
         void UpdateUniformBuffer();
-        void UpdateTransformBuffer(const World& world);
+        void UpdateTransformBuffer(const Scene& scene);
 
         VkDescriptorSetLayout GetSplatDescriptorSetLayout() const { return descriptor_set_layout_; }
         VkDescriptorSet AllocateDescriptorSet();

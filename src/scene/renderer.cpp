@@ -1,15 +1,15 @@
-#include "gfx/renderer.h"
+#include "scene/renderer.h"
 #include "gfx/vulkan_context.h"
 #include "gfx/swapchain.h"
-#include "io/shader_loader.h"
+#include "scene/io/shader_loader.h"
 #include "core/asset_path.h"
 #include "gfx/pipeline/graphics_pipeline_builder.h"
 #include "gfx/resource/buffer_resource.h"
 #include "app/application.h"
 #include "ui/ui_manager.h"
-#include "core/object.h"
-#include "core/world.h"
-#include "gfx/component/i_renderable.h"
+#include "scene/object.h"
+#include "scene/scene.h"
+#include "scene/component/i_renderable.h"
 #include <stdexcept>
 #include <algorithm>
 
@@ -244,9 +244,9 @@ void Renderer::UpdateUniformBuffer()
     uniform_buffer_->Unmap();
 }
 
-void Renderer::UpdateTransformBuffer(const World& world)
+void Renderer::UpdateTransformBuffer(const Scene& scene)
 {
-    const auto& objects = world.GetOrderedObjects();
+    const auto& objects = scene.GetOrderedObjects();
     if (objects.empty()) return;
 
     std::vector<glm::mat4> matrices;

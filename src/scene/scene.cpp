@@ -1,15 +1,15 @@
-#include "core/world.h"
+#include "scene/scene.h"
 #include <algorithm>
 
 using namespace tri;
 
-World::World()
+Scene::Scene()
     : root_(std::unique_ptr<Object>(new Object("Root")))
 {
     RegisterObject(*root_);
 }
 
-Object& World::CreateObject(Object& parent, std::string name)
+Object& Scene::CreateObject(Object& parent, std::string name)
 {
     auto child = std::unique_ptr<Object>(new Object(std::move(name)));
     Object& ref = *child;
@@ -19,7 +19,7 @@ Object& World::CreateObject(Object& parent, std::string name)
     return ref;
 }
 
-void World::DestroyObject(Object& object)
+void Scene::DestroyObject(Object& object)
 {
     Object* parent = object.parent_;
     if (!parent) return; // the root cannot be destroyed
@@ -33,7 +33,7 @@ void World::DestroyObject(Object& object)
         siblings.end());
 }
 
-void World::DestroyChildren(Object& object)
+void Scene::DestroyChildren(Object& object)
 {
     for (auto& child : object.children_)
     {
@@ -42,18 +42,18 @@ void World::DestroyChildren(Object& object)
     object.children_.clear();
 }
 
-void World::Update()
+void Scene::Update()
 {
     root_->UpdateWorldTransform(glm::dmat4(1.0));
 }
 
-void World::RegisterObject(Object& object)
+void Scene::RegisterObject(Object& object)
 {
     object.transform_index_ = static_cast<uint32_t>(ordered_objects_.size());
     ordered_objects_.push_back(&object);
 }
 
-void World::UnregisterSubtree(Object& object)
+void Scene::UnregisterSubtree(Object& object)
 {
     for (auto& child : object.children_)
     {

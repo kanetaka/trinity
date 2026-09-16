@@ -6,7 +6,7 @@
 #include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-#include "core/component.h"
+#include "scene/component.h"
 
 namespace tri
 {
@@ -85,7 +85,7 @@ namespace tri
         }
 
     private:
-        friend class World;
+        friend class Scene;
         explicit Object(std::string name);
 
         std::string name_;

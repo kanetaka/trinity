@@ -1,4 +1,4 @@
-#include "core/object.h"
+#include "scene/object.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace tri;

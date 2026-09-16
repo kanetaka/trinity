@@ -2,8 +2,9 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "app/application.h"
-#include "gfx/renderer.h"
-#include "gfx/component/splat_component.h"
+#include "scene/renderer.h"
+#include "scene/object.h"
+#include "scene/component/splat_component.h"
 #include "gfx/vulkan_context.h"
 #include "gfx/swapchain.h"
 #include "gfx/surface/sdl3_surface_provider.h"
@@ -19,7 +20,7 @@ using namespace tri;
 Application::Application()
     : camera_(glm::dvec3(0.0, 0.0, 5.0), glm::dvec3(0.0, -1.0, 0.0), -90.0f, 0.0f)
 {
-    world_ = std::make_unique<World>();
+    scene_ = std::make_unique<Scene>();
     ui_manager_ = std::make_unique<UiManager>();
 }
 
@@ -28,10 +29,10 @@ void Application::LoadPly(const std::string& path)
     auto device = VulkanContext::Get().GetVkDevice();
     vkDeviceWaitIdle(device);
 
-    Object& root = world_->GetRoot();
-    world_->DestroyChildren(root);
+    Object& root = scene_->GetRoot();
+    scene_->DestroyChildren(root);
 
-    Object& splat_object = world_->CreateObject(root, "Splat");
+    Object& splat_object = scene_->CreateObject(root, "Splat");
     splat_object.AddComponent<SplatComponent>(path, renderer_.get());
 }
 
@@ -49,7 +50,7 @@ void Application::OnInitialize()
 void Application::OnCleanup()
 {
     // Vulkan resources must be released before the device is destroyed.
-    world_.reset();
+    scene_.reset();
 
     if (renderer_)
     {
@@ -75,10 +76,10 @@ void Application::OnDrawFrame()
     renderer_->SetCameraPosition(camera_.GetPosition());
     renderer_->UpdateUniformBuffer();
 
-    world_->Update();
-    renderer_->UpdateTransformBuffer(*world_);
+    scene_->Update();
+    renderer_->UpdateTransformBuffer(*scene_);
 
-    for (auto* object : world_->GetOrderedObjects())
+    for (auto* object : scene_->GetOrderedObjects())
     {
         if (auto* splat = object->GetComponent<SplatComponent>())
         {
@@ -86,7 +87,7 @@ void Application::OnDrawFrame()
         }
     }
 
-    renderer_->Draw(world_->GetRoot());
+    renderer_->Draw(scene_->GetRoot());
 }
 
 void Application::ProcessInput(const Uint8* state, float delta_time)

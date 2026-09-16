@@ -4,9 +4,9 @@
 #include <memory>
 #include <vulkan/vulkan.h>
 #include <glm/glm.hpp>
-#include "core/component.h"
-#include "gfx/component/i_renderable.h"
-#include "io/splat_types.h"
+#include "scene/component.h"
+#include "scene/component/i_renderable.h"
+#include "scene/io/splat_types.h"
 
 namespace tri
 {

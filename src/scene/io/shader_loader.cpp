@@ -1,4 +1,4 @@
-#include "io/shader_loader.h"
+#include "scene/io/shader_loader.h"
 #include <vector>
 #include <fstream>
 

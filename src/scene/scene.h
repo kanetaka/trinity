@@ -2,16 +2,16 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "core/object.h"
+#include "scene/object.h"
 
 namespace tri
 {
     // Owns the Object hierarchy and keeps a flat, contiguous index per Object so that
     // per-object GPU data (e.g. transform matrices) can be uploaded as one packed buffer.
-    class World
+    class Scene
     {
     public:
-        World();
+        Scene();
 
         Object& GetRoot() { return *root_; }
         const Object& GetRoot() const { return *root_; }

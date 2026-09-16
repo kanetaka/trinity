@@ -14,10 +14,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <SDL3/SDL.h>
 
-#include "gfx/component/splat_component.h"
+#include "scene/component/splat_component.h"
 #include "geom/camera.h"
-#include "gfx/renderer.h"
-#include "io/ply_loader.h"
+#include "scene/renderer.h"
+#include "scene/io/ply_loader.h"
 #include "gfx/vulkan_context.h"
 #include "core/asset_path.h"
 #include "gfx/command_buffer.h"

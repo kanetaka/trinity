@@ -11,7 +11,7 @@
 #include "app/iapplication.hpp"
 #include "geom/camera.h"
 #include "ui/ui_manager.h"
-#include "core/world.h"
+#include "scene/scene.h"
 
 namespace tri
 {
@@ -31,11 +31,11 @@ namespace tri
 
         void LoadPly(const std::string& path);
 
-        Object& GetRootObject() { return world_->GetRoot(); }
+        Object& GetRootObject() { return scene_->GetRoot(); }
 
         tri::Renderer* GetRenderer() { return renderer_.get(); }
         tri::Camera& GetCamera() { return camera_; }
-        tri::World& GetWorld() { return *world_; }
+        tri::Scene& GetScene() { return *scene_; }
         tri::UiManager& GetUiManager() { return *ui_manager_; }
 
 
@@ -53,7 +53,7 @@ namespace tri
         tri::Camera camera_;
 
         std::unique_ptr<tri::Renderer> renderer_;
-        std::unique_ptr<tri::World> world_;
+        std::unique_ptr<tri::Scene> scene_;
         std::unique_ptr<tri::UiManager> ui_manager_;
 
         float width_ = 1280.0f;
