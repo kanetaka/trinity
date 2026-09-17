@@ -30,6 +30,8 @@ namespace tri
         static int Run(const std::string& json_args);
 
         void LoadPly(const std::string& path);
+        void LoadPointCloud(const std::string& path);
+        void Load3dgs(const std::string& path);
 
         Object& GetRootObject() { return scene_->GetRoot(); }
 

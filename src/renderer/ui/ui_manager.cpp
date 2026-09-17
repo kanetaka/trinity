@@ -155,6 +155,21 @@ namespace tri
                 ImGui::End();
             }
         }
+
+        ShowPointCloudSettings();
+    }
+
+    void UiManager::ShowPointCloudSettings()
+    {
+        if (show_point_cloud_settings_ && point_size_ptr_)
+        {
+            ImGui::SetNextWindowPos(ImVec2(10.0f, 40.0f), ImGuiCond_FirstUseEver);
+            if (ImGui::Begin("Point Cloud", &show_point_cloud_settings_, ImGuiWindowFlags_AlwaysAutoResize))
+            {
+                ImGui::SliderFloat("Point Size", point_size_ptr_, 0.001f, 0.1f, "%.4f");
+                ImGui::End();
+            }
+        }
     }
 
     bool UiManager::ProcessEvent(const SDL_Event* event)
@@ -181,22 +196,42 @@ namespace tri
         {
             if (ImGui::BeginMenu("File"))
             {
-                if (ImGui::MenuItem("Import 3DGS(*.ply)"))
+                if (ImGui::BeginMenu("Import"))
                 {
-                    OpenFileDialog();
+                    if (ImGui::MenuItem("Import Point Cloud(*.ply)"))
+                    {
+                        OpenFileDialog(on_open_point_cloud_);
+                    }
+                    if (ImGui::MenuItem("Import 3DGS(*.ply)"))
+                    {
+                        if (on_open_3dgs_)
+                        {
+                            OpenFileDialog(on_open_3dgs_);
+                        }
+                        else
+                        {
+                            OpenFileDialog(on_file_open_);
+                        }
+                    }
+                    ImGui::EndMenu();
                 }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("View"))
             {
                 ImGui::MenuItem("Show FPS", nullptr, &show_fps_);
+                if (point_size_ptr_)
+                {
+                    ImGui::MenuItem("Point Cloud Settings", nullptr, &show_point_cloud_settings_);
+                }
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
         }
     }
 
-    void UiManager::OpenFileDialog()
+
+    void UiManager::OpenFileDialog(const std::function<void(const std::string&)>& callback)
     {
 #if defined(_WIN32)
         wchar_t szFile[260] = { 0 };
@@ -219,9 +254,9 @@ namespace tri
             std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
             std::string open_path = converter.to_bytes(ofn.lpstrFile);
 #pragma warning(pop)
-            if (on_file_open_)
+            if (callback)
             {
-                on_file_open_(open_path);
+                callback(open_path);
             }
         }
 #else
@@ -229,3 +264,4 @@ namespace tri
 #endif
     }
 }
+

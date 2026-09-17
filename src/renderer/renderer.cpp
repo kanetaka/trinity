@@ -8,6 +8,7 @@
 #include "scene/object.h"
 #include "scene/scene.h"
 #include "scene/component/i_renderable.h"
+#include "scene/component/point_cloud_component.h"
 #include "renderer/ui/ui_manager.h"
 #include "geometry/camera.h"
 #include <stdexcept>
@@ -77,10 +78,15 @@ void Renderer::Shutdown()
         transform_buffer_.reset();
     }
 
-    if (pipeline_)
+    if (splat_pipeline_)
     {
-        vkDestroyPipeline(device, pipeline_, nullptr);
-        pipeline_ = VK_NULL_HANDLE;
+        vkDestroyPipeline(device, splat_pipeline_, nullptr);
+        splat_pipeline_ = VK_NULL_HANDLE;
+    }
+    if (point_cloud_pipeline_)
+    {
+        vkDestroyPipeline(device, point_cloud_pipeline_, nullptr);
+        point_cloud_pipeline_ = VK_NULL_HANDLE;
     }
     if (pipeline_layout_)
     {
@@ -252,10 +258,22 @@ void Renderer::RenderInternal(UiManager* ui_manager)
 
     vkCmdBeginRendering(command_buffer->Get(), &rendering_info);
 
-    vkCmdBindPipeline(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
+    VkPipeline current_pipeline = VK_NULL_HANDLE;
 
     for (const auto& item : render_items_)
     {
+        VkPipeline needed_pipeline = splat_pipeline_;
+        if (dynamic_cast<PointCloudComponent*>(item.renderable))
+        {
+            needed_pipeline = point_cloud_pipeline_;
+        }
+
+        if (needed_pipeline != current_pipeline && needed_pipeline != VK_NULL_HANDLE)
+        {
+            vkCmdBindPipeline(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, needed_pipeline);
+            current_pipeline = needed_pipeline;
+        }
+
         item.renderable->Render(*command_buffer, pipeline_layout_, item.object->GetTransformIndex());
     }
 
@@ -464,7 +482,7 @@ bool Renderer::InitializeGraphicsPipeline()
     VkPushConstantRange pushRange{};
     pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
     pushRange.offset = 0;
-    pushRange.size = sizeof(uint32_t); // matrixIndex
+    pushRange.size = sizeof(uint32_t) * 2; // matrixIndex + pointSize
 
     VkPipelineLayoutCreateInfo pipeline_layout_info{};
     pipeline_layout_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
@@ -479,7 +497,7 @@ bool Renderer::InitializeGraphicsPipeline()
     }
 
     GraphicsPipelineBuilder builder;
-    pipeline_ = builder.AddShaderStage(VK_SHADER_STAGE_VERTEX_BIT, vert_module, "main")
+    splat_pipeline_ = builder.AddShaderStage(VK_SHADER_STAGE_VERTEX_BIT, vert_module, "main")
         .AddShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, frag_module, "main")
         .SetVertexInput(nullptr, 0, nullptr, 0)
         .SetViewport(extent)
@@ -490,6 +508,28 @@ bool Renderer::InitializeGraphicsPipeline()
 
     vkDestroyShaderModule(device, vert_module, nullptr);
     vkDestroyShaderModule(device, frag_module, nullptr);
+
+    // Load PointCloud Shaders
+    auto pc_vert_module =
+        LoadShaderModule(device, GetAssetRootPath() / "shader" / "point_cloud" / "point_cloud.vert.spv");
+    auto pc_frag_module =
+        LoadShaderModule(device, GetAssetRootPath() / "shader" / "point_cloud" / "point_cloud.frag.spv");
+
+    if (pc_vert_module != VK_NULL_HANDLE && pc_frag_module != VK_NULL_HANDLE)
+    {
+        GraphicsPipelineBuilder pc_builder;
+        point_cloud_pipeline_ = pc_builder.AddShaderStage(VK_SHADER_STAGE_VERTEX_BIT, pc_vert_module, "main")
+            .AddShaderStage(VK_SHADER_STAGE_FRAGMENT_BIT, pc_frag_module, "main")
+            .SetVertexInput(nullptr, 0, nullptr, 0)
+            .SetViewport(extent)
+            .SetPipelineLayout(pipeline_layout_)
+            .UseDynamicRendering(graphics_ctx.GetSwapchain()->GetFormat().format, VK_FORMAT_UNDEFINED)
+            .EnableAlphaBlend()
+            .Build(device);
+
+        vkDestroyShaderModule(device, pc_vert_module, nullptr);
+        vkDestroyShaderModule(device, pc_frag_module, nullptr);
+    }
 
     return true;
 }

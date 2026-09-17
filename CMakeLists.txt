@@ -81,12 +81,16 @@ add_library(tri_scene STATIC
     src/scene/component/i_pre_renderable.h
     src/scene/component/splat_component.h
     src/scene/component/splat_component.cpp
+    src/scene/component/point_cloud_component.h
+    src/scene/component/point_cloud_component.cpp
     src/scene/io/ply_loader.h
     src/scene/io/ply_loader.cpp
     src/scene/io/shader_loader.h
     src/scene/io/shader_loader.cpp
     src/scene/io/splat_types.h
+    src/scene/io/point_cloud_types.h
 )
+
 target_include_directories(tri_scene PUBLIC src)
 target_link_libraries(tri_scene PUBLIC tri_core tri_geometry tri_graphics Vulkan::Vulkan)
 
@@ -140,6 +144,7 @@ target_link_libraries(trinity
 find_program(GLSLC_EXECUTABLE NAMES glslc PATHS ${VK_SDK_PATH}/Bin)
 if(GLSLC_EXECUTABLE)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/asset/shader/splat)
+    file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud)
     add_custom_command(
         OUTPUT ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert.spv
                ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag.spv
@@ -148,12 +153,23 @@ if(GLSLC_EXECUTABLE)
         DEPENDS ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag
         COMMENT "Compiling 3DGS shaders..."
     )
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.vert.spv
+               ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag.spv
+        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.vert -o ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.vert.spv
+        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag -o ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag.spv
+        DEPENDS ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.vert ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag
+        COMMENT "Compiling PointCloud shaders..."
+    )
     add_custom_target(compile_shaders ALL DEPENDS 
         ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert.spv 
         ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag.spv
+        ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.vert.spv
+        ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag.spv
     )
     add_dependencies(trinity compile_shaders)
 endif()
+
 
 # Platform specific settings
 if(WIN32)

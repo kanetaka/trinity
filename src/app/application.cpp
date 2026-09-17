@@ -5,6 +5,7 @@
 #include "renderer/renderer.h"
 #include "scene/object.h"
 #include "scene/component/splat_component.h"
+#include "scene/component/point_cloud_component.h"
 #include "graphics/graphics_context.h"
 #include "graphics/surface/sdl3_surface_provider.h"
 #include <SDL3/SDL.h>
@@ -25,9 +26,19 @@ Application::Application()
 
 void Application::LoadPly(const std::string& path)
 {
+    Load3dgs(path);
+}
+
+void Application::Load3dgs(const std::string& path)
+{
     if (renderer_)
     {
         renderer_->WaitIdle();
+    }
+
+    if (ui_manager_)
+    {
+        ui_manager_->SetPointSizePtr(nullptr);
     }
 
     Object& root = scene_->GetRoot();
@@ -38,9 +49,30 @@ void Application::LoadPly(const std::string& path)
     renderer_->RegisterComponent(splat);
 }
 
+void Application::LoadPointCloud(const std::string& path)
+{
+    if (renderer_)
+    {
+        renderer_->WaitIdle();
+    }
+
+    Object& root = scene_->GetRoot();
+    scene_->DestroyChildren(root);
+
+    Object& pc_object = scene_->CreateObject(root, "PointCloud");
+    auto& point_cloud = pc_object.AddComponent<PointCloudComponent>(*graphics_context_, path);
+    renderer_->RegisterComponent(point_cloud);
+
+    if (ui_manager_)
+    {
+        ui_manager_->SetPointSizePtr(point_cloud.GetPointSizePtr());
+    }
+}
+
 Application::~Application()
 {
 }
+
 
 void Application::OnInitialize()
 {
@@ -179,6 +211,13 @@ int Application::Run(const std::string& json_args)
         app.GetUiManager().SetOnFileOpenCallback([&app](const std::string& path) {
             app.LoadPly(path);
         });
+        app.GetUiManager().SetOnOpenPointCloudCallback([&app](const std::string& path) {
+            app.LoadPointCloud(path);
+        });
+        app.GetUiManager().SetOnOpen3dgsCallback([&app](const std::string& path) {
+            app.Load3dgs(path);
+        });
+
 
         // Dimensions are already set in OnInitialize via Renderer
         app.width_ = app.GetRenderer()->GetScreenWidth();

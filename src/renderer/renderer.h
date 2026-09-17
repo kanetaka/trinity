@@ -104,8 +104,10 @@ namespace tri
         VkDescriptorSetLayout descriptor_set_layout_ = VK_NULL_HANDLE;
         VkDescriptorPool descriptor_pool_ = VK_NULL_HANDLE;
 
-        VkPipeline pipeline_ = VK_NULL_HANDLE;
+        VkPipeline splat_pipeline_ = VK_NULL_HANDLE;
+        VkPipeline point_cloud_pipeline_ = VK_NULL_HANDLE;
         VkPipelineLayout pipeline_layout_ = VK_NULL_HANDLE;
+
 
         std::shared_ptr<UniformBuffer> uniform_buffer_;
         std::shared_ptr<StorageBuffer> transform_buffer_;
