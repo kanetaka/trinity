@@ -21,7 +21,7 @@ namespace tri
         void Shutdown();
 
         void BeginFrame();
-        void Render(std::shared_ptr<CommandBuffer>& command_buffer);
+        void Render(CommandBuffer& command_buffer);
 
         bool ProcessEvent(const SDL_Event* event);
 

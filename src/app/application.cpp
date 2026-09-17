@@ -44,7 +44,9 @@ Application::~Application()
 
 void Application::OnInitialize()
 {
-    renderer_ = std::make_unique<Renderer>(*graphics_context_);
+    renderer_ = std::make_unique<Renderer>(*graphics_context_, scene_.get());
+    renderer_->SetCamera(&camera_);
+    renderer_->SetUiManager(ui_manager_.get());
     renderer_->Initialize();
     width_ = renderer_->GetScreenWidth();
     height_ = renderer_->GetScreenHeight();
@@ -53,6 +55,12 @@ void Application::OnInitialize()
 void Application::OnCleanup()
 {
     // Vulkan resources must be released before the device is destroyed.
+    if (renderer_)
+    {
+        renderer_->SetScene(nullptr);
+        renderer_->SetCamera(nullptr);
+        renderer_->SetUiManager(nullptr);
+    }
     scene_.reset();
 
     if (renderer_)
@@ -78,21 +86,14 @@ void Application::OnDrawFrame()
     float fps = (delta_time > 0.0f) ? (1.0f / delta_time) : 0.0f;
     ui_manager_->SetFps(fps);
 
-    // Update Renderer matrices
-    renderer_->SetViewMatrix(camera_.GetViewMatrix());
-    renderer_->SetProjectionMatrix(camera_.GetProjectionMatrix(width_ / height_));
-    renderer_->SetCameraPosition(camera_.GetPosition());
-    renderer_->UpdateUniformBuffer();
+    renderer_->UpdateCamera(width_ / height_);
 
     scene_->Update();
-    renderer_->UpdateTransformBuffer(*scene_);
+    renderer_->UpdateTransformBuffer();
 
-    scene_->PreRender(camera_);
+    renderer_->PreRender();
 
-    renderer_->Draw(scene_->GetRoot(), [this](auto& command_buffer)
-        {
-            ui_manager_->Render(command_buffer);
-        });
+    renderer_->Draw();
 }
 
 void Application::ProcessInput(const Uint8* state, float delta_time)

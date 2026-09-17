@@ -9,7 +9,7 @@
 #endif
 #include "app/i_application.h"
 #include "geometry/camera.h"
-#include "ui/ui_manager.h"
+#include "renderer/ui/ui_manager.h"
 #include "scene/scene.h"
 
 namespace tri

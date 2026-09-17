@@ -1,4 +1,5 @@
 #include "scene/object.h"
+#include "scene/scene.h"
 #include <glm/gtc/matrix_transform.hpp>
 
 using namespace tri;
@@ -9,6 +10,22 @@ Object::Object(std::string name)
 }
 
 Object::~Object() = default;
+
+void Object::OnComponentAdded(IComponent& component)
+{
+    if (scene_)
+    {
+        scene_->RegisterComponent(*this, component);
+    }
+}
+
+void Object::OnComponentRemoved(IComponent& component)
+{
+    if (scene_)
+    {
+        scene_->UnregisterComponent(*this, component);
+    }
+}
 
 void Object::SetLocalPosition(const glm::dvec3& position)
 {

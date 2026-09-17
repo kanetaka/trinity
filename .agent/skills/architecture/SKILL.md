@@ -10,13 +10,12 @@ description: アーキテクチャに関するスキル
 - Objectは名前、階層（親子）、トランスフォーム、コンポーネントを持つ。
 - 振る舞いはObjectに付与するコンポーネントとして実装する。コンポーネントはIComponentを実装する。
 - 継承は原則インターフェイス（純粋仮想関数のみを持つ抽象クラス）の実装のみで行う。具象クラス同士の実装継承は避け、コンポジション（コンポーネントの合成）で再利用する。
-- モジュールはcore,geometry,graphics,scene,renderer,ui,appの7つとする。
-- coreはgeometry,graphics,scene,renderer,ui,appに依存しない。
-- geometryはgraphics,scene,renderer,ui,appに依存しない。
-- graphicsはgeometry,scene,renderer,ui,appに依存しない。
-- sceneはrenderer,ui,appに依存しない。
-- rendererはui,appに依存しない。
-- uiはappに依存しない。
+- モジュールはcore,geometry,graphics,scene,renderer,appの6つとする。
+- coreはgeometry,graphics,scene,renderer,appに依存しない。
+- geometryはgraphics,scene,renderer,appに依存しない。
+- graphicsはgeometry,scene,renderer,appに依存しない。
+- sceneはrenderer,appに依存しない。
+- rendererはappに依存しない。
 
 # ファイル構成
 - asset:3Dモデルやテクスチャなどのアセットを格納
@@ -37,7 +36,7 @@ description: アーキテクチャに関するスキル
 - src/scene:シーングラフ,オブジェクト,コンポーネントのコードを格納
 - src/scene/io:入出力ライブラリのコードを格納
 - src/renderer:レンダラーのコードを格納
-- src/ui:UIのコードを格納
+- src/renderer/ui:UIのコードを格納
 - tool:ツールプログラムのコードを格納
 
 # 禁止事項

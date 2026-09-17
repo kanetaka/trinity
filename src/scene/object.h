@@ -10,6 +10,8 @@
 
 namespace tri
 {
+    class Scene;
+
     constexpr uint32_t kInvalidTransformIndex = 0xFFFFFFFF;
 
     // Node of the scene graph. Behavior is attached through components implementing
@@ -25,6 +27,7 @@ namespace tri
         const std::string& GetName() const { return name_; }
 
         Object* GetParent() const { return parent_; }
+        Scene* GetScene() const { return scene_; }
         const std::vector<std::unique_ptr<Object>>& GetChildren() const { return children_; }
 
         void SetLocalPosition(const glm::dvec3& position);
@@ -45,7 +48,12 @@ namespace tri
             static_assert(std::is_base_of_v<IComponent, T>, "T must implement IComponent");
             auto component = std::make_unique<T>(std::forward<Args>(args)...);
             T& ref = *component;
+            IComponent* comp_ptr = component.get();
             components_.push_back(std::move(component));
+            if (scene_)
+            {
+                OnComponentAdded(*comp_ptr);
+            }
             return ref;
         }
 
@@ -65,10 +73,21 @@ namespace tri
         template<typename T>
         void RemoveComponent()
         {
-            components_.erase(
-                std::remove_if(components_.begin(), components_.end(),
-                    [](const std::unique_ptr<IComponent>& component) { return dynamic_cast<T*>(component.get()) != nullptr; }),
-                components_.end());
+            for (auto it = components_.begin(); it != components_.end(); )
+            {
+                if (auto* casted = dynamic_cast<T*>(it->get()))
+                {
+                    if (scene_)
+                    {
+                        OnComponentRemoved(*it->get());
+                    }
+                    it = components_.erase(it);
+                }
+                else
+                {
+                    ++it;
+                }
+            }
         }
 
         // Invokes func for every attached component implementing Interface.
@@ -88,7 +107,11 @@ namespace tri
         friend class Scene;
         explicit Object(std::string name);
 
+        void OnComponentAdded(IComponent& component);
+        void OnComponentRemoved(IComponent& component);
+
         std::string name_;
+        Scene* scene_ = nullptr;
         Object* parent_ = nullptr;
         std::vector<std::unique_ptr<Object>> children_;
         std::vector<std::unique_ptr<IComponent>> components_;

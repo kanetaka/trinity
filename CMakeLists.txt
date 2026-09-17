@@ -94,14 +94,8 @@ target_link_libraries(tri_scene PUBLIC tri_core tri_geometry tri_graphics Vulkan
 add_library(tri_renderer STATIC
     src/renderer/renderer.h
     src/renderer/renderer.cpp
-)
-target_include_directories(tri_renderer PUBLIC src)
-target_link_libraries(tri_renderer PUBLIC tri_core tri_graphics tri_scene Vulkan::Vulkan)
-
-# --- Library: tri_ui ---
-add_library(tri_ui STATIC
-    src/ui/ui_manager.h
-    src/ui/ui_manager.cpp
+    src/renderer/ui/ui_manager.h
+    src/renderer/ui/ui_manager.cpp
     lib/imgui/imgui.cpp
     lib/imgui/imgui_demo.cpp
     lib/imgui/imgui_draw.cpp
@@ -110,8 +104,8 @@ add_library(tri_ui STATIC
     lib/imgui/backends/imgui_impl_sdl3.cpp
     lib/imgui/backends/imgui_impl_vulkan.cpp
 )
-target_include_directories(tri_ui PUBLIC src lib/imgui lib/imgui/backends)
-target_link_libraries(tri_ui PUBLIC tri_core tri_graphics Vulkan::Vulkan SDL3::SDL3)
+target_include_directories(tri_renderer PUBLIC src lib/imgui lib/imgui/backends)
+target_link_libraries(tri_renderer PUBLIC tri_core tri_graphics tri_scene Vulkan::Vulkan SDL3::SDL3)
 
 # --- Library: tri_app ---
 add_library(tri_app STATIC
@@ -128,7 +122,6 @@ target_link_libraries(tri_app
     tri_graphics
     tri_scene
     tri_renderer
-    tri_ui
     SDL3::SDL3
     Vulkan::Vulkan
 )

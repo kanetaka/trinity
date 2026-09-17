@@ -8,13 +8,16 @@
 #include "scene/object.h"
 #include "scene/scene.h"
 #include "scene/component/i_renderable.h"
+#include "renderer/ui/ui_manager.h"
+#include "geometry/camera.h"
 #include <stdexcept>
 #include <algorithm>
 
 using namespace tri;
 
-Renderer::Renderer(GraphicsContext& context)
+Renderer::Renderer(GraphicsContext& context, Scene* scene)
     : context_(context)
+    , scene_(scene)
     , screen_width_(0)
     , screen_height_(0)
 {
@@ -96,7 +99,118 @@ void Renderer::Shutdown()
     }
 }
 
-void Renderer::Draw(Object& root, std::function<void(std::shared_ptr<CommandBuffer>&)> post_render)
+void Renderer::UpdateCamera(float aspect)
+{
+    assert(camera_ != nullptr);
+    if (camera_)
+    {
+        UpdateCamera(*camera_, aspect);
+    }
+}
+
+void Renderer::UpdateCamera(const Camera& camera, float aspect)
+{
+    camera_ = &camera;
+    view_ = camera.GetViewMatrix();
+    projection_ = camera.GetProjectionMatrix(aspect);
+    camera_pos_ = camera.GetPosition();
+    UpdateUniformBuffer();
+}
+
+void Renderer::PreRender()
+{
+    assert(scene_ != nullptr);
+    assert(camera_ != nullptr);
+    if (scene_ && camera_)
+    {
+        scene_->PreRender(*camera_);
+    }
+}
+
+void Renderer::PreRender(const Camera& camera)
+{
+    assert(scene_ != nullptr);
+    if (scene_)
+    {
+        scene_->PreRender(camera);
+    }
+}
+
+void Renderer::PreRender(Scene& scene, const Camera& camera)
+{
+    scene.PreRender(camera);
+}
+
+void Renderer::Draw()
+{
+    assert(scene_ != nullptr);
+    Draw(ui_manager_);
+}
+
+void Renderer::Draw(UiManager* ui_manager)
+{
+    assert(scene_ != nullptr);
+    if (scene_)
+    {
+        Draw(*scene_, ui_manager ? ui_manager : ui_manager_);
+    }
+}
+
+void Renderer::Draw(const Scene& scene, UiManager* ui_manager)
+{
+    if (render_items_dirty_ || scene.IsRenderDirty())
+    {
+        render_items_.clear();
+        const auto& entries = scene.GetRenderEntries();
+        render_items_.reserve(entries.size());
+
+        for (const auto& entry : entries)
+        {
+            int order = 0;
+            if (entry.component)
+            {
+                order = entry.component->GetRenderOrder();
+                auto it = type_orders_.find(std::type_index(typeid(*entry.component)));
+                if (it != type_orders_.end())
+                {
+                    order += it->second;
+                }
+            }
+            render_items_.push_back(RenderItem{ entry.renderable, entry.object, order });
+        }
+
+        std::stable_sort(render_items_.begin(), render_items_.end(),
+            [](const RenderItem& a, const RenderItem& b)
+            {
+                return a.render_order < b.render_order;
+            });
+
+        render_items_dirty_ = false;
+        scene.ClearRenderDirty();
+    }
+
+    RenderInternal(ui_manager ? ui_manager : ui_manager_);
+}
+
+void Renderer::Draw(Object& root, UiManager* ui_manager)
+{
+    if (auto* scene = root.GetScene())
+    {
+        Draw(*scene, ui_manager);
+        return;
+    }
+
+    render_items_.clear();
+    CollectRenderItems(root, render_items_);
+    std::stable_sort(render_items_.begin(), render_items_.end(),
+        [](const RenderItem& a, const RenderItem& b)
+        {
+            return a.render_order < b.render_order;
+        });
+    RenderInternal(ui_manager ? ui_manager : ui_manager_);
+}
+
+void Renderer::RenderInternal(UiManager* ui_manager)
 {
     auto& graphics_ctx = context_;
 
@@ -140,23 +254,14 @@ void Renderer::Draw(Object& root, std::function<void(std::shared_ptr<CommandBuff
 
     vkCmdBindPipeline(command_buffer->Get(), VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline_);
 
-    std::vector<RenderItem> render_items;
-    CollectRenderItems(root, render_items);
-
-    std::stable_sort(render_items.begin(), render_items.end(),
-        [](const RenderItem& a, const RenderItem& b)
-        {
-            return a.render_order < b.render_order;
-        });
-
-    for (const auto& item : render_items)
+    for (const auto& item : render_items_)
     {
-        item.renderable->Render(*command_buffer, pipeline_layout_, item.transform_index);
+        item.renderable->Render(*command_buffer, pipeline_layout_, item.object->GetTransformIndex());
     }
 
-    if (post_render)
+    if (ui_manager)
     {
-        post_render(command_buffer);
+        ui_manager->Render(*command_buffer);
     }
 
     vkCmdEndRendering(command_buffer->Get());
@@ -183,7 +288,7 @@ void Renderer::CollectRenderItems(Object& object, std::vector<RenderItem>& out_i
                     order += it->second;
                 }
             }
-            out_items.push_back(RenderItem{ &renderable, object.GetTransformIndex(), order });
+            out_items.push_back(RenderItem{ &renderable, &object, order });
         });
 
     for (auto& child : object.GetChildren())
@@ -247,6 +352,15 @@ void Renderer::UpdateUniformBuffer()
     void* data = uniform_buffer_->Map();
     memcpy(data, &ubo, sizeof(ubo));
     uniform_buffer_->Unmap();
+}
+
+void Renderer::UpdateTransformBuffer()
+{
+    assert(scene_ != nullptr);
+    if (scene_)
+    {
+        UpdateTransformBuffer(*scene_);
+    }
 }
 
 void Renderer::UpdateTransformBuffer(const Scene& scene)

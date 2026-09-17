@@ -1,4 +1,4 @@
-#include "ui/ui_manager.h"
+#include "renderer/ui/ui_manager.h"
 #include "graphics/graphics_context.h"
 #include "graphics/swapchain.h"
 #include "graphics/command_buffer.h"
@@ -163,7 +163,7 @@ namespace tri
         return ImGui_ImplSDL3_ProcessEvent(event);
     }
 
-    void UiManager::Render(std::shared_ptr<CommandBuffer>& command_buffer)
+    void UiManager::Render(CommandBuffer& command_buffer)
     {
         if (!is_initialized_) return;
 
@@ -171,7 +171,7 @@ namespace tri
         ImDrawData* draw_data = ImGui::GetDrawData();
         if (draw_data)
         {
-            ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffer->Get());
+            ImGui_ImplVulkan_RenderDrawData(draw_data, command_buffer.Get());
         }
     }
 
