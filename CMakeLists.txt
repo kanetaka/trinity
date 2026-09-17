@@ -140,26 +140,45 @@ target_link_libraries(trinity
     tri_app
 )
 
-# Compile shaders
-find_program(GLSLC_EXECUTABLE NAMES glslc PATHS ${VK_SDK_PATH}/Bin)
-if(GLSLC_EXECUTABLE)
+# Compile shaders with Slang
+find_program(SLANGC_EXECUTABLE NAMES slangc PATHS ${VK_SDK_PATH}/Bin)
+if(SLANGC_EXECUTABLE)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/asset/shader/splat)
     file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud)
+
+    set(SLANG_FLAGS -target spirv -matrix-layout-column-major -fvk-use-gl-layout)
+
     add_custom_command(
         OUTPUT ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert.spv
-               ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag.spv
-        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert -o ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert.spv
-        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag -o ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag.spv
-        DEPENDS ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag
-        COMMENT "Compiling 3DGS shaders..."
+        COMMAND ${SLANGC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.slang
+                ${SLANG_FLAGS} -entry vsMain -stage vertex
+                -o ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert.spv
+        DEPENDS ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.slang
+        COMMENT "Compiling 3DGS vertex shader with Slang..."
+    )
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag.spv
+        COMMAND ${SLANGC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.slang
+                ${SLANG_FLAGS} -entry fsMain -stage fragment
+                -o ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.frag.spv
+        DEPENDS ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.slang
+        COMMENT "Compiling 3DGS fragment shader with Slang..."
     )
     add_custom_command(
         OUTPUT ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.vert.spv
-               ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag.spv
-        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.vert -o ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.vert.spv
-        COMMAND ${GLSLC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag -o ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag.spv
-        DEPENDS ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.vert ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag
-        COMMENT "Compiling PointCloud shaders..."
+        COMMAND ${SLANGC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.slang
+                ${SLANG_FLAGS} -entry vsMain -stage vertex
+                -o ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.vert.spv
+        DEPENDS ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.slang
+        COMMENT "Compiling PointCloud vertex shader with Slang..."
+    )
+    add_custom_command(
+        OUTPUT ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag.spv
+        COMMAND ${SLANGC_EXECUTABLE} ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.slang
+                ${SLANG_FLAGS} -entry fsMain -stage fragment
+                -o ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.frag.spv
+        DEPENDS ${CMAKE_SOURCE_DIR}/asset/shader/point_cloud/point_cloud.slang
+        COMMENT "Compiling PointCloud fragment shader with Slang..."
     )
     add_custom_target(compile_shaders ALL DEPENDS 
         ${CMAKE_SOURCE_DIR}/asset/shader/splat/splat.vert.spv 
@@ -169,6 +188,7 @@ if(GLSLC_EXECUTABLE)
     )
     add_dependencies(trinity compile_shaders)
 endif()
+
 
 
 # Platform specific settings
