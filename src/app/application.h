@@ -7,7 +7,7 @@
 #ifndef GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
-#include "app/iapplication.hpp"
+#include "app/i_application.h"
 #include "geometry/camera.h"
 #include "ui/ui_manager.h"
 #include "scene/scene.h"

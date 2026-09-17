@@ -117,7 +117,7 @@ target_link_libraries(tri_ui PUBLIC tri_core tri_graphics Vulkan::Vulkan SDL3::S
 add_library(tri_app STATIC
     src/app/application.h
     src/app/application.cpp
-    src/app/iapplication.hpp
+    src/app/i_application.h
 )
 target_compile_definitions(tri_app PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
 target_include_directories(tri_app PUBLIC src lib/json/include)
