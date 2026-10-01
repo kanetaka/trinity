@@ -27,6 +27,7 @@ cmake_install.cmake
 CTestTestfile.cmake
 CPack*.cmake
 *.cmake
+CMakeUserPresets.json
 
 # Visual Studio files
 *.sln

@@ -1,0 +1,23 @@
+{
+    "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+    "name": "trinity",
+    "version-string": "0.1.0",
+    "dependencies": [
+        "cli11",
+        "nlohmann-json",
+        "glm",
+        {
+            "name": "sdl3",
+            "features": [
+                "vulkan"
+            ]
+        },
+        {
+            "name": "imgui",
+            "features": [
+                "sdl3-binding",
+                "vulkan-binding"
+            ]
+        }
+    ]
+}

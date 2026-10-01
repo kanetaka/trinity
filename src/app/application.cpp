@@ -196,7 +196,7 @@ int Application::Run(const std::string& json_args)
 
         if (!window)
         {
-            throw std::runtime_error("SDL_CreateWindow failed");
+            throw std::runtime_error(std::string("SDL_CreateWindow failed: ") + SDL_GetError());
         }
 
         Sdl3SurfaceProvider surface_provider(window);

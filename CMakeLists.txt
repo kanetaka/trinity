@@ -1,5 +1,20 @@
 cmake_minimum_required(VERSION 3.16)
 
+# Auto-detect vcpkg toolchain if not specified or invalid
+if(NOT DEFINED CMAKE_TOOLCHAIN_FILE OR NOT EXISTS "${CMAKE_TOOLCHAIN_FILE}")
+    if(DEFINED ENV{VCPKG_ROOT} AND EXISTS "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+        set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "" FORCE)
+    else()
+        find_program(VCPKG_EXECUTABLE vcpkg)
+        if(VCPKG_EXECUTABLE)
+            get_filename_component(VCPKG_DIR "${VCPKG_EXECUTABLE}" DIRECTORY)
+            if(EXISTS "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake")
+                set(CMAKE_TOOLCHAIN_FILE "${VCPKG_DIR}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "" FORCE)
+            endif()
+        endif()
+    endif()
+endif()
+
 project(trinity LANGUAGES CXX)
 
 # Set C++20 standard
@@ -25,14 +40,19 @@ if(VK_SDK_PATH)
 endif()
 find_package(SDL3 REQUIRED)
 
+# Find vcpkg packages
+find_package(CLI11 CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+
 # --- Library: tri_core ---
 add_library(tri_core STATIC
     src/core/asset_path.h
     src/core/asset_path.cpp
 )
 target_include_directories(tri_core PUBLIC src)
-# Core uses Vulkan SDK for GLM etc
-target_link_libraries(tri_core PUBLIC Vulkan::Vulkan)
+target_link_libraries(tri_core PUBLIC Vulkan::Vulkan glm::glm)
 
 # --- Library: tri_geometry ---
 add_library(tri_geometry STATIC
@@ -100,16 +120,9 @@ add_library(tri_renderer STATIC
     src/renderer/renderer.cpp
     src/renderer/ui/ui_manager.h
     src/renderer/ui/ui_manager.cpp
-    lib/imgui/imgui.cpp
-    lib/imgui/imgui_demo.cpp
-    lib/imgui/imgui_draw.cpp
-    lib/imgui/imgui_tables.cpp
-    lib/imgui/imgui_widgets.cpp
-    lib/imgui/backends/imgui_impl_sdl3.cpp
-    lib/imgui/backends/imgui_impl_vulkan.cpp
 )
-target_include_directories(tri_renderer PUBLIC src lib/imgui lib/imgui/backends)
-target_link_libraries(tri_renderer PUBLIC tri_core tri_graphics tri_scene Vulkan::Vulkan SDL3::SDL3)
+target_include_directories(tri_renderer PUBLIC src)
+target_link_libraries(tri_renderer PUBLIC tri_core tri_graphics tri_scene Vulkan::Vulkan SDL3::SDL3 imgui::imgui)
 
 # --- Library: tri_app ---
 add_library(tri_app STATIC
@@ -118,7 +131,7 @@ add_library(tri_app STATIC
     src/app/i_application.h
 )
 target_compile_definitions(tri_app PUBLIC GLM_FORCE_DEPTH_ZERO_TO_ONE)
-target_include_directories(tri_app PUBLIC src lib/json/include)
+target_include_directories(tri_app PUBLIC src)
 target_link_libraries(tri_app
     PUBLIC
     tri_core
@@ -128,16 +141,19 @@ target_link_libraries(tri_app
     tri_renderer
     SDL3::SDL3
     Vulkan::Vulkan
+    nlohmann_json::nlohmann_json
 )
 
 # --- Executable: trinity ---
 add_executable(trinity
     src/main.cpp
 )
-target_include_directories(trinity PRIVATE src lib/CLI11/include lib/json/include)
+target_include_directories(trinity PRIVATE src)
 target_link_libraries(trinity
     PRIVATE
     tri_app
+    CLI11::CLI11
+    nlohmann_json::nlohmann_json
 )
 
 # Compile shaders with Slang
@@ -209,3 +225,18 @@ endif()
 set_target_properties(trinity PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
 )
+
+# Visual Studio debugger settings
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT trinity)
+set_target_properties(trinity PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+    VS_DEBUGGER_ENVIRONMENT "PATH=${CMAKE_BINARY_DIR}/bin/$(Configuration);${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/$<IF:$<CONFIG:Debug>,debug/bin,bin>;${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/bin;$ENV{VK_SDK_PATH}/Bin;%PATH%"
+)
+
+# Copy runtime DLLs to output directory on post-build
+add_custom_command(TARGET trinity POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
+        "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/$<IF:$<CONFIG:Debug>,debug/bin,bin>"
+        "$<TARGET_FILE_DIR:trinity>"
+)
+
