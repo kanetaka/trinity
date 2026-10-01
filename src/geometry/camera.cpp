@@ -3,7 +3,7 @@
 using namespace tri;
 
 Camera::Camera(glm::dvec3 position, glm::dvec3 up, float yaw, float pitch)
-    : front_(glm::dvec3(0.0, 0.0, -1.0)), movement_speed_(2.5),
+    : front_(glm::dvec3(0.0, 1.0, 0.0)), movement_speed_(2.5),
     mouse_sensitivity_(0.1), zoom_(45.0)
 {
     position_ = position;
@@ -83,9 +83,9 @@ void Camera::ProcessMousePanning(float xoffset, float yoffset)
 void Camera::UpdateCameraVectors()
 {
     glm::dvec3 front;
-    front.x = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
-    front.y = sin(glm::radians(pitch_));
-    front.z = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+    front.x = sin(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+    front.y = cos(glm::radians(yaw_)) * cos(glm::radians(pitch_));
+    front.z = sin(glm::radians(pitch_));
     front_ = glm::normalize(front);
 
     // Normalize the vectors, because their length gets closer to 0 the more you

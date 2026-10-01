@@ -17,7 +17,7 @@
 using namespace tri;
 
 Application::Application()
-    : camera_(glm::dvec3(0.0, 0.0, 5.0), glm::dvec3(0.0, -1.0, 0.0), -90.0f, 0.0f)
+    : camera_(glm::dvec3(0.0, -5.0, 0.0), glm::dvec3(0.0, 0.0, 1.0), 0.0f, 0.0f)
 {
     graphics_context_ = std::make_unique<GraphicsContext>();
     scene_ = std::make_unique<Scene>();
