@@ -1,5 +1,27 @@
 cmake_minimum_required(VERSION 3.16)
 
+if(WIN32)
+    set(ENV{VSLANG} 1033)
+endif()
+
+if(CMAKE_GENERATOR MATCHES "Visual Studio" AND DEFINED CMAKE_GENERATOR_INSTANCE)
+    if(NOT EXISTS "${CMAKE_GENERATOR_INSTANCE}")
+        message(STATUS "Ignoring stale CMAKE_GENERATOR_INSTANCE='${CMAKE_GENERATOR_INSTANCE}'")
+        unset(CMAKE_GENERATOR_INSTANCE CACHE)
+    endif()
+endif()
+
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+    if(DEFINED CMAKE_C_COMPILER AND NOT EXISTS "${CMAKE_C_COMPILER}")
+        message(STATUS "Ignoring stale CMAKE_C_COMPILER='${CMAKE_C_COMPILER}'")
+        unset(CMAKE_C_COMPILER CACHE)
+    endif()
+    if(DEFINED CMAKE_CXX_COMPILER AND NOT EXISTS "${CMAKE_CXX_COMPILER}")
+        message(STATUS "Ignoring stale CMAKE_CXX_COMPILER='${CMAKE_CXX_COMPILER}'")
+        unset(CMAKE_CXX_COMPILER CACHE)
+    endif()
+endif()
+
 # Auto-detect vcpkg toolchain if not specified or invalid
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE OR NOT EXISTS "${CMAKE_TOOLCHAIN_FILE}")
     if(DEFINED ENV{VCPKG_ROOT} AND EXISTS "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")

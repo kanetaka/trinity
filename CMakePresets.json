@@ -5,7 +5,10 @@
             "name": "default",
             "displayName": "Default",
             "description": "Configure trinity project with auto-detected vcpkg toolchain",
-            "binaryDir": "${sourceDir}/build"
+            "binaryDir": "${sourceDir}/build",
+            "environment": {
+                "VSLANG": "1033"
+            }
         }
     ]
 }
