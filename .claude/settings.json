@@ -1,0 +1,19 @@
+{
+    "$schema": "https://json.schemastore.org/claude-code-settings.json",
+    "permissions": {
+        "allow": [
+            "Bash(cmake --preset:*)",
+            "Bash(cmake --build:*)",
+            "Bash(git status:*)",
+            "Bash(git diff:*)",
+            "Bash(git log:*)",
+            "Bash(git show:*)",
+            "PowerShell(cmake --preset:*)",
+            "PowerShell(cmake --build:*)",
+            "PowerShell(git status:*)",
+            "PowerShell(git diff:*)",
+            "PowerShell(git log:*)",
+            "PowerShell(git show:*)"
+        ]
+    }
+}
