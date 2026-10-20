@@ -2,6 +2,7 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #endif
 #include "app/application.h"
+#include "core/logger.h"
 #include "renderer/renderer.h"
 #include "scene/object.h"
 #include "scene/component/splat_component.h"
@@ -33,6 +34,7 @@ void Application::StartColmapReconstruction(const std::string& input_dir, int qu
         return;
     }
 
+    TRI_LOG_INFO("App", "Initiating COLMAP reconstruction for: " + input_dir);
     colmap_loaded_ = false;
     ColmapQuality quality = ColmapQuality::Medium;
     switch (quality_index)
@@ -61,6 +63,7 @@ void Application::LoadPly(const std::string& path)
 
 void Application::Load3dgs(const std::string& path)
 {
+    TRI_LOG_INFO("App", "Loading 3DGS model: " + path);
     if (renderer_)
     {
         renderer_->WaitIdle();
@@ -81,6 +84,7 @@ void Application::Load3dgs(const std::string& path)
 
 void Application::LoadPointCloud(const std::string& path)
 {
+    TRI_LOG_INFO("App", "Loading point cloud: " + path);
     if (renderer_)
     {
         renderer_->WaitIdle();
@@ -112,6 +116,7 @@ void Application::OnInitialize()
     renderer_->Initialize();
     width_ = renderer_->GetScreenWidth();
     height_ = renderer_->GetScreenHeight();
+    TRI_LOG_INFO("App", "Trinity initialized successfully. Screen: " + std::to_string(static_cast<int>(width_)) + "x" + std::to_string(static_cast<int>(height_)));
 }
 
 void Application::OnCleanup()

@@ -73,6 +73,8 @@ find_package(COLMAP CONFIG REQUIRED)
 add_library(tri_core STATIC
     src/core/asset_path.h
     src/core/asset_path.cpp
+    src/core/logger.h
+    src/core/logger.cpp
 )
 target_include_directories(tri_core PUBLIC src)
 target_link_libraries(tri_core PUBLIC Vulkan::Vulkan glm::glm)

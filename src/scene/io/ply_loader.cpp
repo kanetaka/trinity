@@ -1,4 +1,5 @@
 #include "scene/io/ply_loader.h"
+#include "core/logger.h"
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -208,8 +209,7 @@ bool PlyLoader::LoadPly(const std::string& filepath, std::vector<FullSplat>& out
         splat.rot.w = readFloat(off_rot_3, 0.0f);
     }
 
-    std::cout << "Successfully loaded " << vertexCount << " splats from "
-        << filepath << std::endl;
+    TRI_LOG_INFO("PlyLoader", "Successfully loaded " + std::to_string(vertexCount) + " splats from " + filepath);
     return true;
 }
 
@@ -489,8 +489,7 @@ bool PlyLoader::LoadPointCloud(const std::string& filepath, std::vector<PointClo
         }
     }
 
-    std::cout << "Successfully loaded " << vertex_count << " point cloud vertices from "
-        << filepath << std::endl;
+    TRI_LOG_INFO("PlyLoader", "Successfully loaded " + std::to_string(vertex_count) + " point cloud vertices from " + filepath);
     return true;
 }
 

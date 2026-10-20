@@ -1,8 +1,11 @@
 #include "renderer/ui/ui_manager.h"
+#include "core/logger.h"
 #include "graphics/graphics_context.h"
 #include "graphics/swapchain.h"
 #include "graphics/command_buffer.h"
 #include "scene/io/colmap_reconstructor.h"
+#include <algorithm>
+#include <ctime>
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
@@ -160,6 +163,7 @@ namespace tri
 
         ShowPointCloudSettings();
         ShowColmapDialog();
+        ShowOutputWindow();
     }
 
     void UiManager::ShowPointCloudSettings()
@@ -236,6 +240,7 @@ namespace tri
                 {
                     ImGui::MenuItem("Point Cloud Settings", nullptr, &show_point_cloud_settings_);
                 }
+                ImGui::MenuItem("Output Window", nullptr, &show_output_window_);
                 ImGui::EndMenu();
             }
             ImGui::EndMainMenuBar();
@@ -249,8 +254,8 @@ namespace tri
             return;
         }
 
-        ImGui::SetNextWindowSize(ImVec2(600, 440), ImGuiCond_FirstUseEver);
-        if (ImGui::Begin("COLMAP Dense Reconstruction", &show_colmap_dialog_))
+        ImGui::SetNextWindowSize(ImVec2(520, 200), ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("COLMAP Dense Reconstruction", &show_colmap_dialog_, ImGuiWindowFlags_AlwaysAutoResize))
         {
             ImGui::Text("Input Folder:");
             ImGui::SameLine();
@@ -315,25 +320,133 @@ namespace tri
             }
 
             ImGui::Separator();
-            ImGui::Text("Logs:");
-            if (ImGui::BeginChild("LogRegion", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar))
-            {
-                if (colmap_reconstructor_)
-                {
-                    auto logs = colmap_reconstructor_->GetLogs();
-                    for (const auto& log : logs)
-                    {
-                        ImGui::TextUnformatted(log.c_str());
-                    }
-                    if (is_running)
-                    {
-                        ImGui::SetScrollHereY(1.0f);
-                    }
-                }
-                ImGui::EndChild();
-            }
+            ImGui::TextDisabled("Detailed logs are streamed to the Output window below.");
             ImGui::End();
         }
+    }
+
+    void UiManager::ShowOutputWindow()
+    {
+        if (!show_output_window_)
+        {
+            return;
+        }
+
+        ImGuiViewport* viewport = ImGui::GetMainViewport();
+        float default_height = 200.0f;
+        ImGui::SetNextWindowPos(ImVec2(viewport->WorkPos.x, viewport->WorkPos.y + viewport->WorkSize.y - default_height), ImGuiCond_FirstUseEver);
+        ImGui::SetNextWindowSize(ImVec2(viewport->WorkSize.x, default_height), ImGuiCond_FirstUseEver);
+
+        if (ImGui::Begin("Output", &show_output_window_))
+        {
+            // Control bar
+            if (ImGui::Button("Clear"))
+            {
+                Logger::Instance().Clear();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Copy"))
+            {
+                std::string all_text;
+                auto entries = Logger::Instance().GetEntries();
+                for (const auto& e : entries)
+                {
+                    all_text += "[" + e.tag + "] " + e.message + "\n";
+                }
+                ImGui::SetClipboardText(all_text.c_str());
+            }
+            ImGui::SameLine();
+            ImGui::Checkbox("Auto-scroll", &output_auto_scroll_);
+            ImGui::SameLine();
+            ImGui::Checkbox("Info", &output_show_info_);
+            ImGui::SameLine();
+            ImGui::Checkbox("Warn", &output_show_warn_);
+            ImGui::SameLine();
+            ImGui::Checkbox("Error", &output_show_error_);
+            ImGui::SameLine();
+            ImGui::SetNextItemWidth(180.0f);
+            ImGui::InputTextWithHint("##OutputFilter", "Filter...", output_filter_, sizeof(output_filter_));
+
+            auto entries = Logger::Instance().GetEntries();
+            ImGui::SameLine();
+            ImGui::TextDisabled("(%zu entries)", entries.size());
+
+            ImGui::Separator();
+
+            // Log entries scroll region
+            if (ImGui::BeginChild("OutputScrollRegion", ImVec2(0, 0), false, ImGuiWindowFlags_HorizontalScrollbar))
+            {
+                std::string filter_str = output_filter_;
+                std::transform(filter_str.begin(), filter_str.end(), filter_str.begin(), ::tolower);
+
+                for (const auto& entry : entries)
+                {
+                    if (entry.level == LogLevel::Info && !output_show_info_) continue;
+                    if (entry.level == LogLevel::Warning && !output_show_warn_) continue;
+                    if (entry.level == LogLevel::Error && !output_show_error_) continue;
+
+                    if (!filter_str.empty())
+                    {
+                        std::string msg_lower = entry.message;
+                        std::string tag_lower = entry.tag;
+                        std::transform(msg_lower.begin(), msg_lower.end(), msg_lower.begin(), ::tolower);
+                        std::transform(tag_lower.begin(), tag_lower.end(), tag_lower.begin(), ::tolower);
+
+                        if (msg_lower.find(filter_str) == std::string::npos && tag_lower.find(filter_str) == std::string::npos)
+                        {
+                            continue;
+                        }
+                    }
+
+                    // Format timestamp
+                    auto time_t_val = std::chrono::system_clock::to_time_t(entry.timestamp);
+                    std::tm tm_buf;
+#if defined(_WIN32)
+                    localtime_s(&tm_buf, &time_t_val);
+#else
+                    localtime_r(&time_t_val, &tm_buf);
+#endif
+                    char time_str[32];
+                    std::strftime(time_str, sizeof(time_str), "%H:%M:%S", &tm_buf);
+
+                    ImVec4 color(0.85f, 0.85f, 0.85f, 1.0f);
+                    const char* level_prefix = "INFO";
+                    switch (entry.level)
+                    {
+                        case LogLevel::Info:
+                            color = ImVec4(0.85f, 0.85f, 0.85f, 1.0f);
+                            level_prefix = "INFO";
+                            break;
+                        case LogLevel::Warning:
+                            color = ImVec4(1.0f, 0.85f, 0.25f, 1.0f);
+                            level_prefix = "WARN";
+                            break;
+                        case LogLevel::Error:
+                            color = ImVec4(1.0f, 0.35f, 0.35f, 1.0f);
+                            level_prefix = "ERROR";
+                            break;
+                    }
+
+                    ImGui::TextDisabled("[%s]", time_str);
+                    ImGui::SameLine();
+                    ImGui::TextColored(color, "[%s]", level_prefix);
+                    ImGui::SameLine();
+                    if (!entry.tag.empty())
+                    {
+                        ImGui::TextColored(ImVec4(0.45f, 0.75f, 1.0f, 1.0f), "[%s]", entry.tag.c_str());
+                        ImGui::SameLine();
+                    }
+                    ImGui::TextUnformatted(entry.message.c_str());
+                }
+
+                if (output_auto_scroll_ && ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
+                {
+                    ImGui::SetScrollHereY(1.0f);
+                }
+            }
+            ImGui::EndChild();
+        }
+        ImGui::End();
     }
 
     void UiManager::OpenFolderDialog(const std::function<void(const std::string&)>& callback)

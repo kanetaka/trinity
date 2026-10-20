@@ -1,4 +1,5 @@
 #include "scene/io/colmap_reconstructor.h"
+#include "core/logger.h"
 #include <colmap/controllers/automatic_reconstruction.h>
 #include <colmap/scene/reconstruction_manager.h>
 #include <filesystem>
@@ -28,9 +29,11 @@ ColmapReconstructor::~ColmapReconstructor()
 
 void ColmapReconstructor::AddLog(const std::string& message)
 {
-    std::lock_guard<std::mutex> lock(mutex_);
-    logs_.push_back(message);
-    std::cout << "[COLMAP] " << message << std::endl;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        logs_.push_back(message);
+    }
+    TRI_LOG_INFO("COLMAP", message);
 }
 
 std::vector<std::string> ColmapReconstructor::GetLogs()

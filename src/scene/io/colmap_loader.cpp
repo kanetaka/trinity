@@ -1,4 +1,5 @@
 #include "scene/io/colmap_loader.h"
+#include "core/logger.h"
 #include <exception>
 #include <filesystem>
 #include <iostream>
@@ -65,9 +66,9 @@ bool ColmapLoader::LoadPointCloud(const std::string& path, std::vector<PointClou
         out_vertices.push_back(v);
     }
 
-    std::cout << "Loaded COLMAP model: " << model_dir.string()
-              << " (cameras: " << reconstruction.NumCameras()
-              << ", images: " << reconstruction.NumImages()
-              << ", points: " << out_vertices.size() << ")" << std::endl;
+    TRI_LOG_INFO("ColmapLoader", "Loaded COLMAP model: " + model_dir.string()
+        + " (cameras: " + std::to_string(reconstruction.NumCameras())
+        + ", images: " + std::to_string(reconstruction.NumImages())
+        + ", points: " + std::to_string(out_vertices.size()) + ")");
     return true;
 }

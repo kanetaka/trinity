@@ -62,6 +62,7 @@ namespace tri
         void ShowMenu();
         void ShowPointCloudSettings();
         void ShowColmapDialog();
+        void ShowOutputWindow();
         void OpenFileDialog(const std::function<void(const std::string&)>& callback);
         void OpenFolderDialog(const std::function<void(const std::string&)>& callback);
 
@@ -77,6 +78,12 @@ namespace tri
         bool is_initialized_{ false };
         bool show_fps_{ true };
         bool show_point_cloud_settings_{ true };
+        bool show_output_window_{ true };
+        bool output_auto_scroll_{ true };
+        bool output_show_info_{ true };
+        bool output_show_warn_{ true };
+        bool output_show_error_{ true };
+        char output_filter_[128]{ 0 };
         float fps_{ 0.0f };
     };
 }
