@@ -15,6 +15,7 @@
 
 #include "geometry/camera.h"
 #include "scene/io/ply_loader.h"
+#include "scene/io/colmap_loader.h"
 #include "graphics/graphics_context.h"
 #include "graphics/command_buffer.h"
 #include "graphics/resource/buffer_resource.h"
@@ -70,7 +71,14 @@ void PointCloudComponent::Render(CommandBuffer& command_buffer, VkPipelineLayout
 void PointCloudComponent::LoadPointCloud()
 {
     std::vector<PointCloudVertex> vertices;
-    if (!PlyLoader::LoadPointCloud(ply_file_, vertices))
+    if (ColmapLoader::IsColmapModel(ply_file_))
+    {
+        if (!ColmapLoader::LoadPointCloud(ply_file_, vertices))
+        {
+            return;
+        }
+    }
+    else if (!PlyLoader::LoadPointCloud(ply_file_, vertices))
     {
         return;
     }

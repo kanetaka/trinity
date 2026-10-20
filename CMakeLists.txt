@@ -37,7 +37,7 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE OR NOT EXISTS "${CMAKE_TOOLCHAIN_FILE}")
     endif()
 endif()
 
-project(trinity LANGUAGES CXX)
+project(trinity LANGUAGES C CXX)
 
 # Set C++20 standard
 set(CMAKE_CXX_STANDARD 20)
@@ -67,6 +67,7 @@ find_package(CLI11 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(imgui CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
+find_package(COLMAP CONFIG REQUIRED)
 
 # --- Library: tri_core ---
 add_library(tri_core STATIC
@@ -127,6 +128,8 @@ add_library(tri_scene STATIC
     src/scene/component/point_cloud_component.cpp
     src/scene/io/ply_loader.h
     src/scene/io/ply_loader.cpp
+    src/scene/io/colmap_loader.h
+    src/scene/io/colmap_loader.cpp
     src/scene/io/shader_loader.h
     src/scene/io/shader_loader.cpp
     src/scene/io/splat_types.h
@@ -135,6 +138,7 @@ add_library(tri_scene STATIC
 
 target_include_directories(tri_scene PUBLIC src)
 target_link_libraries(tri_scene PUBLIC tri_core tri_geometry tri_graphics Vulkan::Vulkan)
+target_link_libraries(tri_scene PRIVATE colmap::colmap)
 
 # --- Library: tri_renderer ---
 add_library(tri_renderer STATIC

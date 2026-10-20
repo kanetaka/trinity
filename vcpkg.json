@@ -7,6 +7,10 @@
         "nlohmann-json",
         "glm",
         {
+            "name": "colmap",
+            "default-features": false
+        },
+        {
             "name": "sdl3",
             "features": [
                 "vulkan"
