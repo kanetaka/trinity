@@ -10,6 +10,7 @@ namespace tri
 {
     class CommandBuffer;
     class GraphicsContext;
+    class ColmapReconstructor;
 
     class UiManager
     {
@@ -40,6 +41,16 @@ namespace tri
             on_open_3dgs_ = callback;
         }
 
+        void SetColmapReconstructor(ColmapReconstructor* reconstructor)
+        {
+            colmap_reconstructor_ = reconstructor;
+        }
+
+        void SetOnReconstructColmapCallback(std::function<void(const std::string&, int)> callback)
+        {
+            on_reconstruct_colmap_ = callback;
+        }
+
         void SetPointSizePtr(float* point_size_ptr)
         {
             point_size_ptr_ = point_size_ptr;
@@ -50,11 +61,18 @@ namespace tri
     private:
         void ShowMenu();
         void ShowPointCloudSettings();
+        void ShowColmapDialog();
         void OpenFileDialog(const std::function<void(const std::string&)>& callback);
+        void OpenFolderDialog(const std::function<void(const std::string&)>& callback);
 
         std::function<void(const std::string&)> on_file_open_;
         std::function<void(const std::string&)> on_open_point_cloud_;
         std::function<void(const std::string&)> on_open_3dgs_;
+        std::function<void(const std::string&, int)> on_reconstruct_colmap_;
+        ColmapReconstructor* colmap_reconstructor_{ nullptr };
+        bool show_colmap_dialog_{ false };
+        std::string colmap_selected_folder_;
+        int colmap_quality_index_{ 1 };
         float* point_size_ptr_{ nullptr };
         bool is_initialized_{ false };
         bool show_fps_{ true };

@@ -130,6 +130,8 @@ add_library(tri_scene STATIC
     src/scene/io/ply_loader.cpp
     src/scene/io/colmap_loader.h
     src/scene/io/colmap_loader.cpp
+    src/scene/io/colmap_reconstructor.h
+    src/scene/io/colmap_reconstructor.cpp
     src/scene/io/shader_loader.h
     src/scene/io/shader_loader.cpp
     src/scene/io/splat_types.h

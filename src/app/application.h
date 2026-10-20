@@ -16,6 +16,7 @@ namespace tri
 {
     class Renderer;
     class GraphicsContext;
+    class ColmapReconstructor;
 
     class Application : public IApplication
     {
@@ -32,6 +33,7 @@ namespace tri
         void LoadPly(const std::string& path);
         void LoadPointCloud(const std::string& path);
         void Load3dgs(const std::string& path);
+        void StartColmapReconstruction(const std::string& input_dir, int quality_index);
 
         Object& GetRootObject() { return scene_->GetRoot(); }
 
@@ -60,6 +62,8 @@ namespace tri
         std::unique_ptr<tri::Scene> scene_;
         std::unique_ptr<tri::UiManager> ui_manager_;
         std::unique_ptr<tri::GraphicsContext> graphics_context_;
+        std::unique_ptr<tri::ColmapReconstructor> colmap_reconstructor_;
+        bool colmap_loaded_{ false };
 
         float width_ = 1280.0f;
         float height_ = 720.0f;

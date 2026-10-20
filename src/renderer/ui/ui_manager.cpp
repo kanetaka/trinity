@@ -2,6 +2,7 @@
 #include "graphics/graphics_context.h"
 #include "graphics/swapchain.h"
 #include "graphics/command_buffer.h"
+#include "scene/io/colmap_reconstructor.h"
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_vulkan.h>
@@ -12,6 +13,7 @@
 #if defined(_WIN32)
 #include <windows.h>
 #include <commdlg.h>
+#include <shobjidl.h>
 #include <codecvt>
 #include <locale>
 #endif
@@ -157,6 +159,7 @@ namespace tri
         }
 
         ShowPointCloudSettings();
+        ShowColmapDialog();
     }
 
     void UiManager::ShowPointCloudSettings()
@@ -215,6 +218,15 @@ namespace tri
                     }
                     ImGui::EndMenu();
                 }
+                ImGui::Separator();
+                if (ImGui::MenuItem("Reconstruct Dense Point Cloud (COLMAP)..."))
+                {
+                    OpenFolderDialog([this](const std::string& folder)
+                    {
+                        colmap_selected_folder_ = folder;
+                        show_colmap_dialog_ = true;
+                    });
+                }
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("View"))
@@ -230,6 +242,151 @@ namespace tri
         }
     }
 
+    void UiManager::ShowColmapDialog()
+    {
+        if (!show_colmap_dialog_)
+        {
+            return;
+        }
+
+        ImGui::SetNextWindowSize(ImVec2(600, 440), ImGuiCond_FirstUseEver);
+        if (ImGui::Begin("COLMAP Dense Reconstruction", &show_colmap_dialog_))
+        {
+            ImGui::Text("Input Folder:");
+            ImGui::SameLine();
+            ImGui::TextColored(ImVec4(0.4f, 0.8f, 1.0f, 1.0f), "%s", colmap_selected_folder_.c_str());
+
+            ImGui::SameLine();
+            if (ImGui::Button("Browse..."))
+            {
+                OpenFolderDialog([this](const std::string& folder)
+                {
+                    colmap_selected_folder_ = folder;
+                });
+            }
+
+            const char* qualities[] = { "Low", "Medium", "High", "Extreme" };
+            ImGui::Combo("Quality", &colmap_quality_index_, qualities, IM_ARRAYSIZE(qualities));
+
+            ImGui::Separator();
+
+            bool is_running = colmap_reconstructor_ && colmap_reconstructor_->IsRunning();
+            ColmapStatus status = colmap_reconstructor_ ? colmap_reconstructor_->GetStatus() : ColmapStatus::Idle;
+
+            if (is_running)
+            {
+                ImGui::TextColored(ImVec4(1.0f, 0.8f, 0.2f, 1.0f), "Status: Running COLMAP reconstruction (C++)...");
+                if (ImGui::Button("Cancel"))
+                {
+                    colmap_reconstructor_->Cancel();
+                }
+            }
+            else
+            {
+                if (status == ColmapStatus::Success)
+                {
+                    ImGui::TextColored(ImVec4(0.2f, 1.0f, 0.2f, 1.0f), "Status: %s", colmap_reconstructor_->GetStatusMessage().c_str());
+                }
+                else if (status == ColmapStatus::Failed)
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.2f, 0.2f, 1.0f), "Status: %s", colmap_reconstructor_->GetStatusMessage().c_str());
+                }
+                else if (status == ColmapStatus::Cancelled)
+                {
+                    ImGui::TextColored(ImVec4(1.0f, 0.6f, 0.2f, 1.0f), "Status: Cancelled.");
+                }
+                else
+                {
+                    ImGui::Text("Status: Ready to reconstruct.");
+                }
+
+                if (ImGui::Button("Start Reconstruction") && !colmap_selected_folder_.empty())
+                {
+                    if (on_reconstruct_colmap_)
+                    {
+                        on_reconstruct_colmap_(colmap_selected_folder_, colmap_quality_index_);
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Close"))
+                {
+                    show_colmap_dialog_ = false;
+                }
+            }
+
+            ImGui::Separator();
+            ImGui::Text("Logs:");
+            if (ImGui::BeginChild("LogRegion", ImVec2(0, 0), true, ImGuiWindowFlags_HorizontalScrollbar))
+            {
+                if (colmap_reconstructor_)
+                {
+                    auto logs = colmap_reconstructor_->GetLogs();
+                    for (const auto& log : logs)
+                    {
+                        ImGui::TextUnformatted(log.c_str());
+                    }
+                    if (is_running)
+                    {
+                        ImGui::SetScrollHereY(1.0f);
+                    }
+                }
+                ImGui::EndChild();
+            }
+            ImGui::End();
+        }
+    }
+
+    void UiManager::OpenFolderDialog(const std::function<void(const std::string&)>& callback)
+    {
+#if defined(_WIN32)
+        HRESULT hr = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+        bool need_uninit = SUCCEEDED(hr);
+
+        IFileOpenDialog* file_dialog = nullptr;
+        hr = CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_ALL, IID_IFileOpenDialog, reinterpret_cast<void**>(&file_dialog));
+        if (SUCCEEDED(hr))
+        {
+            FILEOPENDIALOGOPTIONS options;
+            if (SUCCEEDED(file_dialog->GetOptions(&options)))
+            {
+                file_dialog->SetOptions(options | FOS_PICKFOLDERS | FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST);
+            }
+
+            file_dialog->SetTitle(L"Select Image Folder for COLMAP Reconstruction");
+
+            if (SUCCEEDED(file_dialog->Show(nullptr)))
+            {
+                IShellItem* result_item = nullptr;
+                if (SUCCEEDED(file_dialog->GetResult(&result_item)))
+                {
+                    PWSTR psz_file_path = nullptr;
+                    if (SUCCEEDED(result_item->GetDisplayName(SIGDN_FILESYSPATH, &psz_file_path)))
+                    {
+#pragma warning(push)
+#pragma warning(disable: 4996)
+                        std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
+                        std::string folder_path = converter.to_bytes(psz_file_path);
+#pragma warning(pop)
+                        CoTaskMemFree(psz_file_path);
+                        if (callback)
+                        {
+                            callback(folder_path);
+                        }
+                    }
+                    result_item->Release();
+                }
+            }
+            file_dialog->Release();
+        }
+
+        if (need_uninit)
+        {
+            CoUninitialize();
+        }
+#else
+        // TODO: Other Platforms folder dialog
+#endif
+    }
 
     void UiManager::OpenFileDialog(const std::function<void(const std::string&)>& callback)
     {

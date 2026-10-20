@@ -9,10 +9,13 @@
 
 #include <filesystem>
 #include <iostream>
+#include <thread>
+#include <chrono>
 #include <CLI/CLI.hpp>
 #include <nlohmann/json.hpp>
 #include "core/asset_path.h"
 #include "app/application.h"
+#include "scene/io/colmap_reconstructor.h"
 
 int main(int argc, char* argv[])
 {
@@ -21,7 +24,25 @@ int main(int argc, char* argv[])
     std::string title = "Trinity Sample";
     app.add_option("-t,--title", title, "Application title");
 
+    std::string reconstruct_path = "";
+    app.add_option("--reconstruct", reconstruct_path, "Run COLMAP reconstruction on folder and exit");
+
     CLI11_PARSE(app, argc, argv);
+
+    if (!reconstruct_path.empty())
+    {
+        std::cout << "Testing COLMAP reconstruction on: " << reconstruct_path << std::endl;
+        tri::ColmapReconstructor reconstructor;
+        reconstructor.Start(reconstruct_path, tri::ColmapQuality::Low);
+        while (reconstructor.IsRunning())
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
+        }
+        std::cout << "Reconstruction Status: " << static_cast<int>(reconstructor.GetStatus()) << std::endl;
+        std::cout << "Status Message: " << reconstructor.GetStatusMessage() << std::endl;
+        std::cout << "Result PLY Path: " << reconstructor.GetFusedPlyPath() << std::endl;
+        return (reconstructor.GetStatus() == tri::ColmapStatus::Success) ? 0 : 1;
+    }
 
     // Create JSON
     nlohmann::json args;

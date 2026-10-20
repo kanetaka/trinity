@@ -6,6 +6,7 @@
 #include "scene/object.h"
 #include "scene/component/splat_component.h"
 #include "scene/component/point_cloud_component.h"
+#include "scene/io/colmap_reconstructor.h"
 #include "graphics/graphics_context.h"
 #include "graphics/surface/sdl3_surface_provider.h"
 #include <SDL3/SDL.h>
@@ -22,6 +23,35 @@ Application::Application()
     graphics_context_ = std::make_unique<GraphicsContext>();
     scene_ = std::make_unique<Scene>();
     ui_manager_ = std::make_unique<UiManager>();
+    colmap_reconstructor_ = std::make_unique<ColmapReconstructor>();
+}
+
+void Application::StartColmapReconstruction(const std::string& input_dir, int quality_index)
+{
+    if (!colmap_reconstructor_)
+    {
+        return;
+    }
+
+    colmap_loaded_ = false;
+    ColmapQuality quality = ColmapQuality::Medium;
+    switch (quality_index)
+    {
+        case 0:
+            quality = ColmapQuality::Low;
+            break;
+        case 1:
+            quality = ColmapQuality::Medium;
+            break;
+        case 2:
+            quality = ColmapQuality::High;
+            break;
+        case 3:
+            quality = ColmapQuality::Extreme;
+            break;
+    }
+
+    colmap_reconstructor_->Start(input_dir, quality);
 }
 
 void Application::LoadPly(const std::string& path)
@@ -86,6 +116,11 @@ void Application::OnInitialize()
 
 void Application::OnCleanup()
 {
+    if (colmap_reconstructor_)
+    {
+        colmap_reconstructor_->Cancel();
+    }
+
     // Vulkan resources must be released before the device is destroyed.
     if (renderer_)
     {
@@ -117,6 +152,16 @@ void Application::OnDrawFrame()
 
     float fps = (delta_time > 0.0f) ? (1.0f / delta_time) : 0.0f;
     ui_manager_->SetFps(fps);
+
+    if (colmap_reconstructor_ && !colmap_loaded_ && colmap_reconstructor_->GetStatus() == ColmapStatus::Success)
+    {
+        const std::string& ply_path = colmap_reconstructor_->GetFusedPlyPath();
+        if (!ply_path.empty())
+        {
+            colmap_loaded_ = true;
+            LoadPointCloud(ply_path);
+        }
+    }
 
     renderer_->UpdateCamera(width_ / height_);
 
@@ -216,6 +261,11 @@ int Application::Run(const std::string& json_args)
         });
         app.GetUiManager().SetOnOpen3dgsCallback([&app](const std::string& path) {
             app.Load3dgs(path);
+        });
+        app.GetUiManager().SetColmapReconstructor(app.colmap_reconstructor_.get());
+        app.GetUiManager().SetOnReconstructColmapCallback([&app](const std::string& folder, int quality_index)
+        {
+            app.StartColmapReconstruction(folder, quality_index);
         });
 
 
